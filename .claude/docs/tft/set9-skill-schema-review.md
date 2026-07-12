@@ -92,3 +92,4 @@ Refined after user review (sheet comments):
 - Effect split into `Effect Category` (Attack / Status / Buff / Debuff / Movement) + `Effect Detail`, per the user's preferred taxonomy (Status = Stun/Slow/Silence/Wound; Buff = stat boost; Debuff = stat deboost).
 - Magnitude split into `Amount` (how much) + `Scaling` (how it behaves: stacking / decaying / falls-off / amplified-if-Wounded / burst).
 - Rows of one attack share a `Step` and their action-instance cells are **vertically merged**, so multiple effects visibly belong to the same action (e.g. Kayle's `Wave` merged across its Damage + MR-shred rows).
+- Two reference tabs added: **`Action Types`** (each delivery archetype + collision behaviour) and **`Effect Types`** (each Effect Category → Detail with a definition). `Amount` clarified to mean the size of *that row's* effect.

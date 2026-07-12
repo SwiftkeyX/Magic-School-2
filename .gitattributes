@@ -1,0 +1,61 @@
+# Normalize line endings: store text as LF in the repo, check out native per-OS.
+* text=auto
+
+# ── Source / text (force LF) ─────────────────────────────────────────────────
+*.cs        text eol=lf diff=csharp
+*.shader    text eol=lf
+*.cginc     text eol=lf
+*.hlsl      text eol=lf
+*.uss       text eol=lf
+*.uxml      text eol=lf
+*.json      text eol=lf
+*.md        text eol=lf
+*.txt       text eol=lf
+*.xml       text eol=lf
+*.yml       text eol=lf
+*.yaml      text eol=lf
+*.sh        text eol=lf
+*.py        text eol=lf
+
+# Windows-only scripts keep CRLF
+*.ps1       text eol=crlf
+*.bat       text eol=crlf
+*.cmd       text eol=crlf
+
+# ── Unity YAML assets (text, mergeable via UnityYAMLMerge) ────────────────────
+*.unity           text eol=lf merge=unityyamlmerge
+*.prefab          text eol=lf merge=unityyamlmerge
+*.asset           text eol=lf merge=unityyamlmerge
+*.meta            text eol=lf merge=unityyamlmerge
+*.mat             text eol=lf merge=unityyamlmerge
+*.anim            text eol=lf merge=unityyamlmerge
+*.controller      text eol=lf merge=unityyamlmerge
+*.physicsMaterial2D text eol=lf merge=unityyamlmerge
+*.scenetemplate   text eol=lf merge=unityyamlmerge
+*.inputactions    text eol=lf
+*.spriteatlas     text eol=lf merge=unityyamlmerge
+
+# ── Binary assets (never diff/merge as text) ─────────────────────────────────
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.psd   binary
+*.tga   binary
+*.tif   binary
+*.bmp   binary
+*.ico   binary
+*.wav   binary
+*.mp3   binary
+*.ogg   binary
+*.aif   binary
+*.ttf   binary
+*.otf   binary
+*.fbx   binary
+*.obj   binary
+*.blend binary
+*.unitypackage binary
+*.dll   binary
+*.so    binary
+*.a     binary
+*.pdf   binary
