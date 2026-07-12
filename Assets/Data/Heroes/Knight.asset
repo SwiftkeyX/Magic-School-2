@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5bb83eda7f4a9a64ab8733ee82839a5c, type: 3}
+  m_Name: Knight
+  m_EditorClassIdentifier: Assembly-CSharp::MagicSchool.Battle.HeroData
+  Id: knight
+  DisplayName: Knight
+  Cost: 1
+  MaxHP: 120
+  ATK: 16
+  DEF: 6
+  MG: 0
+  MR: 6
+  CRIT: 5
+  AttackSpeed: 0.6
+  Range: 1
+  MaxMana: 3
+  ManaPerAttack: 1
+  SkillMultiplier: 2
+  SkillName: Heavy Blow
+  Flags: 
+  Traits:
+  - {fileID: 11400000, guid: e701f55cd34fc834d8ca58ba17de8b4f, type: 2}

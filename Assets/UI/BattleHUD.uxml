@@ -1,0 +1,35 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <Style src="BattleHUD.uss" />
+
+    <!--
+        Root fills the entire UIDocument panel (= screen).
+        picking-mode="Ignore" on non-interactive elements lets mouse events
+        fall through to the 3-D hex board and the uGUI bench/buttons below.
+    -->
+    <ui:VisualElement name="battle-hud-root" class="battle-hud-root"
+                      picking-mode="Ignore">
+
+        <!-- ── Speed-up indicator (absolute, top-right) ──────────────────── -->
+        <ui:Label name="speed-indicator" text="&gt;&gt; FAST" class="speed-indicator"
+                  picking-mode="Ignore" />
+
+        <!-- ── Outcome overlay (absolute, full-screen, hidden by default) ── -->
+        <ui:VisualElement name="outcome-overlay" class="outcome-overlay">
+
+            <ui:VisualElement name="outcome-panel" class="outcome-panel">
+
+                <ui:Label name="outcome-title" text="Victory!"
+                          class="outcome-title" picking-mode="Ignore" />
+
+                <ui:Label name="outcome-sub" text="(Time Limit)"
+                          class="outcome-sub" picking-mode="Ignore" />
+
+                <!-- Continue button: enabled only after OnBattleComplete fires -->
+                <ui:Button name="continue-button" text="Continue"
+                           class="continue-button" />
+
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+    </ui:VisualElement>
+</ui:UXML>

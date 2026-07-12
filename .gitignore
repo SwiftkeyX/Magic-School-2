@@ -1,0 +1,52 @@
+# ── Unity generated / cache folders ─────────────────────────────────────────
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+[Uu]ser[Ss]ettings/
+[Mm]emoryCaptures/
+[Rr]ecordings/
+
+# Asset meta files must be kept for tracked assets, ignored for ignored ones
+!/[Aa]ssets/**/*.meta
+
+# Unity generated meta/crash files
+*.pidb.meta
+*.pdb.meta
+*.mdb.meta
+sysinfo.txt
+
+# Builds / packages
+*.apk
+*.aab
+*.unitypackage
+*.app
+crashlytics-build.properties
+
+# ── IDE / project files (Unity regenerates these) ───────────────────────────
+.vs/
+.idea/
+.vsconfig
+ExportedObj/
+*.csproj
+*.unityproj
+*.sln
+*.slnx
+*.suo
+*.tmp
+*.user
+*.userprefs
+
+# ── OS cruft ─────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ── Secrets — never commit ───────────────────────────────────────────────────
+.env
+*.pem
+.gh-token
+google-service-credential.json
+*credential*.json
+*-credentials.json

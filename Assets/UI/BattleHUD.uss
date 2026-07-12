@@ -1,0 +1,98 @@
+/* ── BattleHUD.uss ────────────────────────────────────────────────────────────
+   Styles for the Battle scene HUD (UI Toolkit).
+   Palette: dark-fantasy matching MainMenu / SchoolHUD.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+/* ── Root ─────────────────────────────────────────────────────────────────── */
+.battle-hud-root {
+    flex-grow: 1;
+    flex-direction: column;
+    background-color: rgba(0, 0, 0, 0);   /* transparent — board shows through */
+}
+
+/* ── Speed-up indicator ───────────────────────────────────────────────────── */
+.speed-indicator {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 18px;
+    -unity-font-style: bold;
+    color: rgb(255, 230, 60);
+    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.85);
+    background-color: rgba(0, 0, 0, 0.55);
+    border-radius: 4px;
+    padding: 4px 10px;
+}
+
+/* ── Outcome overlay (full-screen, absolute) ──────────────────────────────── */
+.outcome-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.78);
+    align-items: center;
+    justify-content: center;
+}
+
+/* ── Outcome panel (centred card) ─────────────────────────────────────────── */
+.outcome-panel {
+    flex-direction: column;
+    align-items: center;
+    background-color: rgba(12, 12, 35, 0.97);
+    border-color: rgba(255, 220, 100, 0.60);
+    border-width: 2px;
+    border-radius: 10px;
+    padding: 40px 60px;
+    min-width: 320px;
+}
+
+/* ── Outcome title (Victory! / Defeated) ─────────────────────────────────── */
+.outcome-title {
+    font-size: 48px;
+    -unity-font-style: bold;
+    color: rgb(255, 220, 80);
+    -unity-text-align: upper-center;
+    margin-bottom: 10px;
+}
+
+/* ── Outcome sub-text (Time Limit note) ──────────────────────────────────── */
+.outcome-sub {
+    font-size: 16px;
+    color: rgba(200, 200, 210, 0.75);
+    -unity-font-style: italic;
+    -unity-text-align: upper-center;
+    margin-bottom: 24px;
+}
+
+/* ── Continue button ──────────────────────────────────────────────────────── */
+.continue-button {
+    height: 48px;
+    min-width: 200px;
+    font-size: 20px;
+    -unity-font-style: bold;
+    color: white;
+    background-color: rgba(40, 60, 120, 0.95);
+    border-color: rgba(255, 220, 100, 0.70);
+    border-width: 1px;
+    border-radius: 6px;
+    -unity-text-align: middle-center;
+    transition-property: background-color, border-color;
+    transition-duration: 0.10s;
+}
+
+.continue-button:hover {
+    background-color: rgba(65, 95, 175, 0.98);
+    border-color: rgba(255, 220, 100, 1);
+}
+
+.continue-button:active {
+    background-color: rgba(25, 40, 85, 0.98);
+}
+
+.continue-button:disabled {
+    color: rgba(160, 160, 180, 0.45);
+    border-color: rgba(160, 160, 180, 0.25);
+    background-color: rgba(25, 25, 55, 0.60);
+}

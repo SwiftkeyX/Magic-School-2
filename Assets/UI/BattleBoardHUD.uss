@@ -1,0 +1,118 @@
+/* ── BattleBoardHUD.uss ────────────────────────────────────────────────────────
+   Start Battle button, placement counter, and bench strip (UI Toolkit migration).
+   ─────────────────────────────────────────────────────────────────────────── */
+
+.battle-board-hud-root {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+
+.start-battle-button {
+    position: absolute;
+    bottom: 130px;
+    left: 50%;
+    translate: -50% 0;
+    width: 160px;
+    height: 50px;
+    font-size: 18px;
+    -unity-text-align: middle-center;
+    background-color: rgb(51, 178, 51);
+    color: white;
+}
+
+.placement-count-label {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    translate: -50% 0;
+    width: 340px;
+    height: 40px;
+    font-size: 22px;
+    color: white;
+    -unity-text-align: middle-center;
+}
+
+.bench-scroll {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 120px;
+    background-color: rgba(0, 0, 0, 0.6);
+}
+
+.bench-card {
+    width: 80px;
+    height: 100px;
+    margin-right: 6px;
+    margin-top: 10px;
+    align-items: center;
+    justify-content: center;
+}
+
+.bench-card-label {
+    font-size: 14px;
+    color: white;
+    -unity-text-align: middle-center;
+    white-space: normal;
+}
+
+/* ── Active-trait panel (left side) ──────────────────────────────────────── */
+.trait-panel {
+    position: absolute;
+    top: 60px;
+    left: 0;
+    width: 210px;
+    padding: 8px;
+    background-color: rgba(0, 0, 0, 0.6);
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
+}
+
+.trait-panel-title {
+    font-size: 20px;
+    color: white;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    margin-bottom: 8px;
+}
+
+.trait-list {
+    flex-direction: column;
+}
+
+.trait-row {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 8px;
+    margin-bottom: 4px;
+    border-radius: 4px;
+}
+
+.trait-row-active {
+    background-color: rgba(212, 175, 55, 0.85);
+}
+
+.trait-row-inactive {
+    background-color: rgba(60, 60, 60, 0.7);
+}
+
+.trait-name {
+    font-size: 15px;
+    color: white;
+    -unity-font-style: bold;
+}
+
+.trait-name-inactive {
+    color: rgb(160, 160, 160);
+}
+
+.trait-count {
+    font-size: 15px;
+    color: white;
+    -unity-text-align: middle-right;
+}
