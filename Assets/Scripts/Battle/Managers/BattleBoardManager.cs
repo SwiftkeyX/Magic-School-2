@@ -341,7 +341,7 @@ namespace MagicSchool.Battle
 
                 int target = isActive
                     ? active.UnitCount
-                    : (trait.Tiers != null && trait.Tiers.Count > 0 ? trait.Tiers.Min(t => t.UnitCount) : count);
+                    : (trait.Breakpoints != null && trait.Breakpoints.Count > 0 ? trait.Breakpoints.Min(b => b.UnitCount) : count);
                 var countLabel = new Label($"{count}/{target}");
                 countLabel.AddToClassList("trait-count");
                 row.Add(countLabel);
