@@ -1,14 +1,8 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using UnityEngine;
 
 namespace MagicSchool.Battle
 {
-    // Targeting helpers and the shared damage mutation choke point.
-    // removed: IsActionLocked, SetMana, SetState, Grid/AllCombatants/GetOpponentsOf/
-    // GetAlliesOf/GetOccupantAt skill-execution accessors, GetZoneShreddedDefense,
-    // GrantMana, AddDreadZone — skill/trait system, rebuilding fresh.
+    // Targeting helpers and the shared damage choke point.
     public partial class AutoBattleResolver
     {
         private Combatant FindInRange(Combatant actor, List<Combatant> opponents)
@@ -23,21 +17,16 @@ namespace MagicSchool.Battle
             return nearest;
         }
 
-        // Shared shield-absorb + HP-subtract + (optional) event + (optional) kill-check
-        // choke point for all damage application. Callers that need to defer the kill
-        // check pass autoHandleKill: false and check target.IsDefeated themselves
-        // afterward. Returns the post-shield damage actually applied to HP.
-        // removed: Phalanx-style intercept redirect — skill system, rebuilding fresh.
-        internal int ApplyDamageAndCheckKill(Combatant actor, Combatant target, int damage, out int shieldAbsorbed,
-            List<string> tags = null, bool bypassShield = false, bool autoHandleKill = true)
+        // Single choke point for all damage application: subtract HP, optionally fire the event,
+        // optionally check the kill. Callers that need to defer the kill check pass
+        // autoHandleKill: false and check target.IsDefeated themselves afterward.
+        //
+        // removed: the shield-absorb branch (and the bypassShield / out shieldAbsorbed params).
+        // Combatant.Shield was read on every hit but never written by anything — dead weight in
+        // the hottest path in the game. Re-add with the first mechanic that actually grants shield.
+        internal int ApplyDamageAndCheckKill(Combatant actor, Combatant target, int damage,
+            List<string> tags = null, bool autoHandleKill = true)
         {
-            shieldAbsorbed = 0;
-            if (!bypassShield && target.Shield > 0)
-            {
-                shieldAbsorbed = Math.Min(target.Shield, damage);
-                target.Shield -= shieldAbsorbed;
-                damage        -= shieldAbsorbed;
-            }
             target.CurrentHP -= damage;
 
             if (tags != null)
@@ -47,15 +36,6 @@ namespace MagicSchool.Battle
                 HandleKill(actor, target);
 
             return damage;
-        }
-
-        internal void MoveUnit(Combatant c, HexCoord dest)
-        {
-            _grid.ClearOccupant(c.Position);
-            var from = c.Position;
-            c.Position = dest;
-            _grid.SetOccupant(c.Position, c.Id);
-            OnCombatantMoved?.Invoke(c.Id, from, c.Position);
         }
     }
 }

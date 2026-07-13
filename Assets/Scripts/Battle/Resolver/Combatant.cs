@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace MagicSchool.Battle
 {
@@ -7,10 +8,15 @@ namespace MagicSchool.Battle
     internal class Combatant
     {
         public string Id;          // unique per combatant instance (grid/units/placement key)
-        public string HeroId;      // hero/type id (e.g. "knight") — used for cosmetic lookups only
+        public string HeroId;      // hero/type id (e.g. "knight") — stable identity of the unit type
         public string DisplayName;
         public Team Team;
         public bool IsPlayer => Team == Team.Player;
+
+        // Presentation, carried from HeroData so the view never has to look it up by Id.
+        public Sprite Icon;
+        public Color Tint;
+
         public int MaxHP;
         public int CurrentHP;
         public int ATK;
@@ -20,13 +26,12 @@ namespace MagicSchool.Battle
         public float AttackSpeed;
         public int Range;
         public HexCoord Position;
-        public float ActionProgress;  // accumulates AttackSpeed × TickDelay each tick; fires at ≥ 1.0
+        public float ActionProgress;  // accumulates AttackSpeed × tick delay each tick; fires at ≥ 1.0
         public bool IsDefeated => CurrentHP <= 0;
 
         public List<BattleBehaviorFlag> Flags;
         public List<TraitData> Traits;        // synergy tags; read by the trait pass at BeginBattle()
-        public int Shield;         // general shield-absorption pool (generic damage-absorb mechanic)
-        public string CurrentTargetId;        // last basic-attack target; used by the "Current Target" priority sort
+        public string CurrentTargetId;        // last basic-attack target
 
         // ── Skill / mana (see Skill.md) ─────────────────────────────────────
         public int    Mana;              // current charge; starts at 0
@@ -36,12 +41,7 @@ namespace MagicSchool.Battle
         public float  SkillMultiplier;   // empowered-hit damage multiplier
         public string SkillName;
 
-        // removed: ChampionId, ChampionRole Role — champion system, rebuilding fresh
-        // removed: IsFrontRow, OmnivampPct, BleedDamagePerTick/BleedTicksRemaining,
-        //   DreadknightState/StrikerState/TricksterState/ElementalistState/RangerState
-        //   and their Dreadknight/Striker/Trickster/Elementalist/Ranger fields — trait system, rebuilding fresh
-        // removed: Mana/MaxMana, CastState State, CastTicksRemaining, PendingTargetHex,
-        //   IsSilenced/SilenceTicksRemaining, IsStunned/StunTicksRemaining, SkillDefinition Skill,
-        //   InterceptPct/InterceptTicksRemaining — skill-cast system, rebuilding fresh
+        // removed: Shield — read on every hit in ApplyDamageAndCheckKill, but never written by
+        // anything. Re-add with the first mechanic that actually grants shield.
     }
 }

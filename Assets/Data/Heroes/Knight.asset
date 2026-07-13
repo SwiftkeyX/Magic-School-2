@@ -14,13 +14,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MagicSchool.Battle.HeroData
   Id: knight
   DisplayName: Knight
-  Cost: 1
+  Icon: {fileID: 0}
+  PlayerTint: {r: 0.2, g: 0.5, b: 1, a: 1}
+  EnemyTint: {r: 1, g: 0.4, b: 0.4, a: 1}
   MaxHP: 120
   ATK: 16
   DEF: 6
   MG: 0
   MR: 6
-  CRIT: 5
   AttackSpeed: 0.6
   Range: 1
   MaxMana: 3

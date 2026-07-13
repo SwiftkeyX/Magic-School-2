@@ -1,16 +1,36 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace MagicSchool.Battle
 {
+    // Board occupancy + pathfinding.
+    //
+    // Board dimensions were `const` before the editability pass, which meant the board could not
+    // be resized without a recompile. They are now serialized instance fields, so every consumer
+    // must reach them through a HexGrid instance — there is no static board size any more.
     public class HexGrid : MonoBehaviour
     {
-        public const int Cols = 7;
-        public const int Rows = 8;          // 0-3 player, 4-7 enemy
-        public const int PlayerRowCount = 4;
+        [SerializeField, Range(3, 16), Tooltip("Board width in hexes.")]
+        private int _cols = 7;
+
+        [SerializeField, Range(4, 16), Tooltip("Board height in hexes. Split evenly-ish between the two sides.")]
+        private int _rows = 8;
+
+        [SerializeField, Range(1, 15), Tooltip("How many rows (from row 0 up) belong to the player. The rest are the enemy's.")]
+        private int _playerRowCount = 4;
+
+        public int Cols           => _cols;
+        public int Rows           => _rows;
+        public int PlayerRowCount => _playerRowCount;
 
         private readonly Dictionary<HexCoord, string> _occupants = new Dictionary<HexCoord, string>();
+
+        // The player's half must leave at least one row for the enemy, or enemies would be
+        // auto-placed off the board and never reachable.
+        private void OnValidate()
+        {
+            _playerRowCount = Mathf.Clamp(_playerRowCount, 1, Mathf.Max(1, _rows - 1));
+        }
 
         public bool IsOccupied(HexCoord coord) => _occupants.ContainsKey(coord);
 
@@ -29,22 +49,6 @@ namespace MagicSchool.Battle
 
         public void Clear() => _occupants.Clear();
 
-        // Returns all coords within hex distance <= range of center, within bounds.
-        public List<HexCoord> GetInRange(HexCoord center, int range)
-        {
-            var result = new List<HexCoord>();
-            for (int col = 0; col < Cols; col++)
-            {
-                for (int row = 0; row < Rows; row++)
-                {
-                    var coord = new HexCoord(col, row);
-                    if (HexCoord.Distance(center, coord) <= range)
-                        result.Add(coord);
-                }
-            }
-            return result;
-        }
-
         // BFS: returns the next step from `from` toward `to`, skipping occupied cells.
         // Returns null if no path exists or destination is already occupied.
         public HexCoord? GetNextStep(HexCoord from, HexCoord to, string moverId)
@@ -54,7 +58,7 @@ namespace MagicSchool.Battle
             var visited = new HashSet<HexCoord> { from };
             var queue = new Queue<(HexCoord coord, HexCoord firstStep)>();
 
-            foreach (HexCoord neighbor in HexCoord.GetNeighbors(from, Cols, Rows))
+            foreach (HexCoord neighbor in HexCoord.GetNeighbors(from, _cols, _rows))
             {
                 // A unit may move through occupied cells only if the occupant is the mover itself.
                 string occupant = GetOccupantId(neighbor);
@@ -69,7 +73,7 @@ namespace MagicSchool.Battle
                 var (current, firstStep) = queue.Dequeue();
                 if (current == to) return firstStep;
 
-                foreach (HexCoord neighbor in HexCoord.GetNeighbors(current, Cols, Rows))
+                foreach (HexCoord neighbor in HexCoord.GetNeighbors(current, _cols, _rows))
                 {
                     if (visited.Contains(neighbor)) continue;
                     string occupant = GetOccupantId(neighbor);
@@ -99,77 +103,7 @@ namespace MagicSchool.Battle
             return best;
         }
 
-        // Hexes intersected by a line from `origin` through `through`, extended to
-        // the board edge or `maxRange` steps (whichever comes first). Used by the
-        // Linear Path targeting filter (Laser/Piercing Beam archetype).
-        public List<HexCoord> GetLinearPath(HexCoord origin, HexCoord through, int maxRange)
-        {
-            var result = new List<HexCoord>();
-            HexCoord.ToCube(origin, out int ox, out int oy, out int oz);
-            HexCoord.ToCube(through, out int tx, out int ty, out int tz);
-
-            int n = HexCoord.Distance(origin, through);
-            if (n == 0) return result;
-
-            for (int step = 1; step <= maxRange; step++)
-            {
-                double t = (double)step / n;
-                double cx = ox + (tx - ox) * t;
-                double cy = oy + (ty - oy) * t;
-                double cz = oz + (tz - oz) * t;
-
-                HexCoord hex = CubeRound(cx, cy, cz);
-                if (hex.Col < 0 || hex.Col >= Cols || hex.Row < 0 || hex.Row >= Rows)
-                    break;
-
-                if (result.Count == 0 || result[result.Count - 1] != hex)
-                    result.Add(hex);
-            }
-            return result;
-        }
-
-        private static HexCoord CubeRound(double x, double y, double z)
-        {
-            int rx = (int)Math.Round(x);
-            int ry = (int)Math.Round(y);
-            int rz = (int)Math.Round(z);
-
-            double xDiff = Math.Abs(rx - x);
-            double yDiff = Math.Abs(ry - y);
-            double zDiff = Math.Abs(rz - z);
-
-            if (xDiff > yDiff && xDiff > zDiff)
-                rx = -ry - rz;
-            else if (yDiff > zDiff)
-                ry = -rx - rz;
-            else
-                rz = -rx - ry;
-
-            return HexCoord.FromCube(rx, ry, rz);
-        }
-
-        // Among `candidates`, finds the hex whose radius-C neighborhood contains the
-        // most `enemyPositions`. Used by the Largest Cluster targeting sort.
-        public HexCoord? FindLargestClusterCenter(IEnumerable<HexCoord> candidates, IEnumerable<HexCoord> enemyPositions, int radius)
-        {
-            var enemyList = new List<HexCoord>(enemyPositions);
-            HexCoord? best = null;
-            int bestCount = -1;
-            foreach (HexCoord candidate in candidates)
-            {
-                int count = 0;
-                foreach (HexCoord enemy in enemyList)
-                {
-                    if (HexCoord.Distance(candidate, enemy) <= radius)
-                        count++;
-                }
-                if (count > bestCount)
-                {
-                    bestCount = count;
-                    best = candidate;
-                }
-            }
-            return best;
-        }
+        // removed: GetInRange, GetLinearPath, CubeRound, FindLargestClusterCenter — scaffolding for
+        // a targeting system (Linear Path / Largest Cluster filters) that does not exist. No caller.
     }
 }

@@ -66,8 +66,9 @@ namespace MagicSchool.Battle
             target.ReleasePointer(evt.pointerId);
             if (_dragging)
                 _owner.OnCardDragEnd(PanelToScreen(evt.position));
-            else
-                _owner.OnCardClicked(_studentId);
+            // A click that never crossed the drag threshold does nothing. It used to call
+            // _owner.OnCardClicked() → HeroSelection.Select(), which had zero subscribers
+            // anywhere — so the click did nothing then either, just less honestly.
             _dragging = false;
         }
 

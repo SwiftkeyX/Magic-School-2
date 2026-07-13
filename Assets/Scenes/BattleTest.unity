@@ -150,6 +150,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MagicSchool.Battle.BattleHUD
   _resolver: {fileID: 1670095322}
+  _speedUpMultiplier: 2
 --- !u!114 &267396968
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -563,6 +564,10 @@ MonoBehaviour:
   _hexTilePrefab: {fileID: 126809410757081819, guid: a82e41ffb6763a34584ba0683301d4a7, type: 3}
   _battleUnitPrefab: {fileID: 4953770828635532444, guid: 91548fef8835bb54f926b0b37860eaca, type: 3}
   _uiDocument: {fileID: 1670095327}
+  _maxSquadSize: 2147483647
+  _hexWidth: 1.1
+  _hexHeight: 0.95
+  _hexOffset: 0.55
   _debugAutoStart: 1
   _debugPlayerStartHpPct: 1
 --- !u!114 &1670095322
@@ -577,6 +582,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 88ff5603cf38d1940a5e4f909141b893, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MagicSchool.Battle.AutoBattleResolver
+  _tickDelay: 0.1
+  _maxBattleTicks: 1200
 --- !u!114 &1670095323
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -589,6 +596,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 25b65b92e447b9540b1623022ebaf6f5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MagicSchool.Battle.HexGrid
+  _cols: 7
+  _rows: 8
+  _playerRowCount: 4
 --- !u!4 &1670095324
 Transform:
   m_ObjectHideFlags: 0
@@ -639,52 +649,6 @@ MonoBehaviour:
   m_PivotReferenceSize: 0
   m_Pivot: 0
   m_WorldSpaceCollider: {fileID: 0}
---- !u!1 &1773384225
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1773384227}
-  - component: {fileID: 1773384226}
-  m_Layer: 0
-  m_Name: BattleTestHarness
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1773384226
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1773384225}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7a5dc1598ac83a14caabe2e965e5cf01, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MagicSchool.Battle.BattleTestHarness
-  _resolver: {fileID: 1670095322}
-  _matchup: {fileID: 11400000, guid: 3449116aa2c9e504d8930ee8a6ef7880, type: 2}
---- !u!4 &1773384227
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1773384225}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -694,4 +658,3 @@ SceneRoots:
   - {fileID: 644388480}
   - {fileID: 1372694549}
   - {fileID: 267396969}
-  - {fileID: 1773384227}
