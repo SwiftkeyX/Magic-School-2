@@ -1,0 +1,37 @@
+{
+  "$schema": "https://aka.ms/codetour-schema",
+  "title": "AutoBattle: the two-clock loop",
+  "description": "How BattleLoop() drives a battle. Movement and attacking run on SEPARATE clocks — this tour is the result of the 'AutoBattle separate' review note.",
+  "steps": [
+    {
+      "file": "Assets/Scripts/Battle/Resolver/AutoBattleResolver.cs",
+      "description": "**Start here: the bug this design fixes.**\n\nThere used to be only ONE clock, `ActionProgress`, charged at `AttackSpeed × tickDelay`. A unit that was out of range spent that whole *attack* cycle to take one hex step.\n\nSo movement speed **was** attack speed. Knight (`AttackSpeed 0.6`) and Archer (`0.7`) didn't just swing at different rates, they *walked* at different rates — the Archer crossed the board 17% faster for no reason anyone designed. And moving silently cost a unit its attack.\n\n`_moveSpeed` is the fix: **one shared pace, identical for every unit**. It is deliberately NOT a per-hero stat. `AttackSpeed` now governs attack cadence and nothing else.",
+      "pattern": "private float _moveSpeed = 0\\.65f;"
+    },
+    {
+      "file": "Assets/Scripts/Battle/Resolver/AutoBattleResolver.cs",
+      "description": "**Phase 1 — CHARGE.**\n\nEvery living unit accrues both clocks each tick.\n\nLook at the two lines closely: `c.AttackSpeed` is read **from the unit**, `_moveSpeed` is read **from the resolver**. That asymmetry is the entire change — per-unit attack cadence, shared movement pace.\n\nBoth clocks are a 0→1 fraction of one cycle, not a countdown.",
+      "pattern": "c\\.AttackCooldown \\+= c\\.AttackSpeed \\* _tickDelay;"
+    },
+    {
+      "file": "Assets/Scripts/Battle/Resolver/AutoBattleResolver.cs",
+      "description": "**Phase 2 — ATTACK.** Units whose attack clock is full, ordered fastest-first.\n\nThe key line is the `continue` a few lines down: if **nothing is in range**, the unit does not attack **and does not lose its charge**. Under the old single-clock model this branch called `MoveTowardNearest()` and then burned the full cycle — which is exactly how walking came to cost you an attack.\n\nNow a unit that walks keeps charging, so it strikes the moment it arrives.",
+      "pattern": "var readyToAttackCombatants = _combatants"
+    },
+    {
+      "file": "Assets/Scripts/Battle/Resolver/AutoBattleResolver.cs",
+      "description": "**Phase 3 — MOVE.** Units whose *move* clock is full and who have **nothing in range**.\n\nA unit with a target in range `continue`s — it stands and fights rather than repositioning. So a unit attacks or moves in a tick, never both.\n\n`MoveTowardNearest()` is unchanged (it lives in `AutoBattleResolver.Attack.cs`) — it already handles grid occupancy and fires `OnCombatantMoved` for the view.",
+      "pattern": "var readyToMoveCombatants = _combatants"
+    },
+    {
+      "file": "Assets/Scripts/Battle/Resolver/AutoBattleResolver.cs",
+      "description": "**Phase 4 — CLAMP. Read this before you try to 'simplify' it.**\n\nThe obvious refactor is to fold this into Phase 1 as `Min(x + delta, 1f)`. **That silently breaks the simulation.**\n\nWhy: a unit sitting at `1.02` gets pinned to `1.0`; it attacks, subtracts `1.0`, and lands on `0.0` instead of `0.02`. It loses a sliver on *every single cycle*, and attack speed gets re-quantised to the tick rate — so `AttackSpeed` 0.30 and 0.35 stop being meaningfully different.\n\nClamping **here**, after the action phases, only touches units that *couldn't act*. Its real job is to stop **banking**: without it, a unit that walked 30 ticks would arrive holding 1.8 attacks and burst on contact. With it, it arrives with exactly **one**.\n\nSee `Combat.md`, Core Rules 7–8.",
+      "pattern": "c\\.AttackCooldown = Mathf\\.Min\\(c\\.AttackCooldown, 1f\\);"
+    },
+    {
+      "file": "Assets/Scripts/Battle/Resolver/Combatant.cs",
+      "description": "The two clocks as they live on the unit.\n\n`AttackCooldown` was called `ActionProgress` when it did both jobs. `MoveCooldown` is new.\n\nNote what is **not** here: there is no per-unit move speed. That is deliberate — see the open question in `Combat.md`.",
+      "pattern": "public float AttackCooldown;"
+    }
+  ]
+}

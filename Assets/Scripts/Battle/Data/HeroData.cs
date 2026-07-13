@@ -12,11 +12,6 @@ namespace MagicSchool.Battle
     [CreateAssetMenu(menuName = "MagicSchool/Hero", fileName = "Hero")]
     public class HeroData : ScriptableObject
     {
-        // TODO(deferred): typing this by hand in the Inspector invites typos. An enum was proposed,
-        // but it would make adding a hero require a recompile — the opposite of the editability pass.
-        // Deriving it from the asset filename conflicts with Hero.md:103, which permits two heroes to
-        // share an Id. Resolve what this field is actually for first: it is read in exactly one place
-        // (ToCombatData), and the Combatant.HeroId that preserves it is never read by anything.
         [Tooltip("Stable lookup/display key, e.g. \"knight\". Lowercase, no spaces.")]
         public string Id;
 
@@ -69,11 +64,6 @@ namespace MagicSchool.Battle
         public string SkillName = "Skill";
 
         [Header("Combat / Synergy")]
-        // TODO(deferred): this field should not exist. Damage archetype (physical / magic / both) is a
-        // property of the ACTION, not of the unit — the target should mitigate against whatever it was
-        // hit with, per the skill's own description. Already dead in practice: BattleBehaviorFlag has
-        // one member, no hero asset sets it, every hero has MG 0, so isMagic is always false. Delete it
-        // together with the skill rebuild that replaces it (rewrites Hero.md Core Rule 6 + Skill.md:37).
         [Tooltip("MagicAttack makes this unit strike with MG vs MR instead of ATK vs DEF.")]
         public List<BattleBehaviorFlag> Flags = new List<BattleBehaviorFlag>();
 
