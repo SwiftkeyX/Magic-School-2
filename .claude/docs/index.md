@@ -31,6 +31,7 @@
 | File | Purpose |
 |---|---|
 | `other/changelog.md` | Milestone log — one entry per significant decision or release |
+| `other/architecture-overview.md` | Auto-generated SRP + coupling summary across all GDDs (`/read-architecture`) |
 | `other/adr/` | Architecture Decision Records — one file per decision |
 
 ## TFT reference (`tft/`)
