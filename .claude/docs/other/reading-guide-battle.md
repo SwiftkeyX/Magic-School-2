@@ -28,7 +28,8 @@ But it needs ~10 minutes of vocabulary first, or the types won't mean anything. 
 
 **The single most useful thing you can do:** open `UnitCombatData` (in `BattleData.cs`) and
 `Combatant.cs` side by side. The fields `Combatant` has *extra* — `CurrentHP`, `Mana`,
-`ActionProgress`, `Position`, `SkillArmed` — are exactly "state that exists only while fighting."
+`AttackCooldown`, `MoveCooldown`, `Position`, `SkillArmed` — are exactly "state that exists only
+while fighting."
 
 **That diff *is* the design.** Authored data on the left, runtime state on the right.
 
@@ -46,10 +47,15 @@ But it needs ~10 minutes of vocabulary first, or the types won't mean anything. 
 
 ### The whole game, in one paragraph
 
-Every tick (0.1s), each living unit accumulates `ActionProgress += AttackSpeed × tickDelay`. When a
-unit's progress crosses **1.0**, it acts: **attack** if an enemy is within `Range`, otherwise **step
-toward the nearest one**. Repeat until one side is wiped, or the tick cap hits. That's it — the
-whole auto-battler is about 40 lines in `BattleLoop()`.
+Every tick (0.1s), each living unit charges **two independent clocks**:
+`AttackCooldown += AttackSpeed × tickDelay` (per-unit) and `MoveCooldown += _moveSpeed × tickDelay`
+(**shared** — the same pace for everyone). When a clock crosses **1.0** the unit spends it:
+**attack** if an enemy is within `Range`, otherwise **step toward the nearest one**. Repeat until one
+side is wiped, or the tick cap hits. That's it — the whole auto-battler is `BattleLoop()`.
+
+The two clocks are separate on purpose. When there was only one, a hero that swung faster also
+*walked* faster, and walking cost you an attack. `AttackSpeed` now governs attack cadence and
+nothing else. See `production/gdd/Combat.md`.
 
 ### Things worth noticing as you read
 
@@ -99,10 +105,15 @@ BattleBoardManager.Start()
   └→ BeginBattle()
        └→ ApplyTraitBonuses()           synergies applied ONCE, before the loop
        └→ BattleLoop()  ──────────────────────┐
-            every 0.1s:                       │
-              ActionProgress += AttackSpeed×dt│   ← the clock
-              units at >= 1.0 act:            │
-                Attack()   or   MoveTowardNearest()
+            every 0.1s, in four phases:       │
+              1. CHARGE                       │
+                   AttackCooldown += AttackSpeed×dt   ← per-unit clock
+                   MoveCooldown   += _moveSpeed  ×dt   ← SHARED clock
+              2. ATTACK  (charged AND in range)
+                   Attack()
+              3. MOVE    (charged AND nothing in range)
+                   MoveTowardNearest()
+              4. CLAMP both clocks to <= 1.0  ← stops banking; keep it its OWN phase
                   └→ fires OnCombatantActed / OnCombatantMoved / OnCombatantDefeated
                        └→ BattleBoardManager animates the sprites
             until one side is wiped ──────────┘
