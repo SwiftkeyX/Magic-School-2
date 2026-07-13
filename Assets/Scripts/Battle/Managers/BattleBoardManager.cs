@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -6,73 +5,90 @@ using UnityEngine.UIElements;
 
 namespace MagicSchool.Battle
 {
+    [RequireComponent(typeof(HexGrid))]
     public class BattleBoardManager : MonoBehaviour
     {
         // ── Inspector ────────────────────────────────────────────────────────
-        [SerializeField] AutoBattleResolver   _resolver;
-        [SerializeField] GameObject           _hexTilePrefab;
-        [SerializeField] GameObject           _battleUnitPrefab;
-        [SerializeField] private UnityEngine.UIElements.UIDocument _uiDocument;
-        // removed: TraitTracker _traitTracker, ChampionRoster _championRoster — trait/champion system, rebuilding fresh
+        [SerializeField] private AutoBattleResolver _resolver;
+        [SerializeField] private GameObject         _hexTilePrefab;
+        [SerializeField] private GameObject         _battleUnitPrefab;
+        [SerializeField] private UIDocument         _uiDocument;
 
-        private UnityEngine.UIElements.VisualElement _root;
-        private UnityEngine.UIElements.Button        _startBattleButton;
-        private UnityEngine.UIElements.Label         _placementCountText;
-        private ScrollView _benchScrollView;
-        private UnityEngine.UIElements.VisualElement _benchContainer;
-        private UnityEngine.UIElements.VisualElement _traitList;
-        private readonly Dictionary<string, UnityEngine.UIElements.VisualElement> _benchCardsById = new();
+        [Header("Placement")]
+        [SerializeField, Range(1, 12), Tooltip("How many heroes the player may field. Was int.MaxValue, which rendered as \"0/2147483647 heroes placed\".")]
+        private int _maxSquadSize = 8;
 
-        // ── Hex constants ────────────────────────────────────────────────────
-        private const float HexWidth  = 1.1f;
-        private const float HexHeight = 0.95f;
-        private const float HexOffset = 0.55f;
+        [Header("Board Layout")]
+        [SerializeField, Range(0.5f, 3f), Tooltip("Centre-to-centre horizontal distance between hex columns.")]
+        private float _hexWidth = 1.1f;
+
+        [SerializeField, Range(0.4f, 3f), Tooltip("Centre-to-centre vertical distance between hex rows.")]
+        private float _hexHeight = 0.95f;
+
+        [SerializeField, Range(0f, 1.5f), Tooltip("Horizontal shift applied to odd rows (half a hex).")]
+        private float _hexOffset = 0.55f;
+
+        private VisualElement _root;
+        private Button        _startBattleButton;
+        private Label         _placementCountText;
+        private ScrollView    _benchScrollView;
+        private VisualElement _benchContainer;
+        private VisualElement _traitList;
+        private readonly Dictionary<string, VisualElement> _benchCardsById = new();
 
         // ── State ────────────────────────────────────────────────────────────
         private readonly Dictionary<HexCoord, HexTileView>      _tiles             = new();
-        private readonly Dictionary<string,   BattleUnit>        _units             = new();
-        private readonly Dictionary<string,   HexCoord>          _pendingPlacements = new();
+        private readonly Dictionary<string,   BattleUnit>       _units             = new();
+        private readonly Dictionary<string,   HexCoord>         _pendingPlacements = new();
         private readonly Dictionary<string,   CombatantSnapshot> _studentSnapshots  = new();
 
         private HexGrid _grid;
         private bool    _battleStarted;
-        private int     _maxSquadSize        = int.MaxValue; // unlimited in standalone; set by BeginPlacement() in production
-        // removed: _placementPhaseActive, _championDataLookup — BeginPlacement()/champion system, rebuilding fresh
 
         // ── Placement controller (owns drag state and pointer input) ──────────
         private BattlePlacementController _placementCtrl;
 
-        // ── Internal properties (read by BattlePlacementController) ──────────
+        // ── Internal accessors (read by BattlePlacementController) ────────────
         internal bool IsBattleStarted => _battleStarted;
         internal int  MaxSquadSize    => _maxSquadSize;
+        internal float HexWidth       => _hexWidth;
+
+        // The drag ghost needs the hero's authored tint. It used to call a static
+        // BattleBoardManager.StudentColor(id) that switch'd on the literal "knight"/"archer".
+        // It now reads the same snapshot the board renders from — one source, authored on the asset.
+        internal Color GetStudentTint(string studentId) =>
+            _studentSnapshots.TryGetValue(studentId, out var snap) ? snap.Tint : Color.white;
+
+        // Instance geometry, so the board can be re-laid-out from the Inspector.
+        internal Vector3 CoordToWorld(HexCoord c) =>
+            new Vector3(c.Col * _hexWidth + (c.Row % 2 == 1 ? _hexOffset : 0f),
+                        c.Row * _hexHeight, 0f);
 
         // ── Lifecycle ────────────────────────────────────────────────────────
         private void Awake()
         {
             _grid = GetComponent<HexGrid>();
-            if (_grid == null) { Debug.LogError("[BattleBoardManager] HexGrid missing", this); enabled = false; return; }
-            // removed: RunManager.Instance?.RegisterBattleBoardManager(this) — meta-progression system, rebuilding fresh
         }
 
         private void Start()
         {
-            if (_resolver == null)    { Debug.LogError("[BattleBoardManager] AutoBattleResolver missing", this); enabled = false; return; }
-            if (_uiDocument == null)  { Debug.LogError("[BattleBoardManager] UIDocument missing", this); enabled = false; return; }
+            if (_resolver == null)   { Debug.LogError("[BattleBoardManager] AutoBattleResolver missing", this); enabled = false; return; }
+            if (_uiDocument == null) { Debug.LogError("[BattleBoardManager] UIDocument missing", this); enabled = false; return; }
 
             _uiDocument.sortingOrder = BattleUISortOrder.BoardBenchHUD;
             _root = _uiDocument.rootVisualElement;
-            _startBattleButton  = _root.Q<UnityEngine.UIElements.Button>("start-battle-button");
-            _placementCountText = _root.Q<UnityEngine.UIElements.Label>("placement-count-label");
-            _benchScrollView = _root.Q<ScrollView>("bench-scroll");
-            _benchContainer = _benchScrollView.contentContainer;
-            _traitList = _root.Q<UnityEngine.UIElements.VisualElement>("trait-list");
+            _startBattleButton  = _root.Q<Button>("start-battle-button");
+            _placementCountText = _root.Q<Label>("placement-count-label");
+            _benchScrollView    = _root.Q<ScrollView>("bench-scroll");
+            _benchContainer     = _benchScrollView.contentContainer;
+            _traitList          = _root.Q<VisualElement>("trait-list");
 
             if (_startBattleButton == null) { Debug.LogError("[BattleBoardManager] start-battle-button not found in UXML", this); enabled = false; return; }
 
             BuildBoard();
 
             // Instantiate the placement controller after BuildBoard() so _tiles is fully populated.
-            _placementCtrl = new BattlePlacementController(this, _tiles, _pendingPlacements, _grid, HexWidth);
+            _placementCtrl = new BattlePlacementController(this, _tiles, _pendingPlacements, _grid);
 
             _resolver.OnCombatantMoved    += HandleMoved;
             _resolver.OnCombatantActed    += HandleActed;
@@ -81,12 +97,8 @@ namespace MagicSchool.Battle
             _startBattleButton.SetEnabled(false);
             _startBattleButton.clicked += OnStartBattle;
 
-            // removed: RunManager-driven production path (BeginPlacement() called externally) —
-            // meta-progression system, rebuilding fresh. This standalone path is now unconditional.
-            _maxSquadSize = int.MaxValue;
             _resolver.EnsureCombatantsInitialized();
-            var snapshots = _resolver.GetCombatantSnapshots();
-            var students  = snapshots.Where(s => s.IsStudent).ToList();
+            var students = _resolver.GetCombatantSnapshots().Where(s => s.IsStudent).ToList();
             foreach (var s in students)
                 _studentSnapshots[s.Id] = s;
             BuildBench(students);
@@ -105,21 +117,17 @@ namespace MagicSchool.Battle
             _resolver.OnCombatantDefeated -= HandleDefeated;
         }
 
-        // removed: BeginPlacement(List<StudentCombatData>, List<EnemyCombatData>, int) — this
-        // was called by RunManager after SetCombatants() in the production flow. Meta-progression
-        // system, rebuilding fresh. The standalone path in Start() now covers all cases.
-
         // ── Board construction ───────────────────────────────────────────────
-        // Full visual height of a pointy-top hex whose centre-to-centre column width = HexWidth
-        private static readonly float HexVisualHeight = HexWidth * 2f / Mathf.Sqrt(3f);
-
         private void BuildBoard()
         {
             var hexSprite = HexSpriteGenerator.GetHexSprite();
-            var scale     = new Vector3(HexWidth, HexVisualHeight, 1f);
 
-            for (int row = 0; row < HexGrid.Rows; row++)
-            for (int col = 0; col < HexGrid.Cols; col++)
+            // Full visual height of a pointy-top hex whose centre-to-centre column width = _hexWidth
+            float hexVisualHeight = _hexWidth * 2f / Mathf.Sqrt(3f);
+            var   scale           = new Vector3(_hexWidth, hexVisualHeight, 1f);
+
+            for (int row = 0; row < _grid.Rows; row++)
+            for (int col = 0; col < _grid.Cols; col++)
             {
                 var coord = new HexCoord(col, row);
                 var go    = Instantiate(_hexTilePrefab, CoordToWorld(coord), Quaternion.identity, transform);
@@ -127,7 +135,9 @@ namespace MagicSchool.Battle
                 var sr = go.GetComponent<SpriteRenderer>();
                 if (sr != null) sr.sprite = hexSprite;
                 var view = go.GetComponent<HexTileView>();
-                view.Init(coord);
+                // Player-side is a property of the board, not of the tile — pass it in rather than
+                // letting the tile reach for a static board constant.
+                view.Init(coord, _grid.PlayerRowCount);
                 _tiles[coord] = view;
             }
         }
@@ -142,7 +152,7 @@ namespace MagicSchool.Battle
                 var card = new VisualElement();
                 card.name = $"Card_{s.Id}";
                 card.AddToClassList("bench-card");
-                card.style.backgroundColor = new StyleColor(StudentColor(s.HeroId));
+                card.style.backgroundColor = new StyleColor(s.Tint);   // authored on the asset
 
                 var label = new Label(s.DisplayName);
                 label.AddToClassList("bench-card-label");
@@ -156,11 +166,11 @@ namespace MagicSchool.Battle
         }
 
         // ── Drag/placement entry points (delegate to BattlePlacementController) ──
-        // Thin wrappers — BenchCardDragManipulator's API is unchanged.
-        public void OnCardClicked(string studentId)   => _placementCtrl?.OnCardClicked(studentId);
         public void OnCardDragStart(string studentId) => _placementCtrl?.OnCardDragStart(studentId);
         public void OnCardDrag(Vector2 screenPos)     => _placementCtrl?.OnCardDrag(screenPos);
         public void OnCardDragEnd(Vector2 screenPos)  => _placementCtrl?.OnCardDragEnd(screenPos);
+        // removed: OnCardClicked — it forwarded to HeroSelection.Select(), which had zero
+        // subscribers. Clicking a bench card did nothing; now it honestly does nothing.
 
         // ── Placement state mutations (called back by BattlePlacementController) ─
         internal void UnplaceStudent(string studentId)
@@ -178,14 +188,8 @@ namespace MagicSchool.Battle
             if (_benchCardsById.TryGetValue(studentId, out var card))
                 card.style.opacity = 1f;
 
-            _startBattleButton.SetEnabled(_pendingPlacements.Count >= 1 && _pendingPlacements.Count <= _maxSquadSize);
+            RefreshStartButton();
             UpdatePlacementCountText();
-        }
-
-        private void UpdatePlacementCountText()
-        {
-            if (_placementCountText != null)
-                _placementCountText.text = $"{_pendingPlacements.Count}/{_maxSquadSize} heroes placed";
         }
 
         internal void PlaceStudent(string studentId, HexCoord coord)
@@ -193,8 +197,8 @@ namespace MagicSchool.Battle
             if (!_studentSnapshots.TryGetValue(studentId, out var snap)) return;
             if (_grid.IsOccupied(coord)) return;
 
-            // Squad cap: reject placement of a new (currently unplaced) student when cap is reached.
-            // Re-placing an already-placed student (moving it to a different tile) is always allowed.
+            // Squad cap: reject a new placement at the cap. Re-placing an already-placed student
+            // (moving it to another tile) is always allowed.
             bool isReplacing = _pendingPlacements.ContainsKey(studentId);
             if (!isReplacing && _pendingPlacements.Count >= _maxSquadSize) return;
 
@@ -214,27 +218,13 @@ namespace MagicSchool.Battle
             _pendingPlacements[studentId] = coord;
             _grid.SetOccupant(coord, studentId);
 
-            // Spawn unit — MaxHP sourced from snapshot (B3).
-            // L3: null-check BattleUnit component before dereferencing; a misconfigured prefab
-            // would otherwise NullReferenceException here. Roll back placement state on failure
-            // so the board is not left in a half-placed inconsistency.
-            var go   = Instantiate(_battleUnitPrefab, CoordToWorld(coord), Quaternion.identity);
-            var unit = go.GetComponent<BattleUnit>();
+            var unit = SpawnUnit(snap, coord);
             if (unit == null)
             {
-                Debug.LogError($"[BattleBoardManager] BattleUnit component missing on _battleUnitPrefab for student '{studentId}'", go);
-                Destroy(go);
+                // Roll back so the board is never left half-placed.
                 _pendingPlacements.Remove(studentId);
                 _grid.ClearOccupant(coord);
                 return;
-            }
-            unit.Init(studentId, coord, snap.HeroId);
-            unit.InitHealthBar(snap.MaxHP, snap.MaxHP);
-            var sr = go.GetComponent<SpriteRenderer>();
-            if (sr != null)
-            {
-                if (sr.sprite == null) sr.sprite = HexSpriteGenerator.GetFallbackSprite();
-                sr.color = StudentColor(snap.HeroId);
             }
             _units[studentId] = unit;
 
@@ -242,22 +232,55 @@ namespace MagicSchool.Battle
             if (_benchCardsById.TryGetValue(studentId, out var card))
                 card.style.opacity = 0.4f;
 
-            _startBattleButton.SetEnabled(_pendingPlacements.Count >= 1 && _pendingPlacements.Count <= _maxSquadSize);
+            RefreshStartButton();
             UpdatePlacementCountText();
+        }
+
+        // Single spawn path for both teams. Appearance comes entirely from the snapshot — the
+        // board no longer knows or cares what a "knight" is.
+        private BattleUnit SpawnUnit(CombatantSnapshot snap, HexCoord coord)
+        {
+            var go   = Instantiate(_battleUnitPrefab, CoordToWorld(coord), Quaternion.identity);
+            var unit = go.GetComponent<BattleUnit>();
+            if (unit == null)
+            {
+                Debug.LogError($"[BattleBoardManager] BattleUnit component missing on _battleUnitPrefab " +
+                               $"(spawning '{snap.DisplayName}')", go);
+                Destroy(go);
+                return null;
+            }
+
+            unit.Init(snap.Id, coord);
+            unit.SetVisual(snap.Icon, snap.Tint);
+            unit.InitHealthBar(snap.MaxHP, snap.MaxHP);
+            return unit;
+        }
+
+        private void RefreshStartButton() =>
+            _startBattleButton.SetEnabled(_pendingPlacements.Count >= 1 && _pendingPlacements.Count <= _maxSquadSize);
+
+        private void UpdatePlacementCountText()
+        {
+            if (_placementCountText != null)
+                _placementCountText.text = $"{_pendingPlacements.Count}/{_maxSquadSize} heroes placed";
         }
 
         // ── Test helper (editor/QA only) ─────────────────────────────────────
 #if UNITY_EDITOR
+        [Header("Debug (Editor only)")]
         [SerializeField] private bool  _debugAutoStart;
-        [SerializeField] private float _debugPlayerStartHpPct = 1f;
+        [SerializeField, Range(0.05f, 1f)] private float _debugPlayerStartHpPct = 1f;
 
         public void TestAutoPlace()
         {
-            // Place whatever students were seeded, by their unique instance Id, across the
-            // front row. No hardcoded ids — works for any roster and unique-id scheme.
+            // Place whatever students were seeded, by their unique instance Id, across the front
+            // row — capped by the squad size and the board width.
             int col = 0;
             foreach (var s in _studentSnapshots.Values)
+            {
+                if (col >= _grid.Cols || col >= _maxSquadSize) break;
                 PlaceStudent(s.Id, new HexCoord(col++, 0));
+            }
             OnStartBattle();
         }
 #endif
@@ -267,38 +290,20 @@ namespace MagicSchool.Battle
         {
             if (_battleStarted || _pendingPlacements.Count == 0) return;
             _battleStarted = true;
-            _startBattleButton.style.display = UnityEngine.UIElements.DisplayStyle.None;
-            _benchScrollView.style.display = UnityEngine.UIElements.DisplayStyle.None;
+            _startBattleButton.style.display = DisplayStyle.None;
+            _benchScrollView.style.display   = DisplayStyle.None;
 
-            // Snapshot enemy data BEFORE RunManager may re-call SetCombatants with the filtered squad.
-            // Both paths spawn enemy GOs here (visual layer — BattleBoardManager's job).
+            // Enemy GameObjects are spawned from GetAutoEnemyPlacements() — the same method
+            // BeginBattle() now places the simulation from, so sprites and sim cannot disagree.
             var enemyPlacements = _resolver.GetAutoEnemyPlacements();
-            var enemySnapshots  = _resolver.GetCombatantSnapshots().Where(s => !s.IsStudent).ToList();
+            var enemySnapshots  = _resolver.GetCombatantSnapshots().Where(s => !s.IsStudent);
             foreach (var e in enemySnapshots)
             {
                 if (!enemyPlacements.TryGetValue(e.Id, out var coord)) continue;
-                var go   = Instantiate(_battleUnitPrefab, CoordToWorld(coord), Quaternion.identity);
-                var unit = go.GetComponent<BattleUnit>();
-                // L3: null-check BattleUnit component; a misconfigured prefab would NullReferenceException here.
-                if (unit == null)
-                {
-                    Debug.LogError($"[BattleBoardManager] BattleUnit component missing on _battleUnitPrefab for enemy '{e.Id}'", go);
-                    Destroy(go);
-                    continue;
-                }
-                unit.Init(e.Id, coord, e.HeroId);
-                unit.InitHealthBar(e.MaxHP, e.MaxHP);
-                var sr = go.GetComponent<SpriteRenderer>();
-                if (sr != null)
-                {
-                    if (sr.sprite == null) sr.sprite = HexSpriteGenerator.GetFallbackSprite();
-                    sr.color = EnemyColor(e.HeroId);
-                }
-                _units[e.Id] = unit;
+                var unit = SpawnUnit(e, coord);
+                if (unit != null) _units[e.Id] = unit;
             }
 
-            // removed: RunManager-driven production path (ConfirmSquadPlacement) — meta-progression
-            // system, rebuilding fresh. This standalone call is now unconditional.
             _resolver.SetUnitPositions(_pendingPlacements);
 #if UNITY_EDITOR
             if (_debugPlayerStartHpPct < 1f) _resolver.DebugSetAllPlayerHp(_debugPlayerStartHpPct);
@@ -325,28 +330,25 @@ namespace MagicSchool.Battle
                 if (trait == null) continue;
                 bool isActive = active != null;
 
-                var row = new UnityEngine.UIElements.VisualElement();
+                var row = new VisualElement();
                 row.AddToClassList("trait-row");
                 row.AddToClassList(isActive ? "trait-row-active" : "trait-row-inactive");
 
-                var nameLabel = new UnityEngine.UIElements.Label(trait.DisplayName);
+                var nameLabel = new Label(trait.DisplayName);
                 nameLabel.AddToClassList("trait-name");
                 if (!isActive) nameLabel.AddToClassList("trait-name-inactive");
                 row.Add(nameLabel);
 
                 int target = isActive
                     ? active.UnitCount
-                    : (trait.Tiers != null && trait.Tiers.Count > 0 ? trait.Tiers.Min(t => t.UnitCount) : count);
-                var countLabel = new UnityEngine.UIElements.Label($"{count}/{target}");
+                    : (trait.Breakpoints != null && trait.Breakpoints.Count > 0 ? trait.Breakpoints.Min(b => b.UnitCount) : count);
+                var countLabel = new Label($"{count}/{target}");
                 countLabel.AddToClassList("trait-count");
                 row.Add(countLabel);
 
                 _traitList.Add(row);
             }
         }
-
-        // removed: ApplyTraitModifiers(AutoBattleResolver, Dictionary<string, HexCoord>) — trait
-        // system, rebuilding fresh. Combatants use their base stats as-is (no pre-battle modifier pass).
 
         // ── Event handlers ───────────────────────────────────────────────────
         private void HandleMoved(string id, HexCoord from, HexCoord to)
@@ -355,15 +357,12 @@ namespace MagicSchool.Battle
             unit.MoveTo(CoordToWorld(to), to);
         }
 
-        private void HandleActed(string actorId, string targetId, int damage, System.Collections.Generic.List<string> flags)
+        private void HandleActed(string actorId, string targetId, int damage, List<string> flags)
         {
             if (_units.TryGetValue(actorId, out var actor) && _units.TryGetValue(targetId, out var target))
             {
                 actor.PlayAttackAnim(target.transform.position);
-                Debug.DrawLine(actor.transform.position, target.transform.position, Color.red, 0.5f);
-                int cur = _resolver.GetCurrentHP(targetId);
-                int max = _resolver.GetMaxHP(targetId);
-                target.UpdateHP(cur, max);
+                target.UpdateHP(_resolver.GetCurrentHP(targetId), _resolver.GetMaxHP(targetId));
             }
         }
 
@@ -374,30 +373,10 @@ namespace MagicSchool.Battle
             _units.Remove(id);
         }
 
-        // removed: HandleSkillCast, HandleManaChanged, HandleCastStateChanged — skill system,
-        // rebuilding fresh. BattleUnit still exposes PlayCastText/UpdateMana/SetCastingVisual
-        // for whenever that's rebuilt.
-
-        // ── Helpers ──────────────────────────────────────────────────────────
-        // internal static so BattlePlacementController can call BattleBoardManager.CoordToWorld()
-        // without holding an instance reference — pure geometry, no mutable state.
-        internal static Vector3 CoordToWorld(HexCoord c) =>
-            new Vector3(c.Col * HexWidth + (c.Row % 2 == 1 ? HexOffset : 0f),
-                        c.Row * HexHeight, 0f);
-
-        // internal static so BattlePlacementController can tint the drag ghost consistently.
-        internal static Color StudentColor(string id) => id switch
-        {
-            "knight" => new Color(0.2f, 0.5f, 1.0f),
-            "archer" => new Color(0.2f, 0.8f, 0.3f),
-            _        => new Color(0.3f, 0.3f, 0.3f),
-        };
-
-        private static Color EnemyColor(string id) => id switch
-        {
-            "knight" => new Color(1.0f, 0.4f, 0.4f),
-            "archer" => new Color(1.0f, 0.7f, 0.2f),
-            _        => Color.gray,
-        };
+        // removed: StudentColor(id) / EnemyColor(id) — hardcoded switch on the literals "knight"
+        // and "archer". Any new HeroData asset fell through to the default case and rendered as a
+        // gray square, which meant adding a hero required a C# edit. Appearance is now authored on
+        // HeroData (Icon / PlayerTint / EnemyTint) and reaches the view via CombatantSnapshot.
+        // See Hero GDD Core Rule 7 — presentation is data, never a code lookup.
     }
 }

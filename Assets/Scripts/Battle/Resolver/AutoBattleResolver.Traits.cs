@@ -5,7 +5,7 @@ using UnityEngine;
 namespace MagicSchool.Battle
 {
     // Flat stat-bonus trait synergy pass. Runs once from BeginBattle(): counts distinct
-    // heroes per trait per team, then applies the highest satisfied tier's StatBonus to
+    // heroes per trait per team, then applies the highest satisfied breakpoint's StatBonus to
     // each trait member on that team. Members-only, additive, evaluated once. See Trait GDD.
     public partial class AutoBattleResolver
     {
@@ -22,27 +22,27 @@ namespace MagicSchool.Battle
                 foreach (var kv in counts)
                 {
                     TraitData trait = kv.Key;
-                    int       count = kv.Value;
-                    TraitTier tier  = trait.GetActiveTier(count);
-                    if (tier == null) continue;   // below the first breakpoint — no bonus
+                    int count = kv.Value;
+                    TraitBreakpoint bp = trait.GetActiveBreakpoint(count);
+                    if (bp == null) continue;   // below the first breakpoint — no bonus
 
                     foreach (var c in members.Where(c => c.Traits != null && c.Traits.Contains(trait)))
-                        tier.Bonus.ApplyTo(c);
+                        bp.Bonus.ApplyTo(c);
 
                     Debug.Log($"[AutoBattle] Trait '{trait.DisplayName}' ({team}) active at {count} → " +
-                              $"tier {tier.UnitCount} (+HP {tier.Bonus.HP}, +ATK {tier.Bonus.ATK}, " +
-                              $"+MG {tier.Bonus.MG}, +DEF {tier.Bonus.DEF}, +MR {tier.Bonus.MR}, " +
-                              $"+AS {tier.Bonus.AttackSpeed})");
+                              $"breakpoint {bp.UnitCount} (+HP {bp.Bonus.HP}, +ATK {bp.Bonus.ATK}, " +
+                              $"+MG {bp.Bonus.MG}, +DEF {bp.Bonus.DEF}, +MR {bp.Bonus.MR}, " +
+                              $"+AS {bp.Bonus.AttackSpeed})");
                 }
             }
         }
 
         // Read-only active-trait readout for a future HUD synergy panel. Not used in combat.
-        public List<(TraitData trait, int count, TraitTier active)> GetActiveTraits(Team team)
+        public List<(TraitData trait, int count, TraitBreakpoint active)> GetActiveTraits(Team team)
         {
             var members = _combatants.Where(c => c.Team == team).ToList();
             return CountTraits(members)
-                .Select(kv => (kv.Key, kv.Value, kv.Key.GetActiveTier(kv.Value)))
+                .Select(kv => (kv.Key, kv.Value, kv.Key.GetActiveBreakpoint(kv.Value)))
                 .ToList();
         }
 

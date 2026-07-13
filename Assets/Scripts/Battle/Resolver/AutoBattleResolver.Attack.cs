@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -6,9 +5,7 @@ using UnityEngine;
 namespace MagicSchool.Battle
 {
     // Basic-attack resolution and the kill/death handoff.
-    // removed: skill-cast lifecycle (GrantAttackMana/CheckCastTriggers/TriggerCast/
-    // ResolveCastPlaceholder) and Striker/Ranger/Omnivamp/Trickster-bleed hooks in
-    // Attack()/HandleKill() — skill/trait system, rebuilding fresh.
+    // removed: ApplyDamage() — a private wrapper with no caller.
     public partial class AutoBattleResolver
     {
         private void Attack(Combatant actor, Combatant target)
@@ -31,7 +28,7 @@ namespace MagicSchool.Battle
                 Debug.Log($"[AutoBattle] SKILL! {actor.DisplayName} casts {actor.SkillName} — empowered attack (x{actor.SkillMultiplier})");
             }
 
-            damage = ApplyDamageAndCheckKill(actor, target, damage, out _, tags: null, autoHandleKill: false);
+            damage = ApplyDamageAndCheckKill(actor, target, damage, tags: null, autoHandleKill: false);
 
             Debug.Log($"[AutoBattle] {actor.DisplayName} → {target.DisplayName}: {damage} dmg{(cast ? " [SKILL]" : "")} (HP:{target.CurrentHP}/{target.MaxHP})");
             OnCombatantActed?.Invoke(actor.Id, target.Id, damage, new List<string>());
@@ -50,11 +47,6 @@ namespace MagicSchool.Battle
 
             if (target.IsDefeated)
                 HandleKill(actor, target);
-        }
-
-        private void ApplyDamage(Combatant target, int damage)
-        {
-            ApplyDamageAndCheckKill(null, target, damage, out _, tags: null, autoHandleKill: false);
         }
 
         internal void HandleKill(Combatant actor, Combatant target)

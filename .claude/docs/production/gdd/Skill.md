@@ -1,8 +1,8 @@
 # Skill
 
 > **Status**: Approved
-> **Last Updated**: 2026-07-12
-> **Implements Pillar**: (pillars TBD — game-vision.md not yet authored)
+> **Last Updated**: 2026-07-13
+> **Implements Pillar**: (pillars TBD — `game-vision.md` exists but is an unfilled template; no pillars are authored yet)
 
 ## Summary
 
@@ -36,6 +36,7 @@ Skills give each Hero a rhythm: charge up over a few attacks, then unleash a big
 4. A unit with `MaxMana ≤ 0` has no skill and never arms.
 5. The empowered attack uses the same offense type as the basic attack (ATK vs DEF, or MG vs MR when the unit has `MagicAttack`). The skill only scales the final damage; it does not change targeting or range.
 6. Mana is gained *after* damage resolves, so with `MaxMana 3, ManaPerAttack 1` the 4th attack (then 7th, 10th, …) is empowered.
+7. **Damage applies directly to HP — there is no shield layer.** `Combatant.Shield` and the shield-absorb branch in `ApplyDamageAndCheckKill()` were removed: the field was read on every hit but **never written by anything**, so it was dead weight in the hottest path in the game. Re-add it together with the first mechanic that actually grants shield.
 
 ### States and Transitions
 

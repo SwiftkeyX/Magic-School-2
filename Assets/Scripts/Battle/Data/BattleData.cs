@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace MagicSchool.Battle
 {
@@ -8,15 +9,15 @@ namespace MagicSchool.Battle
     // Which side a unit fights for. Replaces the former implicit student/enemy split.
     public enum Team { Player, Enemy }
 
-    // Optional per-unit combat behaviors. MagicAttack makes a unit strike with MG/MR
-    // instead of ATK/DEF; the rest are reserved hooks for future abilities.
+    // Optional per-unit combat behaviors.
+    //
+    // This enum previously also declared FirstHitDouble, AOEAttack, TakesReducedDamage and
+    // ShadowSurge. None was ever implemented — they appeared in the Inspector dropdown and did
+    // nothing, which is worse than a missing feature because it produces confident, wrong tuning.
+    // Removed per Hero GDD Core Rule 6. Re-add a member only together with the code that reads it.
     public enum BattleBehaviorFlag
     {
-        FirstHitDouble,
-        AOEAttack,
-        TakesReducedDamage,
-        ShadowSurge,
-        MagicAttack,    // when present, unit uses MG/MR instead of ATK/DEF
+        MagicAttack,    // unit strikes with MG/MR instead of ATK/DEF
     }
 
     public struct BattleResult
@@ -26,22 +27,29 @@ namespace MagicSchool.Battle
         public bool TimedOut;     // true when the battle hit the tick cap instead of a wipe
     }
 
-    // Unified data contract for any unit entering battle, tagged by Team. Replaces the
-    // former StudentCombatData + EnemyCombatData split (the duplication was flagged in-code).
+    // Unified data contract for any unit entering battle, tagged by Team.
     // Produced by HeroData.ToCombatData(); consumed by AutoBattleResolver.SetCombatants().
+    //
+    // Tint is already resolved to the fighting side by ToCombatData(), so nothing downstream
+    // has to branch on Team to know how to draw the unit.
     [Serializable]
     public class UnitCombatData
     {
         public string Id;
         public string DisplayName;
         public Team   Team;
+
+        // Presentation, authored on HeroData. Carrying it here (and on into CombatantSnapshot)
+        // is what lets the board render a unit without a hardcoded Id → color lookup.
+        public Sprite Icon;
+        public Color  Tint = Color.white;
+
         public int    MaxHP;
         public int    ATK;
         public int    DEF;
         public int    MG;
         public int    MR;
         public float  AttackSpeed;      // attacks per second
-        public int    CRIT;
         public int    Range = 1;        // 1 = melee, >1 = ranged
 
         // Skill / mana (see Skill.md). MaxMana 0 = no skill.
@@ -55,12 +63,15 @@ namespace MagicSchool.Battle
     }
 
     // Read-only snapshot exposed to BattleHUD and BattleBoardManager for initialization.
+    // This is the view's ONLY source of unit appearance — see Hero GDD Core Rule 7.
     public class CombatantSnapshot
     {
         public string Id;          // unique per combatant instance
-        public string HeroId;      // hero/type id — used for cosmetic lookups (colors)
+        public string HeroId;      // hero/type id — stable identity of the unit type
         public string DisplayName;
         public bool   IsStudent;   // true when the unit's Team == Team.Player
+        public Sprite Icon;        // authored on HeroData; null → procedural fallback square
+        public Color  Tint;        // authored on HeroData, resolved for this unit's team
         public int    MaxHP;
         public int    CurrentHP;
         public HexCoord Position;

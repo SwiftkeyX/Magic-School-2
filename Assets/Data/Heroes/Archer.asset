@@ -14,13 +14,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MagicSchool.Battle.HeroData
   Id: archer
   DisplayName: Archer
-  Cost: 1
+  Icon: {fileID: 0}
+  PlayerTint: {r: 0.2, g: 0.8, b: 0.3, a: 1}
+  EnemyTint: {r: 1, g: 0.7, b: 0.2, a: 1}
   MaxHP: 80
   ATK: 14
   DEF: 3
   MG: 0
   MR: 3
-  CRIT: 10
   AttackSpeed: 0.7
   Range: 2
   MaxMana: 3

@@ -22,6 +22,9 @@ namespace MagicSchool.Battle
         // ── Inspector reference ───────────────────────────────────────────────
         [SerializeField] private AutoBattleResolver _resolver;
 
+        [SerializeField, Range(1.5f, 8f), Tooltip("Playback speed while the SpeedUp input is held. Affects only how fast the battle is WATCHED — the simulation step is unchanged, so the outcome is identical at any speed.")]
+        private float _speedUpMultiplier = 2f;
+
         // ── UIDocument ────────────────────────────────────────────────────────
         private UIDocument    _document;
         private VisualElement _root;
@@ -128,15 +131,20 @@ namespace MagicSchool.Battle
                       $"{(result.TimedOut ? " (Time Limit)" : string.Empty)}");
         }
 
-        // ── Speed-up indicator ────────────────────────────────────────────────
+        // ── Speed-up ──────────────────────────────────────────────────────────
+        // These used to toggle the indicator label and nothing else — the resolver's tick rate was
+        // a compile-time const, so holding SpeedUp showed a "speeding up" badge while the battle
+        // ran at exactly the same speed. The indicator was lying. It now drives the resolver.
 
         private void HandleSpeedUpStarted()
         {
+            if (_resolver != null) _resolver.SpeedMultiplier = _speedUpMultiplier;
             SetDisplay(_speedIndicator, true);
         }
 
         private void HandleSpeedUpCancelled()
         {
+            if (_resolver != null) _resolver.SpeedMultiplier = 1f;
             SetDisplay(_speedIndicator, false);
         }
 
