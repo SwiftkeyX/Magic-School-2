@@ -12,6 +12,11 @@ namespace MagicSchool.Battle
     [CreateAssetMenu(menuName = "MagicSchool/Hero", fileName = "Hero")]
     public class HeroData : ScriptableObject
     {
+        // TODO(deferred): typing this by hand in the Inspector invites typos. An enum was proposed,
+        // but it would make adding a hero require a recompile — the opposite of the editability pass.
+        // Deriving it from the asset filename conflicts with Hero.md:103, which permits two heroes to
+        // share an Id. Resolve what this field is actually for first: it is read in exactly one place
+        // (ToCombatData), and the Combatant.HeroId that preserves it is never read by anything.
         [Tooltip("Stable lookup/display key, e.g. \"knight\". Lowercase, no spaces.")]
         public string Id;
 
@@ -64,6 +69,11 @@ namespace MagicSchool.Battle
         public string SkillName = "Skill";
 
         [Header("Combat / Synergy")]
+        // TODO(deferred): this field should not exist. Damage archetype (physical / magic / both) is a
+        // property of the ACTION, not of the unit — the target should mitigate against whatever it was
+        // hit with, per the skill's own description. Already dead in practice: BattleBehaviorFlag has
+        // one member, no hero asset sets it, every hero has MG 0, so isMagic is always false. Delete it
+        // together with the skill rebuild that replaces it (rewrites Hero.md Core Rule 6 + Skill.md:37).
         [Tooltip("MagicAttack makes this unit strike with MG vs MR instead of ATK vs DEF.")]
         public List<BattleBehaviorFlag> Flags = new List<BattleBehaviorFlag>();
 
@@ -72,22 +82,22 @@ namespace MagicSchool.Battle
 
         // Authoring floors. Each of these values was authorable before the editability pass and
         // each failed SILENTLY at runtime — see the Authoring Guardrails table in Hero.md.
-        private const int   MinMaxHP          = 1;      // 0 → CurrentHP/MaxHP = NaN, unit dead on spawn
-        private const int   MinDefense        = 0;      // -100 → divide-by-zero in ApplyMitigation
-        private const float MinAttackSpeed    = 0.05f;  // 0 → unit never acts; battle stalls to the tick cap
+        private const int MinMaxHP = 1;      // 0 → CurrentHP/MaxHP = NaN, unit dead on spawn
+        private const int MinDefense = 0;      // -100 → divide-by-zero in ApplyMitigation
+        private const float MinAttackSpeed = 0.05f;  // 0 → unit never acts; battle stalls to the tick cap
         private const float MinSkillMultiplier = 1f;    // <1 → the "empowered" hit lands weaker than a normal one
 
         // [Range] guards the slider, but a value can still arrive via script, a merge, or a
         // hand-edited .asset — so the floors are enforced here as well.
         private void OnValidate()
         {
-            MaxHP           = Mathf.Max(MinMaxHP, MaxHP);
-            DEF             = Mathf.Max(MinDefense, DEF);
-            MR              = Mathf.Max(MinDefense, MR);
-            AttackSpeed     = Mathf.Max(MinAttackSpeed, AttackSpeed);
+            MaxHP = Mathf.Max(MinMaxHP, MaxHP);
+            DEF = Mathf.Max(MinDefense, DEF);
+            MR = Mathf.Max(MinDefense, MR);
+            AttackSpeed = Mathf.Max(MinAttackSpeed, AttackSpeed);
             SkillMultiplier = Mathf.Max(MinSkillMultiplier, SkillMultiplier);
-            MaxMana         = Mathf.Max(0, MaxMana);
-            Range           = Mathf.Max(1, Range);
+            MaxMana = Mathf.Max(0, MaxMana);
+            Range = Mathf.Max(1, Range);
         }
 
         // Projects this hero into a runtime-seed UnitCombatData for the given team.
@@ -98,24 +108,24 @@ namespace MagicSchool.Battle
         {
             return new UnitCombatData
             {
-                Id          = Id,
+                Id = Id,
                 DisplayName = DisplayName,
-                Team        = team,
-                Icon        = Icon,
-                Tint        = team == Team.Player ? PlayerTint : EnemyTint,
-                MaxHP       = MaxHP,
-                ATK         = ATK,
-                DEF         = DEF,
-                MG          = MG,
-                MR          = MR,
+                Team = team,
+                Icon = Icon,
+                Tint = team == Team.Player ? PlayerTint : EnemyTint,
+                MaxHP = MaxHP,
+                ATK = ATK,
+                DEF = DEF,
+                MG = MG,
+                MR = MR,
                 AttackSpeed = AttackSpeed,
-                Range       = Range,
-                MaxMana         = MaxMana,
-                ManaPerAttack   = ManaPerAttack,
+                Range = Range,
+                MaxMana = MaxMana,
+                ManaPerAttack = ManaPerAttack,
                 SkillMultiplier = SkillMultiplier,
-                SkillName       = SkillName,
-                Flags       = Flags  != null ? new List<BattleBehaviorFlag>(Flags)  : new List<BattleBehaviorFlag>(),
-                Traits      = Traits != null ? new List<TraitData>(Traits)          : new List<TraitData>(),
+                SkillName = SkillName,
+                Flags = Flags != null ? new List<BattleBehaviorFlag>(Flags) : new List<BattleBehaviorFlag>(),
+                Traits = Traits != null ? new List<TraitData>(Traits) : new List<TraitData>(),
             };
         }
     }

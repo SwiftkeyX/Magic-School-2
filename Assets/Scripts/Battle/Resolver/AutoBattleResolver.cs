@@ -7,22 +7,22 @@ using UnityEngine;
 namespace MagicSchool.Battle
 {
     [RequireComponent(typeof(HexGrid))]
-    public partial class AutoBattleResolver : MonoBehaviour
+    public partial class AutoBattleResolver : MonoBehaviour // autobattleresolver is a confusing name. Is it make sense if it was named "AutoBattleSimulation"?
     {
         // ── Events ──────────────────────────────────────────────────────────
         // Setup event — fires at the end of SetCombatants(); subscribers call
         // GetCombatantSnapshots() themselves to get data (no payload per GDD).
-        public event Action                                     OnCombatantsSet;
+        public event Action OnCombatantsSet;
 
         public event Action<string, string, int, List<string>> OnCombatantActed;
-        public event Action<string, HexCoord, HexCoord>        OnCombatantMoved;
-        public event Action<string>                             OnCombatantDefeated;
-        public event Action<BattleResult>                       OnBattleComplete;
+        public event Action<string, HexCoord, HexCoord> OnCombatantMoved;
+        public event Action<string> OnCombatantDefeated;
+        public event Action<BattleResult> OnBattleComplete;
         // removed: OnSkillCast, OnManaChanged, OnCastStateChanged — skill system, rebuilding fresh
 
         // Static forwarding event — AudioSystem subscribes here so it does not need
         // FindObjectOfType to reach a non-singleton AutoBattleResolver instance.
-        public static event Action<BattleResult>                OnAnyBattleComplete;
+        public static event Action<BattleResult> OnAnyBattleComplete;
 
         // ── Tuning ───────────────────────────────────────────────────────────
         // These were `const` before the editability pass — battle pace and length could not be
@@ -41,10 +41,10 @@ namespace MagicSchool.Battle
         public float SpeedMultiplier { get; set; } = 1f;
 
         // ── State ────────────────────────────────────────────────────────────
-        private readonly List<Combatant>              _combatants       = new List<Combatant>();
+        private readonly List<Combatant> _combatants = new List<Combatant>();
         private readonly Dictionary<string, HexCoord> _playerPlacements = new Dictionary<string, HexCoord>();
-        private          HexGrid                      _grid;
-        private          bool                         _battleRunning;
+        private HexGrid _grid;
+        private bool _battleRunning;
 
         // Combatant itself lives in its own file (Combatant.cs), top-level in this namespace.
 
@@ -60,7 +60,7 @@ namespace MagicSchool.Battle
         public void BeginBattle()
         {
             if (_battleRunning) { Debug.LogWarning("[AutoBattleResolver] Battle already running."); return; }
-            if (_grid == null)  { Debug.LogError("[AutoBattleResolver] HexGrid component required on the same GameObject.", this); return; }
+            if (_grid == null) { Debug.LogError("[AutoBattleResolver] HexGrid component required on the same GameObject.", this); return; }
 
             // Apply player placements
             foreach (var kv in _playerPlacements)
@@ -76,6 +76,7 @@ namespace MagicSchool.Battle
             // GetAutoEnemyPlacements() — BattleBoardManager spawns enemy GameObjects from that
             // method, while the simulation placed them from this one. Two copies of the same
             // rule meant a change to either silently desynced the sprites from the sim.
+            // what is this for? do combatant include hero from both side?
             foreach (var kv in GetAutoEnemyPlacements())
             {
                 var c = _combatants.FirstOrDefault(x => x.Id == kv.Key);
@@ -90,6 +91,12 @@ namespace MagicSchool.Battle
             StartCoroutine(BattleLoop());
         }
 
+        // I don't like AutoBattle is this long having 6 partial class
+        // Let's try reduce the line of code by dividing its responsibility
+        // TODO: In BattleLoop(), it also update the tick for each combatant.
+        // Each combantant instance should have update its own tick be listening to Event fire by BattleLoop().
+        // How is that sound?   
+        /// <returns></returns>
         private IEnumerator BattleLoop()
         {
             _battleRunning = true;
@@ -127,15 +134,16 @@ namespace MagicSchool.Battle
                     actor.ActionProgress -= 1.0f;
 
                     // Win check
-                    bool playersAlive = _combatants.Any(c =>  c.IsPlayer && !c.IsDefeated);
+                    bool playersAlive = _combatants.Any(c => c.IsPlayer && !c.IsDefeated);
                     bool enemiesAlive = _combatants.Any(c => !c.IsPlayer && !c.IsDefeated);
                     if (!enemiesAlive || !playersAlive) goto BattleEnd;
                 }
 
+                // After 120 tick, declare Timeout, end the battle early
                 ticks++;
                 if (ticks >= _maxBattleTicks)
                 {
-                    int pCount = _combatants.Count(c =>  c.IsPlayer && !c.IsDefeated);
+                    int pCount = _combatants.Count(c => c.IsPlayer && !c.IsDefeated);
                     int eCount = _combatants.Count(c => !c.IsPlayer && !c.IsDefeated);
                     var result = new BattleResult { Won = pCount > eCount, TicksElapsed = ticks, TimedOut = true };
                     Debug.Log($"[AutoBattle] TIMEOUT — {(result.Won ? "PLAYERS WIN" : "PLAYERS LOSE")}");
@@ -148,10 +156,10 @@ namespace MagicSchool.Battle
                 // Only the wall-clock wait is scaled by SpeedMultiplier — the sim step above is not.
                 yield return new WaitForSeconds(_tickDelay / Mathf.Max(0.01f, SpeedMultiplier));
             }
-
-            BattleEnd:
+            // what is this?
+        BattleEnd:
             {
-                bool won       = _combatants.Any(c => c.IsPlayer && !c.IsDefeated);
+                bool won = _combatants.Any(c => c.IsPlayer && !c.IsDefeated);
                 int finalTicks = ticks;
                 var res = new BattleResult { Won = won, TicksElapsed = finalTicks, TimedOut = false };
                 Debug.Log($"[AutoBattle] END — {(won ? "PLAYERS WIN" : "PLAYERS LOSE")} in {finalTicks} ticks");

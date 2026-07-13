@@ -26,7 +26,12 @@ namespace MagicSchool.Battle
         public float AttackSpeed;
         public int Range;
         public HexCoord Position;
-        public float ActionProgress;  // accumulates AttackSpeed × tick delay each tick; fires at ≥ 1.0
+        // Attack cooldown as a 0→1 fraction of one attack cycle, not a countdown timer. Each tick
+        // adds AttackSpeed × tickDelay; at ≥ 1.0 the unit acts, then 1.0 is SUBTRACTED rather than
+        // reset to zero — so a fast unit's overflow carries into the next cycle instead of being
+        // discarded. That carry is what keeps attack speed continuous rather than quantised to the
+        // tick rate: at 0.1s/tick, AttackSpeed 0.35 and 0.30 stay genuinely different.
+        public float ActionProgress;
         public bool IsDefeated => CurrentHP <= 0;
 
         public List<BattleBehaviorFlag> Flags;
@@ -34,11 +39,11 @@ namespace MagicSchool.Battle
         public string CurrentTargetId;        // last basic-attack target
 
         // ── Skill / mana (see Skill.md) ─────────────────────────────────────
-        public int    Mana;              // current charge; starts at 0
-        public int    MaxMana;           // 0 = no skill
-        public int    ManaPerAttack;     // gained per basic attack
-        public bool   SkillArmed;        // when true, the next attack is empowered
-        public float  SkillMultiplier;   // empowered-hit damage multiplier
+        public int Mana;              // current charge; starts at 0
+        public int MaxMana;           // 0 = no skill
+        public int ManaPerAttack;     // gained per basic attack
+        public bool SkillArmed;        // when true, the next attack is empowered
+        public float SkillMultiplier;   // empowered-hit damage multiplier
         public string SkillName;
 
         // removed: Shield — read on every hit in ApplyDamageAndCheckKill, but never written by
