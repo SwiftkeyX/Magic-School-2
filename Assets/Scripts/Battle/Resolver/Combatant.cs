@@ -26,12 +26,18 @@ namespace MagicSchool.Battle
         public float AttackSpeed;
         public int Range;
         public HexCoord Position;
-        // Attack cooldown as a 0→1 fraction of one attack cycle, not a countdown timer. Each tick
-        // adds AttackSpeed × tickDelay; at ≥ 1.0 the unit acts, then 1.0 is SUBTRACTED rather than
-        // reset to zero — so a fast unit's overflow carries into the next cycle instead of being
-        // discarded. That carry is what keeps attack speed continuous rather than quantised to the
-        // tick rate: at 0.1s/tick, AttackSpeed 0.35 and 0.30 stay genuinely different.
-        public float ActionProgress;
+        // Two INDEPENDENT clocks (see Combat.md). Each is a 0→1 fraction of one cycle, not a
+        // countdown timer. At ≥ 1.0 the unit acts and 1.0 is SUBTRACTED rather than reset to zero —
+        // so overflow carries into the next cycle instead of being discarded. That carry is what
+        // keeps the cadence continuous rather than quantised to the tick rate: at 0.1s/tick,
+        // AttackSpeed 0.35 and 0.30 stay genuinely different.
+        //
+        // AttackCooldown charges at AttackSpeed × tickDelay — PER-UNIT.
+        // MoveCooldown   charges at _moveSpeed  × tickDelay — SHARED by every unit on the board.
+        // They are separate so that attack speed no longer secretly sets walking speed: a hero that
+        // swings faster does not also cross the board faster.
+        public float AttackCooldown;
+        public float MoveCooldown;
         public bool IsDefeated => CurrentHP <= 0;
 
         public List<BattleBehaviorFlag> Flags;

@@ -86,7 +86,7 @@ Replaces the former `StudentCombatData` + `EnemyCombatData` (the duplication was
 
 | Field | Clamp | Failure it prevents |
 |---|---|---|
-| `AttackSpeed` | `≥ 0.05` | `0` → `ActionProgress` never reaches 1.0 → the unit **never acts** and the battle silently runs to its 120-second tick cap |
+| `AttackSpeed` | `≥ 0.05` | `0` → `AttackCooldown` never reaches 1.0 → the unit **never attacks**. It still walks (movement is on its own clock — see Combat.md), so it closes on the enemy and then stands there, and the battle silently runs to its 120-second tick cap |
 | `MaxHP` | `≥ 1` | `0` → `current/max` = NaN in the health bar, and the unit is defeated on spawn |
 | `DEF`, `MR` | `≥ 0` | `-100` → divide-by-zero in `ApplyMitigation`'s `100/(100+DEF)` |
 | `SkillMultiplier` | `≥ 1` | `< 1` → the "empowered" hit lands *weaker* than a normal one |
@@ -124,8 +124,10 @@ Safe ranges below are enforced by `[Range]` in the Inspector — they are not me
 | `MaxHP` | per-hero | 30–800 | tankier | squishier |
 | `ATK` / `MG` | per-hero | 0–80 | more damage | less damage |
 | `DEF` / `MR` | per-hero | 0–50 | more mitigation | less mitigation |
-| `AttackSpeed` | per-hero | 0.05–1.0 | acts more often | acts less often |
+| `AttackSpeed` | per-hero | 0.05–1.0 | **attacks** more often | **attacks** less often |
 | `Range` | 1 | 1–4 | attacks from further | must close distance |
+
+> `AttackSpeed` governs attack cadence **only**. It does not affect how fast a hero moves — movement runs on its own shared clock (`_moveSpeed`, on the resolver) and is identical for every hero. See `Combat.md`. There is deliberately **no** per-hero movement stat.
 
 ---
 
@@ -136,7 +138,7 @@ Safe ranges below are enforced by `[Range]` in the Inspector — they are not me
 - [ ] `ToCombatData(team)` produces a `UnitCombatData` with correct stats, presentation, `Team`, `Flags`, and `Traits`, without mutating the asset.
 - [ ] Seed sources build the battle roster from `HeroData` assets. Base roster: one melee (Knight, range 1) + one ranged (Archer, range 2), each with a Skill and the shared Fighter trait; a mirror match fields the same two on both teams.
 - [ ] No hardcoded unit stats **or unit visuals** remain in code — all live on assets.
-- [ ] An out-of-range value (e.g. `AttackSpeed = 0`) is clamped or rejected at author time, not discovered as a 120-second stall at runtime.
+- [ ] An out-of-range value (e.g. `AttackSpeed = 0`, which would let a hero walk up to the enemy and then never swing) is clamped or rejected at author time, not discovered as a 120-second stall at runtime.
 
 ---
 
@@ -145,7 +147,8 @@ Safe ranges below are enforced by `[Range]` in the Inspector — they are not me
 | This Doc References | Target Doc | Element Referenced | Nature |
 |---|---|---|---|
 | Hero carries traits | `production/gdd/Trait.md` | `TraitData` list | Data dependency |
-| Hero data feeds combat | (Combat resolver) | `SetCombatants(List<UnitCombatData>)` | Data dependency |
+| Hero data feeds combat | `production/gdd/Combat.md` | `SetCombatants(List<UnitCombatData>)` | Data dependency |
+| `AttackSpeed` drives only the attack clock | `production/gdd/Combat.md` | `AttackCooldown`, the two-clock model | Rule dependency |
 
 ---
 
