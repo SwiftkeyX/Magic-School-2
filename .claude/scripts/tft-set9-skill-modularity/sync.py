@@ -1,6 +1,6 @@
 """Write `data/*.csv` to the `tft-set9-skill` sheet. THE one writer.
 
-Run from repo-root cwd:  python .claude/scripts/tft/sync.py
+Run from repo-root cwd:  python .claude/scripts/tft-set9-skill-modularity/sync.py
 
 This replaces 17 scripts and ~5,000 lines. The CSVs under `data/` are the source of truth; this
 script makes the sheet match them, derives every merge from the values, and then checks the sheet's
@@ -36,7 +36,7 @@ import pathlib
 
 from sheet import D, HERO_COLUMNS, col_letter, cols, open_sheet, remerge_hero
 
-DATA = pathlib.Path(".claude/scripts/tft/data")
+DATA = pathlib.Path(".claude/scripts/tft-set9-skill-modularity/data")
 
 HERO = "Hero"
 # Reference tabs are plain tables - synced positionally. Only `Hero` has a logical column schema.

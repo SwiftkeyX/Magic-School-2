@@ -7,7 +7,7 @@ silently started writing into the wrong column the moment that happened. Look th
 row 1 instead and the whole class of bug goes away.
 
 Everything here runs from repo-root cwd:
-    python .claude/scripts/tft/sync.py
+    python .claude/scripts/tft-set9-skill-modularity/sync.py
 """
 
 import gspread

@@ -34,5 +34,5 @@ is now `../sheet.py`, which does not resolve from this folder. That is deliberat
 
 ## If you need to change the sheet
 
-Edit the CSV in `../data/`, run `python .claude/scripts/tft/sync.py`. The git diff shows exactly
+Edit the CSV in `../data/`, run `python .claude/scripts/tft-set9-skill-modularity/sync.py`. The git diff shows exactly
 which cells moved. See `../README.md`, and `.claude/docs/tft/set9-skill-schema-review.md` §O.

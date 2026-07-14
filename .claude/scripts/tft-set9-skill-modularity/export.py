@@ -1,6 +1,6 @@
 """Snapshot the `tft-set9-skill` sheet into `data/*.csv`.
 
-Run from repo-root cwd:  python .claude/scripts/tft/export.py
+Run from repo-root cwd:  python .claude/scripts/tft-set9-skill-modularity/export.py
 
 The CSVs are the SOURCE OF TRUTH; `sync.py` writes them back to the sheet. This script exists to
 bootstrap them from the live sheet, and afterwards to re-snapshot if the sheet is ever edited by hand.
@@ -25,7 +25,7 @@ import pathlib
 
 from sheet import open_sheet
 
-DATA = pathlib.Path(".claude/scripts/tft/data")
+DATA = pathlib.Path(".claude/scripts/tft-set9-skill-modularity/data")
 
 # Sheet tab name -> csv filename. Every tab the scripts own.
 TABS = {

@@ -1,14 +1,19 @@
-# TFT Set 9 skill sheet — tooling
+# `tft-set9-skill` sheet — tooling
 
 The Google Sheet `tft-set9-skill` encodes every TFT Set 9 champion's skill as structured data.
 **Nothing here touches the Unity game** — this is data/schema work.
+
+**Scope, and why the folder is named so specifically:** this folder writes the **`tft-set9-skill`
+sheet, and nothing else**. Other scripts in `.claude/scripts/` also touch TFT data (`sheet_sync.py`,
+`balance_report.py`, `push_stats_to_sheet.py`) — they are a different job, and they are none of this
+folder's business. A bare `tft/` would have claimed a namespace it does not own.
 
 ## To change the sheet
 
 **Edit the CSV in `data/`, then run:**
 
 ```
-python .claude/scripts/tft/sync.py
+python .claude/scripts/tft-set9-skill-modularity/sync.py
 ```
 
 That's it. The git diff on the CSV then shows **exactly which cells moved** — which is the whole

@@ -296,7 +296,7 @@ The first ruling here was that Gwen's cone is a real collider. **That was wrong*
 
 The `Column Explain` value lists were split across two scripts — `tft-add-freljord-piltover.py` held Trigger/Aim/Recipient, `tft-add-shurima.py` held Condition. They did not yet fight (different keys), but this pass adds values to **all four**, and a third writer would have restarted the exact overwrite-each-other bug that bit twice. All four now have a single owner: the latest origin pass.
 
-All share `.claude/scripts/tft/sheet.py`, which resolves **columns by header name, never by index**. That is not cosmetic: every script addressed cells as `r[14]`, and inserting `Action Source` mid-table would have silently redirected every one of those writes into the wrong column. The header lookup kills the whole class of bug.
+All share the tooling's shared helper (now `.claude/scripts/tft-set9-skill-modularity/sheet.py`), which resolves **columns by header name, never by index**. That is not cosmetic: every script addressed cells as `r[14]`, and inserting `Action Source` mid-table would have silently redirected every one of those writes into the wrong column. The header lookup kills the whole class of bug.
 
 **Idempotence is the acceptance test.** Run all three scripts twice; the second pass must report **zero changes**. That is what caught both cell-fighting bugs.
 
@@ -556,7 +556,7 @@ The suite had reached **17 scripts, 5,257 lines, and ~13 minutes** per acceptanc
 The sheet's state was verified correct at round 9, so **the sheet became the source of truth, and then the truth moved into the repo:**
 
 ```
-.claude/scripts/tft/
+.claude/scripts/tft-set9-skill-modularity/
   README.md    the entry point: "edit a CSV, run sync.py"
   sheet.py     helpers: cols(), remerge_hero(), post_replies()
   export.py    sheet -> data/*.csv        (snapshot)
@@ -566,8 +566,12 @@ The sheet's state was verified correct at round 9, so **the sheet became the sou
 ```
 
 It is a self-contained folder on purpose. `data/` and `archive/` are generic names, and
-`.claude/scripts/` is shared with other work — namespacing them under `tft/` is what stops a future
-collision.
+`.claude/scripts/` is shared with other work — namespacing them is what stops a future collision.
+
+**The folder is named for its job, not for the game.** Other scripts in this repo also touch TFT data
+(`sheet_sync.py`, `balance_report.py`, `push_stats_to_sheet.py`), but they are a different task. A
+bare `tft/` would have claimed a namespace it does not own; `tft-set9-skill-modularity/` claims only
+the sheet it actually writes.
 
 **5,007 lines retired. 523 lines live. ~13 minutes → 68 seconds.**
 
