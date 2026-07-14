@@ -27,6 +27,21 @@ When a user challenges a factual or technical claim:
 2. Test or verify immediately (run the tool, check the schema, read the docs)
 3. Update position based on evidence — not based on the user's confidence level
 
+## Critical clarity rules
+
+1. **Prioritize readability over academic jargon.**
+2. **Use bold text, bullet points, and short paragraphs** to break up dense explanations.
+3. **When providing code, include inline comments explaining *why* a line exists** if it isn't obvious.
+4. **Keep explanations concise.** Do not over-explain simple concepts.
+
+**Rule 3 and rule 4 do not conflict — they govern different things.** Rule 4 is about explanations
+*to the user*: don't pad, don't restate the obvious. Rule 3 is about *code*: a comment that records
+why a line exists is what stops the next person (or the next session) from "simplifying" it back into
+a bug. Keep those comments even when they are long.
+
+**Long silences are a clarity failure.** If a task runs for minutes without output — a slow test
+suite, a batch of network calls — say what is running and why before starting it, not after.
+
 ## Declare verification criteria before every implementation task
 
 Before taking any action that changes code, scenes, files, or configuration, output a verification block:
