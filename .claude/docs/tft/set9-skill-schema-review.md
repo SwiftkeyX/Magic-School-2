@@ -532,3 +532,56 @@ Writing `"1"` into a continuation row instead of a blank made that row look like
 Round 9's match key `"same step"` also matched Soraka's *"This are the same heal, so it should be combine into same step"* — a comment answered back in round 5. It collected a reply about Shen and Jayce that had nothing to do with it. The reply was deleted by hand and a guard added.
 
 **Match keys are substrings of the comment's own text, and a mismatch fails SILENTLY.** Longer keys must be listed first, and any already-answered comment whose text contains a shorter key must be listed *ahead* of it with its existing reply body, so it matches there and is skipped.
+
+---
+
+## O. The consolidation — 17 scripts became 1
+
+The user asked the question that ended §N: **"is checking those scripts necessary? I thought it was one-time use?"**
+
+They were right, and the answer was uncomfortable. Look again at the three bugs in §N:
+
+| Bug | Real, or self-inflicted? |
+|---|---|
+| `tft-add-ionia` crashing on a deleted tab | **Real** — Ionia's reference rows were never written. |
+| The round 7 ↔ round 9 renumber fight (§N.2) | **Self-inflicted** — no fight if round 7 were retired. |
+| The `add-ionia` ↔ `apply-comments` duplicate row (§N.1) | **Self-inflicted** — same. |
+
+**Two of the three bugs existed only because the scripts were re-run.** Each `tft-review-roundN.py` is a *migration*: it patches the sheet from state N-1 to state N. Once applied, it has no further work — but the acceptance discipline re-ran it anyway, on every pass, for ever. **A one-shot migration cannot fight anything if it is never run again.**
+
+The suite had reached **17 scripts, 5,257 lines, and ~13 minutes** per acceptance run — to describe one 132-row table.
+
+### The new shape
+
+The sheet's state was verified correct at round 9, so **the sheet became the source of truth, and then the truth moved into the repo:**
+
+```
+.claude/scripts/
+  tft_sheet.py   helpers: cols(), remerge_hero(), post_replies()
+  tft-export.py  sheet   -> data/*.csv    (snapshot)
+  tft-sync.py    data/*.csv -> sheet      (THE one writer) + validate
+  data/*.csv     the source of truth, one file per tab
+  archive/       the 17 retired scripts — kept for history, never run
+```
+
+**5,007 lines retired. 523 lines live. ~13 minutes → 68 seconds.**
+
+### Why a CSV is enough
+
+**Merges are DERIVED from the values, never stored.** `remerge_hero()` reconstructs all three layers — the champion identity block, the `Step`/`Skill Type` span, and the value-run merges on `Trigger`…`Aim Target` — from the cell values alone. So a flat table fully describes the sheet.
+
+**A blank cell is data.** A merged cell reads back `""` on every row but its first, so a continuation row exports as a genuine empty string and is written back as one. They round-trip exactly.
+
+### The gate that made it safe
+
+The whole refactor rested on one cheap, decisive check:
+
+> **Export the sheet, then run the sync. It must report ZERO cells changed on its FIRST run.**
+
+A zero-diff first run proves the CSV reproduces the sheet *exactly* — the export is lossless and the writer is faithful. Any non-zero diff would have meant the round-trip lost something. **It passed, and nothing was archived until it did.** The sheet was never at risk: a zero-diff sync writes nothing.
+
+### What this buys
+
+A review round used to mean **a new 300-line patch script** that would then be re-run for ever. It now means: **edit the CSV, run one script.** The git diff shows exactly which cells moved — which is the thing a patch script could never show.
+
+And the "two scripts fight over one cell" bug is no longer something the tests catch. **It is something the architecture forbids.**
