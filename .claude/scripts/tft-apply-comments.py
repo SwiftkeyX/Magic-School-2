@@ -15,122 +15,24 @@ Demacia/Noxus rows:
 Idempotent: re-running detects the work is already done and only tops up what is missing.
 """
 
-import re
-
-import gspread
-from google.auth.transport.requests import AuthorizedSession
-from google.oauth2.service_account import Credentials
-
-KEY = "1X5glHjVcgv3yYG4Q2SyV9YJS3sv_wH5XAg3RLOHnUa4"
-CRED = "google-service-credential.json"
-D = "—"
+from tft_sheet import (COUNT_DEFAULT, D, SPREAD_DEFAULT, col_letter, cols, find_row, open_sheet,
+                       post_replies)
 
 # Action Types is Action | Collision | Cadence | What it does | Clarify more.
 # `What it does` stays ONE clean sentence; every caveat, rule and example lives in `Clarify more`.
 # Anything the user wrote themselves is preserved verbatim in the Clarify column.
-ACTION_ROWS = {
-    "Auto-Attack": (
-        "Target-Only", "Not specify",
-        "Basic attack on the aimed enemy.",
-        "Mechanically this IS a homing projectile - fired at the aim target and always landing on "
-        "it, which is why its Collision is Target-Only. It is kept as its own Action only because "
-        "it is the unit's default attack rather than an ability."),
-    "First hit Projectile": (
-        "First-Hit", "Not specify",
-        "Fires a projectile that stops on the FIRST unit it hits.",
-        "Has travel speed. The first unit it collides with may NOT be the unit aimed at - that is "
-        "the whole point: Taliyah's boulder is thrown toward a knocked-up enemy but hits whatever "
-        "it meets first, and each of Akshan's 6 shots lands on the first body in its lane."),
-    "Homing Projectile": (
-        "Target-Only", "Not specify",
-        "Fires a projectile that homes on the aim target and applies its effect to it.",
-        "Has travel speed. Nothing on the way is touched - the projectile tracks the target until "
-        "it lands (Poppy, Cassiopeia, Samira)."),
-    "Pierce Projectile": (
-        "Pierce-All", "Not specify",
-        "Fires a projectile that passes THROUGH every unit in its path, hitting all of them.",
-        "Has travel speed. Recipients can be enemies or allies - Sona's damages enemies AND buffs "
-        "allies in the same path. This replaced the old 'Wave' action, which was a duplicate of "
-        "it: Kayle's and Sona's waves, Jhin's line shot, Yasuo's whirlwind and Ahri's wave are all "
-        "this one archetype."),
-    "Circle AOE": (
-        "Area", "Not specify",
-        "Affects everyone inside an X-hex circle (X = the AOE (hex) column).",
-        "The circle is centred on the AIM TARGET's hex - that is Self for a self-centred spin "
-        "(Garen, Galio), but the current target's hex for Karma, Ahri and Yasuo's slam."),
-    "Standard Laser": (
-        "Pierce-All", "Over time",
-        "Beam that pierces ALL units in the path and damages them continuously until it ends.",
-        "NO travel speed - it spawns on the unit and points at the target. Taxonomy only - no Set "
-        "9 unit here uses it."),
-    "Laser Shot": (
-        "Pierce-All", "Once",
-        "Beam that pierces ALL units in the path but applies its effect ONCE.",
-        "NO travel speed - it spawns on the unit and points at the target. Irelia's frontal hit is "
-        "this: it pierces everyone in front of her and lands once, even though it does not look "
-        "like a beam. Jhin moved OFF this to Pierce Projectile, because his shot DOES have travel "
-        "speed."),
-    "Current Target Laser": (
-        "Target-Only", "Over time",
-        "Beam locked onto the aimed target ONLY, applying its effect over a duration.",
-        "NO travel speed. Nothing between the unit and the target is touched (Lux)."),
-    "Cast": (
-        "None", "Not specify",
-        "Self plays an animation, then applies the stated effect or sets up the step that follows.",
-        "Projects no hitbox into the world, so its Collision is ALWAYS None - even when it is a "
-        "melee strike on a target (Darius, Yasuo). Who it lands on is carried by Aim Target and "
-        "Effect Recipient, not by the collision."),
-    "Leap": (
-        "None", "Not specify",
-        "Self leaps to the target hex - a reposition.",
-        "Projects nothing, so Collision is None. Normally just sets up the follow-up action that "
-        "does the damage (Jarvan's and Katarina's landing AOE)."),
-    "Charge Into": (
-        "Pierce-All", "Once",
-        "Self CHARGES to the target hex, colliding with every unit in the path, and stops there.",
-        "Not an AOE - the units hit are exactly the ones it ran through (Sion)."),
-    "Receive Projectile": (
-        "Self", "Not specify",
-        "Waits for a previously thrown projectile to RETURN to the caster, then applies its "
-        "effect to self.",
-        "Collision is Self, NOT None: something IS flying back and the unit it collides with is "
-        "the caster (Poppy's shield)."),
-    "Burst Projectile": (
-        "Area", "Not specify",
-        "Projectile that flies at the aim target and DETONATES on impact, hitting everyone in an "
-        "X-hex circle.",
-        "Has travel speed. The circle is centred on the IMPACT hex, not on the caster. (This is "
-        "First hit Projectile + Circle AOE, this show that some of the Action are small action "
-        "combine, maybe consider create new tab for \"Action Template\" to contain those action, "
-        "but that is for later time when those action are more)"),
-    "Grab & Slam": (
-        "Flank-Pair", "Once",
-        "Self grabs one enemy from EACH side and slams them together.",
-        "The effect applies only to the grabbed enemies. If only one side is occupied then only "
-        "one is grabbed - and the effect is amplified by 50% (Sett)."),
-    # Generalised from the Zed-specific "Summon Shadow": Azir's Sand Soldier is the same archetype.
-    "Summon": (
-        "None", "Not specify",
-        "Self spawns a unit (a clone, a soldier) at a target hex.",
-        "The spawned unit becomes a SECOND action source for the steps that follow - it acts on its "
-        "own, and its action is centred on IT, not on Self. Zed's Shadow and Azir's Sand Soldier "
-        "are both this."),
-    "Summon Attack": (
-        "Target-Only", "Not specify",
-        "A previously summoned unit - not the caster - performs the attack on the aim target.",
-        "The caster does nothing here; the summon is the one acting. Azir's Sand Soldier strikes "
-        "AZIR's current target, which is why the source cannot be smuggled into Aim Target the way "
-        "Zed's Shadow is - see 'Note - Action Source' in Column Explain."),
-    "Knock Back": (
-        "Pierce-All", "Once",
-        "Self smashes the aimed enemy across the board.",
-        "The FLYING ENEMY is the hitbox: everyone it collides with on the way is hit as well. Not a "
-        "projectile the caster fired - the thrown body IS the projectile (K'Sante)."),
-}
+# ACTION_ROWS lived here: the 'Action Types' tab's contents. That tab is DELETED - the
+# 'Action Model' tab (tft-action-model.py) is the canonical action taxonomy now, and this
+# script no longer defines actions at all. It still sweeps Hero for retired action NAMES
+# below, because those rewrite champion rows, not the taxonomy.
 
 # Box AOE was proposed for Irelia's frontal hit, then dropped: by the projectile/laser rule it is
 # laser-like (no travel speed, spawns on the unit, pierces, lands once) - which is just Laser Shot.
-RETIRED_ACTIONS = {"Box AOE": "Laser Shot"}
+# Summon Attack existed only to smuggle the action's SOURCE into its name. Now that the Action
+# Source column carries that, it is just Source=Summon + an ordinary Auto-Attack.
+RETIRED_ACTIONS = {"Box AOE": "Laser Shot", "Summon Attack": "Auto-Attack",
+                   # Gwen's cone was never a collider - it is a sweeping line (the user's call).
+                   "Cone Slash": "Sweep Laser"}
 
 # Zed's Shadow and Azir's Sand Soldier are the same archetype - one action covers both.
 RENAMED_ACTIONS = {"Summon Shadow": "Summon"}
@@ -155,7 +57,10 @@ SELF_COLLISION_ROW = [
 COLUMN_EXPLAIN_EDITS = {
     "Champion … Skill Description": {
         2: "MERGED vertically across every row the champion owns, so the identity block spans all "
-           "of that champion's steps. Origin/Class un-merged into separate slots.",
+           "of that champion's steps. Origin/Class un-merged into separate slots. Range is the "
+           "unit's attack range in HEXES, from tft-set9 → Champions → Range — a number, never a "
+           "position. (It held 'Frontliner'/'Backliner' for 35 champions until round 4; see "
+           "'Note - Range'.)",
     },
     "(Merged cells)": {
         2: "When Step/Trigger/Action are merged across rows, those rows are the same attack — "
@@ -167,7 +72,7 @@ COLUMN_EXPLAIN_EDITS = {
            "Leap projects no hitbox — its Collision is None. Values: First-Hit / Pierce-All / Area "
            "/ Target-Only / Flank-Pair / Self / None. 'Self' means something WAS projected and it "
            "collides with the caster (Poppy's returning shield) — that is not the same as None. "
-           "Detailed per Action in 'Action Types'.",
+           "Detailed per Action in the 'Action Model' tab.",
     },
     # Aim Target / Effect Recipient value lists are owned by tft-add-shurima.py - see note above.
     "Effect Category": {
@@ -176,13 +81,15 @@ COLUMN_EXPLAIN_EDITS = {
     # kept under EDITS, not NOTES: the notes-appender only creates rows, it never updates them,
     # so a note that names a retired action would otherwise go stale unnoticed.
     "Note - Projectile vs Laser": {
-        1: "The two are told apart by TRAVEL SPEED, not by shape.",
-        2: "PROJECTILE: fired from the unit and travels to the target - it has a projectile speed "
-           "(Homing / First hit / Pierce / Burst). LASER: no travel speed at all - it spawns on "
-           "top of the unit and points at the target (Standard Laser / Laser Shot / Current Target "
-           "Laser). This is why Jhin is a Pierce Projectile and not a laser (his shot travels), "
-           "and why Irelia's frontal hit IS a Laser Shot (it does not travel - it just appears in "
-           "front of her, pierces, and lands once).",
+        1: "Delivery is told apart by WHERE the hitbox spawns and whether it TRAVELS - not by "
+           "shape. There are three modes.",
+        2: "PROJECTILE: spawns on the unit and TRAVELS to the target - it has a projectile speed "
+           "(Homing / First hit / Pierce / Burst). LASER: spawns on the unit, NO travel - it just "
+           "extends toward the target (Standard Laser / Laser Shot / Current Target Laser). SPAWN "
+           "AT TARGET: spawns on the TARGET, no travel at all - nothing crosses the gap, so "
+           "nothing in between can be touched (Taliyah's active). This is why Jhin is a Pierce "
+           "Projectile and not a laser (his shot travels), and why Irelia's frontal hit IS a Laser "
+           "Shot (it does not travel - it just appears in front of her, pierces, and lands once).",
     },
 }
 
@@ -207,50 +114,47 @@ COLUMN_EXPLAIN_NOTES = [
 ]
 
 
-def col_letter(i):
-    s, i = "", i + 1
-    while i:
-        i, r = divmod(i - 1, 26)
-        s = chr(65 + r) + s
-    return s
-
-
-def find_row(vals, col, value):
-    for i, r in enumerate(vals):
-        if len(r) > col and r[col].strip() == value:
-            return i
-    return None
-
-
 # --------------------------------------------------------------------------- Hero tab
-def effective_aim(vals):
-    """Aim Target (col Q) carried down through the merged K-Q block of each action."""
-    out, cur = [], ""
-    for r in vals:
-        if r[10].strip():  # a Step number starts a new action instance
-            cur = r[16]
-        out.append(cur)
-    return out
-
-
 def fix_hero(sh):
     ws = sh.worksheet("Hero")
     vals = ws.get_all_values()
+    c = cols(vals[0])          # resolve columns off the header, never by hard-coded index
+    width = len(vals[0])
+
+    def at(name, row):
+        return f"{col_letter(c[name])}{row}"
+
+    def val(r, name):
+        return r[c[name]] if c[name] < len(r) else ""
 
     # 1. Irelia's second hitbox - a Laser Shot in front of her, alongside the Circle AOE on her.
-    irelia = find_row(vals, 0, "Irelia")
-    jhin = next(i for i in range(irelia + 1, len(vals)) if vals[i][0].strip())
-    if not any(vals[i][10].strip() == "4" for i in range(irelia, jhin)):
+    irelia = find_row(vals, c["Champion"], "Irelia")
+    jhin = next(i for i in range(irelia + 1, len(vals)) if val(vals[i], "Champion").strip())
+    if not any(val(vals[i], "Step").strip() == "4" for i in range(irelia, jhin)):
         sh.batch_update({"requests": [{"insertDimension": {
             "range": {"sheetId": ws.id, "dimension": "ROWS",
                       "startIndex": jhin, "endIndex": jhin + 1},
             "inheritFromBefore": True,
         }}]})
-        row = ([""] * 10
-               + ["4", "Active", "On Shield Expire", D, "Laser Shot", "Pierce-All", "Current"]
-               + ["Enemies in path", "Attack", "Damage", "70/100/150% AP",
-                  "+30% of damage absorbed", "Once", D, D, D])
-        ws.update([row], f"A{jhin + 1}:Z{jhin + 1}", value_input_option="RAW")
+        cells = {
+            "Step": "4", "Skill Type": "Active", "Trigger": "On Shield Expire", "Condition": D,
+            "Action": "Laser Shot", "Collision": "Pierce-All", "Aim Target": "Current",
+            "Effect Recipient": "Enemies in path", "Effect Category": "Attack",
+            "Effect Detail": "Damage", "Amount": "70/100/150% AP",
+            "Scaling": "+30% of damage absorbed", "Cadence": "Once",
+            "Duration": D, "AOE": D, "Cast": D,
+        }
+        # Both of these columns were added to Hero after this pass was written, so guard on the
+        # header rather than assuming: an older sheet must still take the insert.
+        if "Action Source" in c:
+            cells["Action Source"] = "Self"
+        if "Count" in c:
+            cells["Count"], cells["Spread"] = COUNT_DEFAULT, SPREAD_DEFAULT
+        row = [""] * width
+        for name, v in cells.items():
+            row[c[name]] = v
+        ws.update([row], f"A{jhin + 1}:{col_letter(width - 1)}{jhin + 1}",
+                  value_input_option="RAW")
         print(f"Hero: inserted Irelia's second-hitbox step at row {jhin + 1}")
         vals = ws.get_all_values()
     else:
@@ -259,61 +163,74 @@ def fix_hero(sh):
     # 2. Galio's Aim Target holds a stray hyphen instead of Self - fix before the sweep below,
     #    or his two rows never register as "recipient == aim".
     edits = []
-    galio = find_row(vals, 0, "Galio")
-    if galio is not None and vals[galio][16].strip() in ("-", ""):
-        vals[galio][16] = "Self"
-        edits.append({"range": f"Q{galio + 1}", "values": [["Self"]]})
+    galio = find_row(vals, c["Champion"], "Galio")
+    if galio is not None and val(vals[galio], "Aim Target").strip() in ("-", ""):
+        vals[galio][c["Aim Target"]] = "Self"
+        edits.append({"range": at("Aim Target", galio + 1), "values": [["Self"]]})
 
-    aims = effective_aim(vals)
+    # Aim Target carried down through each action's merged block.
+    aims, cur = [], ""
+    for r in vals:
+        if val(r, "Step").strip():
+            cur = val(r, "Aim Target")
+        aims.append(cur)
+
     champ = ""
     for i, r in enumerate(vals):
         if i == 0:
             continue
-        if r[0].strip():
-            champ = r[0].strip()
+        if val(r, "Champion").strip():
+            champ = val(r, "Champion").strip()
         n = i + 1
+        action, coll = val(r, "Action"), val(r, "Collision")
 
         # Wave is gone - it was a duplicate of Pierce Projectile.
         # Jhin's shot has travel speed, so it is a projectile, not a laser. (Irelia's frontal hit
         # genuinely IS a Laser Shot, so this cannot be a blanket rule on the action name.)
-        if r[14] == "Wave" or (champ == "Jhin" and r[14] == "Laser Shot"):
-            edits.append({"range": f"O{n}", "values": [["Pierce Projectile"]]})
+        if action == "Wave" or (champ == "Jhin" and action == "Laser Shot"):
+            edits.append({"range": at("Action", n), "values": [["Pierce Projectile"]]})
 
-        # Box AOE was retired: no travel speed + pierces + lands once IS a Laser Shot.
-        if r[14] in RETIRED_ACTIONS:
-            edits.append({"range": f"O{n}", "values": [[RETIRED_ACTIONS[r[14]]]]})
-        if r[17] == "Enemies in box":
-            edits.append({"range": f"R{n}", "values": [["Enemies in path"]]})
+        # Retired actions: Box AOE (= a Laser Shot) and Summon Attack (= Source=Summon + an
+        # ordinary Auto-Attack, now that Action Source exists to carry the source).
+        if action in RETIRED_ACTIONS:
+            edits.append({"range": at("Action", n),
+                          "values": [[RETIRED_ACTIONS[action]]]})
+        if val(r, "Effect Recipient") == "Enemies in box":
+            edits.append({"range": at("Effect Recipient", n),
+                          "values": [["Enemies in path"]]})
 
         # A melee Cast projects no hitbox - it has no collision.
-        if r[14] == "Cast" and r[15] not in ("None", D, ""):
-            edits.append({"range": f"P{n}", "values": [["None"]]})
+        if action == "Cast" and coll not in ("None", D, ""):
+            edits.append({"range": at("Collision", n), "values": [["None"]]})
 
         # Yasuo's dash, slash and slam all return to the enemy his Step 2 whirlwind picked.
-        if champ == "Yasuo" and r[10].strip() in ("3", "4", "5"):
-            if r[16] != "Step 2 Aim target":
-                edits.append({"range": f"Q{n}", "values": [["Step 2 Aim target"]]})
+        if champ == "Yasuo" and val(r, "Step").strip() in ("3", "4", "5"):
+            if val(r, "Aim Target") != "Step 2 Aim target":
+                edits.append({"range": at("Aim Target", n),
+                              "values": [["Step 2 Aim target"]]})
             aims[i] = "Step 2 Aim target"
 
         # Zed's shadow is a summon, not a reposition.
-        if r[19] == "(summon)" and r[18] != "Summon":
-            edits.append({"range": f"S{n}", "values": [["Summon"]]})
+        if val(r, "Effect Detail") == "(summon)" and val(r, "Effect Category") != "Summon":
+            edits.append({"range": at("Effect Category", n), "values": [["Summon"]]})
 
         # The returning projectile collides with the caster - that IS a collision, unlike a
         # self-cast which projects nothing.
-        if r[14] == "Receive Projectile" and r[15] != "Self":
-            edits.append({"range": f"P{n}", "values": [["Self"]]})
+        if action == "Receive Projectile" and coll != "Self":
+            edits.append({"range": at("Collision", n), "values": [["Self"]]})
 
         # Collapse a recipient that only restates the aim.
-        aim, rec = aims[i], r[17].strip()
+        aim, rec = aims[i], val(r, "Effect Recipient").strip()
         same = ((aim == "Self" and rec == "Self")
                 or (rec == "Aimed enemy"
                     and (aim.startswith("Current") or aim.startswith("Step ")))
                 or (aim == "Lowest-HP Allies" and rec == "2 lowest-HP allies"))
         if same:
-            edits.append({"range": f"R{n}", "values": [["Same to Aim Target"]]})
+            edits.append({"range": at("Effect Recipient", n),
+                          "values": [["Same to Aim Target"]]})
 
-    ws.batch_update(edits, value_input_option="RAW")
+    if edits:
+        ws.batch_update(edits, value_input_option="RAW")
     print(f"Hero: {len(edits)} cells updated")
     merge_champion_blocks(sh, ws)
 
@@ -345,53 +262,6 @@ def merge_champion_blocks(sh, ws):
 
 
 # --------------------------------------------------------------- reference tabs
-def fix_action_types(sh):
-    """Rebuild Action Types as 5 columns: the description column was a dumping ground.
-
-    `What it does` is now one clean sentence per action; every caveat, rule and example moves
-    to a new `Clarify more` column, mirroring how the Column Explain tab is laid out.
-    """
-    ws = sh.worksheet("Action Types")
-    vals = ws.get_all_values()
-
-    for dead in ["Wave", *RETIRED_ACTIONS]:
-        i = find_row(vals, 0, dead)
-        if i is not None:
-            ws.delete_rows(i + 1)
-            vals = ws.get_all_values()
-            print(f"Action Types: deleted the {dead} row")
-
-    for old, new in RENAMED_ACTIONS.items():
-        i = find_row(vals, 0, old)
-        if i is not None:
-            ws.update([[new]], f"A{i + 1}", value_input_option="RAW")
-            vals = ws.get_all_values()
-            print(f"Action Types: renamed {old} -> {new}")
-
-    pending = [a for a in ACTION_ROWS if find_row(vals, 0, a) is None]
-    if pending:
-        ws.append_rows([[a, *ACTION_ROWS[a]] for a in pending], value_input_option="RAW")
-        vals = ws.get_all_values()
-        print(f"Action Types: added {pending}")
-
-    if ws.col_count < 5:
-        ws.add_cols(5 - ws.col_count)
-
-    edits = []
-    if len(vals[0]) < 5 or vals[0][4] != "Clarify more":
-        edits.append({"range": "E1", "values": [["Clarify more"]]})
-    for action, (coll, cadence, what, clarify) in ACTION_ROWS.items():
-        i = find_row(vals, 0, action)
-        if i is None:
-            raise SystemExit(f"Action Types: row '{action}' not found")
-        row = vals[i] + [""] * (5 - len(vals[i]))
-        for c, text in ((1, coll), (2, cadence), (3, what), (4, clarify)):
-            if row[c] != text:
-                edits.append({"range": f"{col_letter(c)}{i + 1}", "values": [[text]]})
-    ws.batch_update(edits, value_input_option="RAW")
-    print(f"Action Types: split into What it does / Clarify more — {len(edits)} cells updated")
-
-
 def fix_effect_types(sh):
     ws = sh.worksheet("Effect Types")
     vals = ws.get_all_values()
@@ -460,6 +330,46 @@ def fix_column_explain(sh):
 
 # ------------------------------------------------------------------ comment replies
 REPLIES = [
+    # NOTE: matching is "first key found in the comment text", so the LONGER key must come first -
+    # "No need to mention" is a prefix of "No need to mention obvious thing".
+    ("No need to mention obvious thing",
+     "Removed. 'Sunder' is just TFT's name for Debuff -> DEF, which the Effect Types row already "
+     "says - restating it in Scaling added nothing. Scaling is now an em-dash."),
+    ("No need to mention",
+     "Removed. 'Empowered Attack' is already defined in Effect Types as 'the recipient's NEXT "
+     "attack deals bonus damage', so spelling it out again in Scaling was redundant. Scaling is "
+     "now an em-dash."),
+    ("It's time for creating the action template",
+     "Agreed, and your Ashe decomposition is exactly right - it is already latent in the data. "
+     "Multiplicity is currently smuggled into the Scaling column as prose in FOUR places: Ashe "
+     "'×8 arrows in a cone', Akshan '×6 shots', Karma '×3 bursts', Azir 'all 3 Soldiers strike at "
+     "once'. That is the same failure mode Action Source had before it earned a column: a real, "
+     "recurring axis leaking into free text because there was nowhere structured to put it. So it "
+     "is not bad - it is overdue.\n\n"
+     "Built in TWO NEW TABS so nothing that works can break:\n"
+     "- 'Action Templates': every Action decomposed into Delivery × Collision × Shape. This is "
+     "where your two earlier observations land as structure - Burst Projectile = First hit "
+     "Projectile + Circle AOE, and Circle AOE has the SAME delivery as Spawn At Target and differs "
+     "only in shape.\n"
+     "- 'Hero (template)': a copy of Hero plus Count and Spread columns. Ashe = First hit "
+     "Projectile, Count 8, Spread Cone. Akshan = Count 6, Same target. Karma = Count 3, Current + "
+     "Left + Right (your note about why it spreads is now the definition of that spread). Azir = "
+     "Count 3.\n\n"
+     "Ahri: your description changed her encoding. A 360° radial wave from her, hitbox big enough "
+     "to reach everyone, is NOT aimed at the current target - so she is now Aim = Self, Spread = "
+     "360° radial, Recipient = All enemies. I had her aimed at Current, which was wrong.\n\n"
+     "Hero is untouched. If the template model proves out, it becomes the canonical tab."),
+    ("This is 2 hex",
+     "Fixed - 2 hexes, on both rows of that action (the damage and the Chill). I had guessed 1 "
+     "from 'nearby enemies'; the source text gives no number, so thanks for the real value."),
+    ("The circle AOE spawn at summon's hex",
+     "Yes - and this is a correction to my reasoning, not just to the cell. I had written 'Self' "
+     "meaning 'self AS SEEN BY the summon' - i.e. relative to the Action Source. That implicit "
+     "reading is exactly what this schema exists to stamp out. Aim Target is now ABSOLUTE: 'Self' "
+     "always means the champion, so the shadow's AOE is aimed at 'Summon'. Written into Column "
+     "Explain as a rule. Zed's steps 3 and 4 now read Self/Self and Summon/Summon - the two "
+     "columns still say different things (Source = who acts, Aim = where it lands); for Zed they "
+     "coincide, for Azir they do not."),
     ("I thought it weird to state the action here",
      "Done. Yasuo's melee slash (Cast) now has Collision = None, and the same defect is fixed on "
      "Darius' two Cast rows. Rule written into Column Explain: only an action that PROJECTS a "
@@ -508,6 +418,16 @@ REPLIES = [
      "'Self' is now its own row in Collision Types: something WAS projected and the unit it hits "
      "is the caster. None stays reserved for actions that project nothing at all (a self-cast, a "
      "leap)."),
+    ("This skill isn't Homing Projectile",
+     "You're right, and it completes the rule rather than breaking it. Nothing travels and nothing "
+     "is fired - the hitbox just appears on her target's hex. That is neither a projectile (spawns "
+     "on the unit, travels) nor a laser (spawns on the unit, no travel), so it is a THIRD delivery "
+     "mode, told apart by where the hitbox SPAWNS: on the target. I named it 'Spawn At Target' - "
+     "it isolates exactly what is different (the spawn location), where 'Instant Hitbox' would not "
+     "(a laser is instant too). Collision = Target-Only, because nothing crosses the gap so nothing "
+     "in between can be touched. Taliyah's active is now Spawn At Target; her passive boulder stays "
+     "a First hit Projectile, since that one really is thrown. Note - Projectile vs Laser is now a "
+     "three-way rule."),
     ("Nice to note that, Auto-Attack is also a homing projectile",
      "Done - recorded as 'Note - Auto-Attack' in Column Explain, and stated on the Auto-Attack row "
      "itself in Action Types: it IS a homing projectile (fired at the aim target, always lands on "
@@ -526,37 +446,15 @@ REPLIES = [
 ]
 
 
-def reply_to_comments():
-    creds = Credentials.from_service_account_file(
-        CRED, scopes=["https://www.googleapis.com/auth/drive"])
-    s = AuthorizedSession(creds)
-    url = f"https://www.googleapis.com/drive/v3/files/{KEY}/comments"
-    r = s.get(url, params={"fields": "comments(id,content,replies(content))", "pageSize": 100})
-    r.raise_for_status()
-
-    posted = 0
-    for c in r.json().get("comments", []):
-        body = next((t for k, t in REPLIES if k in c["content"]), None)
-        if body is None:
-            print(f"  !! no reply drafted for: {c['content'][:60]!r}")
-            continue
-        if any(body[:40] in rp.get("content", "") for rp in c.get("replies", [])):
-            continue  # already answered
-        rr = s.post(f"{url}/{c['id']}/replies", params={"fields": "id"}, json={"content": body})
-        rr.raise_for_status()
-        posted += 1
-    print(f"Comments: posted {posted} replies (left unresolved)")
-
-
 def main():
-    gc = gspread.service_account(filename=CRED)
-    sh = gc.open_by_key(KEY)
+    sh = open_sheet()
     fix_hero(sh)
-    fix_action_types(sh)
     fix_effect_types(sh)
     fix_collision_types(sh)
     fix_column_explain(sh)
-    reply_to_comments()
+    # The 'Dedicate new tab to it' comment is answered by tft-action-templates.py, which owns the
+    # Spread Types tab - hence warn_unmatched=False.
+    post_replies(REPLIES, warn_unmatched=False)
 
 
 if __name__ == "__main__":
