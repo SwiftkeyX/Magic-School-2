@@ -24,8 +24,15 @@ point, and something the old 300-line-patch-script-per-round approach could neve
 | `data/*.csv` | **The source of truth.** One file per tab. |
 | `sync.py` | **THE one writer.** CSV → sheet, derives every merge, then validates. |
 | `export.py` | Sheet → CSV. Use only to re-snapshot if the sheet is edited by hand. |
+| `reply.py` | Replies to the review comments. Holds **the current round's** replies; overwrite it each round. |
 | `sheet.py` | Shared helpers: `cols()`, `remerge_hero()`, `post_replies()`. |
 | `archive/` | 17 retired scripts (~5,000 lines). Kept for history. **Never run them.** |
+
+## Renaming a column
+
+`sync.py` **never writes the header row** — the headers are yours to rename. But `cols()` resolves
+columns **by name**, so if you rename one in the sheet you must also rename it in `HERO_COLUMNS`
+(`sheet.py`), or every write into that column stops resolving. It fails loudly, not silently.
 
 Run everything from **repo-root cwd**. Set `PYTHONIOENCODING=utf-8` — the sheet contains em-dashes
 and `×`, which crash the default Windows console codec.
@@ -44,9 +51,15 @@ This is the only thing that has ever caught the real bugs. It takes about a minu
    off the sheet's own header row.
 
 2. **A blank cell is DATA.** A merged cell reads back as `""` on every row but its first, so a blank
-   means *"same as the row above"* and must round-trip as a blank. **Never fill `Step`** — it is what
-   the re-merge reads to find step *boundaries*, so a filled continuation row looks like a new step
-   start, and a renumber pass will then fight it for ever.
+   means *"same as the row above"* — and **the comparison must be merge-aware on BOTH sides**, or it
+   is a stable infinite loop: write, merge, blank, write. `sync.py` compares merged columns by their
+   *effective* values (blank inherits the row above) and writes the filled value, letting the
+   re-merge absorb the duplicate.
+
+   **`Step` and `Skill Type` are the exception, and must stay one.** `Step` is what the re-merge
+   reads to find step *boundaries*, so a filled continuation row looks like a **new step start** and
+   never merges away — then a renumber pass fights it for ever. They are compared **raw** and written
+   **literally**, blanks included.
 
 3. **Merges are DERIVED from the values, never stored.** That is why a flat CSV fully describes the
    sheet. `remerge_hero()` reconstructs all three layers (champion identity block, step block, value

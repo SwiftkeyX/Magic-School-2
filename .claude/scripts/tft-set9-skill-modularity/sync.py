@@ -34,7 +34,8 @@ THE THREE RULES THIS SCRIPT IS BUILT AROUND
 import csv
 import pathlib
 
-from sheet import D, HERO_COLUMNS, col_letter, cols, open_sheet, remerge_hero
+from sheet import (D, HERO_COLUMNS, IDENTITY_BLOCK, RUN_COLUMNS, col_letter, cols, open_sheet,
+                   remerge_hero)
 
 DATA = pathlib.Path(".claude/scripts/tft-set9-skill-modularity/data")
 
@@ -76,8 +77,39 @@ def check_rows(tab, sheet_rows, csv_rows):
             f"something this script will do behind your back. Re-export, or delete them explicitly.")
 
 
+# Columns that get MERGED, and so read back as "" on every row but the first of their run. A blank
+# in one of these means "same as the row above" - on BOTH sides of the comparison.
+MERGED_COLUMNS = set(IDENTITY_BLOCK) | set(RUN_COLUMNS)
+
+
+def fill_down(seq):
+    """Resolve a merged column to its EFFECTIVE values: a blank inherits the row above."""
+    out, prev = [], ""
+    for v in seq:
+        if v.strip():
+            prev = v
+        out.append(prev)
+    return out
+
+
 def sync_hero(sh):
-    """Sync Hero by LOGICAL COLUMN NAME, so a renamed or inserted column cannot misalign the write."""
+    """Sync Hero by LOGICAL COLUMN NAME, so a renamed or inserted column cannot misalign the write.
+
+    THE COMPARISON HAS TO SURVIVE ITS OWN MERGING, and getting that wrong is a stable infinite loop.
+
+    A merged cell reads back as "" on every row but its first. So when a hand-edit collapses a step,
+    the re-merge swallows the continuation row's Trigger into the row above - the SHEET now reads ""
+    there while the CSV still names the value. Compare those raw and they differ for ever: write,
+    merge, blank, write. The second run is the only thing that catches it.
+
+    So: for merged columns, compare EFFECTIVE against EFFECTIVE (blank = "same as above", on both
+    sides) and write the FILLED value - the re-merge absorbs the duplicate by itself, which is what
+    makes the rewrite converge.
+
+    STEP AND SKILL TYPE ARE THE EXCEPTION, and they must stay one. `Step` is what remerge_hero()
+    reads to find the step BOUNDARIES: fill a continuation row and it looks like a NEW STEP START, so
+    it never merges away. They are compared RAW and written LITERALLY, blanks included.
+    """
     ws = sh.worksheet(HERO)
     sheet = trim(ws.get_all_values())
     want = trim(read_csv("hero.csv"))
@@ -93,13 +125,21 @@ def sync_hero(sh):
         sheet += [[""] * len(sheet[0]) for _ in range(len(want) - len(sheet))]
 
     edits = []
-    for i in range(1, len(want)):            # row 0 is the header - NEVER written
-        for name in HERO_COLUMNS:
-            new = cell(want[i], wc[name])
-            if cell(sheet[i], sc[name]) != new:
-                edits.append({"range": f"{col_letter(sc[name])}{i + 1}", "values": [[new]]})
+    for name in HERO_COLUMNS:                       # row 0 is the header - NEVER written
+        have = [cell(sheet[i], sc[name]) for i in range(1, len(want))]
+        mine = [cell(want[i], wc[name]) for i in range(1, len(want))]
+        if name in MERGED_COLUMNS:
+            have, mine = fill_down(have), fill_down(mine)
+        for k, (a, b) in enumerate(zip(have, mine)):
+            if a != b:
+                edits.append({"range": f"{col_letter(sc[name])}{k + 2}", "values": [[b]]})
 
     if edits:
+        # Unmerge first, or a merged cell silently eats the write. remerge_hero() rebuilds the
+        # layout from the values afterwards.
+        sh.batch_update({"requests": [{"unmergeCells": {"range": {
+            "sheetId": ws.id, "startRowIndex": 1, "endRowIndex": len(sheet),
+            "startColumnIndex": 0, "endColumnIndex": sc["Aim Target"] + 1}}}]})
         ws.batch_update(edits, value_input_option="RAW")
     print(f"{HERO}: {len(edits)} cells updated ({len(want) - 1} rows)")
     return bool(edits)

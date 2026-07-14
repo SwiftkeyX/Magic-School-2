@@ -28,7 +28,12 @@ HERO_COLUMNS = [
     "Step", "Skill Type", "Trigger", "Condition", "Action Source", "Action",
     "Count", "Spread", "Collision",
     "Aim Target", "Effect Recipient", "Effect Category", "Effect Detail",
-    "Amount", "Scaling Type", "Scaling", "Cadence", "Duration", "AOE", "Cast",
+    # `Effect Cadence` / `Effect Duration` were plain `Cadence` / `Duration (s)`. The user renamed
+    # them for clarity: both describe the EFFECT, not the action, which puts them in the same family
+    # as Effect Recipient / Category / Detail. The names here MUST track the sheet's header text —
+    # cols() matches exact-then-prefix, and "Effect Duration (s)".startswith("Duration") is False, so
+    # a stale name here does not fall back gracefully. It raises, which is the behaviour we want.
+    "Amount", "Scaling Type", "Scaling", "Effect Cadence", "Effect Duration", "AOE", "Cast",
 ]
 
 # The action-instance block: these cells are vertically merged across the rows of one action.
@@ -241,22 +246,34 @@ def sync_notes(sh, notes=(), edits=None):
 def post_replies(replies, warn_unmatched=True):
     """Reply to the sheet's review comments. `replies` is [(match, body), ...].
 
-    A comment is matched by the FIRST key found in its text, so list a longer key before any
-    key that is a prefix of it. Comments are left UNRESOLVED — resolving is the user's call.
-    Idempotent: a comment whose replies already open with this body is skipped.
+    A comment is matched by the FIRST key found in its text, so list a longer key before any key that
+    is a prefix of it. Comments are left UNRESOLVED — resolving is the user's call.
 
-    `warn_unmatched` is for the script that answers EVERY comment; a script that owns only a
-    few of them passes False, or it warns about the comments another script already answered.
+    Idempotent twice over:
+      - a comment whose replies already open with this body is skipped;
+      - a comment the USER HAS RESOLVED is skipped entirely.
+
+    RESOLVED COMMENTS ARE NEVER ANSWERED. The user resolves a comment when they are done with it —
+    often because they posted it twice. Replying anyway just piles noise onto a closed thread, and a
+    short match key makes that easy to do by accident: the user duplicated one comment four times and
+    resolved two, so a key matching its text would have answered threads they had already closed.
+
+    `warn_unmatched` is for a script that answers EVERY open comment; one that owns only a few passes
+    False, or it warns about the comments another round already answered.
     """
     creds = Credentials.from_service_account_file(
         CRED, scopes=["https://www.googleapis.com/auth/drive"])
     s = AuthorizedSession(creds)
     url = f"https://www.googleapis.com/drive/v3/files/{KEY}/comments"
-    r = s.get(url, params={"fields": "comments(id,content,replies(content))", "pageSize": 100})
+    r = s.get(url, params={"fields": "comments(id,content,resolved,replies(content))",
+                           "pageSize": 100})
     r.raise_for_status()
 
-    posted = 0
+    posted = skipped = 0
     for c in r.json().get("comments", []):
+        if c.get("resolved"):
+            skipped += 1
+            continue
         body = next((t for k, t in replies if k in c["content"]), None)
         if body is None:
             if warn_unmatched:
@@ -267,4 +284,4 @@ def post_replies(replies, warn_unmatched=True):
         rr = s.post(f"{url}/{c['id']}/replies", params={"fields": "id"}, json={"content": body})
         rr.raise_for_status()
         posted += 1
-    print(f"Comments: posted {posted} replies (left unresolved)")
+    print(f"Comments: posted {posted} replies ({skipped} resolved threads left alone)")
