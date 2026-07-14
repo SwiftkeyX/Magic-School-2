@@ -28,7 +28,7 @@ Plus: Viego is a Laser Shot, not a Cast. Maokai's range is 1.
 corrects `Hero`, `Effect Types` and `Column Explain`.
 """
 
-from tft_sheet import D, col_letter, cols, open_sheet, post_replies
+from tft_sheet import D, col_letter, cols, open_sheet, post_replies, sync_notes
 
 # Gwen's cone, from the user's sketch: one hex at range 1, three at range 2. Depth 2, 4 hexes.
 GWEN_CONE = "4 (1 hex at range 1, 3 at range 2)"
@@ -82,8 +82,10 @@ COLUMN_EXPLAIN_EDITS = {
            "it lasts the whole combat and never falls off (Viego's stacks, every Ionia bonus). "
            "Blank / em-dash if the effect is instant and has nothing to expire.",
     },
-    # This note previously taught that Shape = Cone is a real collider (Gwen). That is FALSE - she
-    # is a sweeping laser. Rewritten rather than amended: the old text is not salvageable.
+}
+
+# The Note row lives in Design Notes now, not Column Explain.
+NOTE_EDITS = {
     "Note - Cone: shape vs spread": {
         1: "A cone is NEVER a hitbox. It is always either an arrangement or an illusion.",
         2: "There is no cone collider anywhere in this sheet. Two different things LOOK like a "
@@ -312,6 +314,7 @@ def main():
     sh = open_sheet()
     fix_hero(sh)
     fix_reference_tabs(sh)
+    sync_notes(sh, edits=NOTE_EDITS)
     post_replies(REPLIES, warn_unmatched=False)
     ask(sh)
 

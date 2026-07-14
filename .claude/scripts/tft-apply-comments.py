@@ -16,7 +16,7 @@ Idempotent: re-running detects the work is already done and only tops up what is
 """
 
 from tft_sheet import (COUNT_DEFAULT, D, SPREAD_DEFAULT, col_letter, cols, find_row, open_sheet,
-                       post_replies)
+                       post_replies, sync_notes)
 
 # Action Types is Action | Collision | Cadence | What it does | Clarify more.
 # `What it does` stays ONE clean sentence; every caveat, rule and example lives in `Clarify more`.
@@ -78,8 +78,10 @@ COLUMN_EXPLAIN_EDITS = {
     "Effect Category": {
         2: "e.g. Attack / Status / Buff / Debuff / Movement / Summon. See the 'Effect Types' tab.",
     },
-    # kept under EDITS, not NOTES: the notes-appender only creates rows, it never updates them,
-    # so a note that names a retired action would otherwise go stale unnoticed.
+}
+
+# Note ROWS live in the Design Notes tab, not in Column Explain — see sync_notes().
+NOTE_EDITS = {
     "Note - Projectile vs Laser": {
         1: "Delivery is told apart by WHERE the hitbox spawns and whether it TRAVELS - not by "
            "shape. There are three modes.",
@@ -128,9 +130,13 @@ def fix_hero(sh):
         return r[c[name]] if c[name] < len(r) else ""
 
     # 1. Irelia's second hitbox - a Laser Shot in front of her, alongside the Circle AOE on her.
+    # The guard asks whether the ROW EXISTS, not whether a given STEP NUMBER exists. It used to
+    # test for step "4", and round 7 renumbered her steps down by one when her passive moved to
+    # step 0 - so the test found no step 4 and inserted the row a SECOND time. A step number is a
+    # position, not an identity: never guard on one.
     irelia = find_row(vals, c["Champion"], "Irelia")
     jhin = next(i for i in range(irelia + 1, len(vals)) if val(vals[i], "Champion").strip())
-    if not any(val(vals[i], "Step").strip() == "4" for i in range(irelia, jhin)):
+    if not any(val(vals[i], "Action").strip() == "Laser Shot" for i in range(irelia, jhin)):
         sh.batch_update({"requests": [{"insertDimension": {
             "range": {"sheetId": ws.id, "dimension": "ROWS",
                       "startIndex": jhin, "endIndex": jhin + 1},
@@ -203,12 +209,15 @@ def fix_hero(sh):
         if action == "Cast" and coll not in ("None", D, ""):
             edits.append({"range": at("Collision", n), "values": [["None"]]})
 
-        # Yasuo's dash, slash and slam all return to the enemy his Step 2 whirlwind picked.
-        if champ == "Yasuo" and val(r, "Step").strip() in ("3", "4", "5"):
-            if val(r, "Aim Target") != "Step 2 Aim target":
+        # Yasuo's dash, slash and slam all return to the enemy his whirlwind picked. Round 7 moved
+        # his passive to step 0, so the whirlwind is step 1 (was 2) and the three re-aims are steps
+        # 2-4 (were 3-5). Both the key AND the value it writes had to move: a step number is a KEY,
+        # and renumbering one without rewriting what points at it leaves a dangling pointer.
+        if champ == "Yasuo" and val(r, "Step").strip() in ("2", "3", "4"):
+            if val(r, "Aim Target") != "Step 1 Aim target":
                 edits.append({"range": at("Aim Target", n),
-                              "values": [["Step 2 Aim target"]]})
-            aims[i] = "Step 2 Aim target"
+                              "values": [["Step 1 Aim target"]]})
+            aims[i] = "Step 1 Aim target"
 
         # Zed's shadow is a summon, not a reposition.
         if val(r, "Effect Detail") == "(summon)" and val(r, "Effect Category") != "Summon":
@@ -321,11 +330,7 @@ def fix_column_explain(sh):
                 edits.append({"range": f"{col_letter(c)}{i + 1}", "values": [[text]]})
     ws.batch_update(edits, value_input_option="RAW")
 
-    seen = {r[0].strip() for r in vals if r}
-    notes = [n for n in COLUMN_EXPLAIN_NOTES if n[0] not in seen]
-    if notes:
-        ws.append_rows(notes, value_input_option="RAW")
-    print(f"Column Explain: {len(edits)} cells updated, {len(notes)} note rows appended")
+    print(f"Column Explain: {len(edits)} cells updated")
 
 
 # ------------------------------------------------------------------ comment replies
@@ -452,6 +457,7 @@ def main():
     fix_effect_types(sh)
     fix_collision_types(sh)
     fix_column_explain(sh)
+    sync_notes(sh, COLUMN_EXPLAIN_NOTES, NOTE_EDITS)
     # The 'Dedicate new tab to it' comment is answered by tft-action-templates.py, which owns the
     # Spread Types tab - hence warn_unmatched=False.
     post_replies(REPLIES, warn_unmatched=False)

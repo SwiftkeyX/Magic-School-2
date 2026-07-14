@@ -32,7 +32,7 @@ longer a coincidence, and a third would settle it.
 
 import gspread
 
-from tft_sheet import col_letter, cols, open_sheet, post_replies
+from tft_sheet import col_letter, cols, open_sheet, post_replies, sync_notes
 
 SOURCE_KEY = "1xj6em5XlvIN1gWHTKOPDsssmkgnS3jIsaLnAMjYyPUA"   # tft-set9
 
@@ -40,7 +40,10 @@ SOURCE_KEY = "1xj6em5XlvIN1gWHTKOPDsssmkgnS3jIsaLnAMjYyPUA"   # tft-set9
 # it just normal AA range" - melee Bastion, so 1. The ONLY value here not taken from the source.
 RANGE_OVERRIDES = {"Maokai": "1"}
 
-SPREAD_FIX = {("Soraka", "3"): {"Spread": "Re-picked per instance"}}
+# SUPERSEDED: round 5 folded her two heals into one step (so the stars are step 2, not 3)
+# and round 6 renamed the value to "Each to its own target". Soraka's block is declared
+# outright in round 5 now — a second writer here would just fight it.
+SPREAD_FIX = {}
 
 # The 'Champion … Skill Description' row is OWNED by tft-apply-comments.py, so the Range wording
 # lives there, not here. This script writing it too would mean two scripts fighting over one cell
@@ -161,11 +164,6 @@ def fix_spread(sh):
 def fix_column_explain(sh):
     ws = sh.worksheet("Column Explain")
     vals = ws.get_all_values()
-    seen = {r[0].strip() for r in vals if r}
-    notes = [n for n in COLUMN_EXPLAIN_NOTES if n[0] not in seen]
-    if notes:
-        ws.append_rows(notes, value_input_option="RAW")
-    print(f"Column Explain: {len(notes)} note rows appended")
 
 
 def main():
@@ -176,6 +174,7 @@ def main():
     post_replies(REPLIES, warn_unmatched=False)
     print("\n'Re-picked per instance' is defined by tft-action-templates.py (owner of Spread "
           "Types) — run it next.")
+    sync_notes(sh, COLUMN_EXPLAIN_NOTES)
 
 
 if __name__ == "__main__":

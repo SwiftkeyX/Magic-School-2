@@ -27,7 +27,7 @@ HERO_COLUMNS = [
     "Step", "Skill Type", "Trigger", "Condition", "Action Source", "Action",
     "Count", "Spread", "Collision",
     "Aim Target", "Effect Recipient", "Effect Category", "Effect Detail",
-    "Amount", "Scaling", "Cadence", "Duration", "AOE", "Cast",
+    "Amount", "Scaling Type", "Scaling", "Cadence", "Duration", "AOE", "Cast",
 ]
 
 # The action-instance block: these cells are vertically merged across the rows of one action.
@@ -35,8 +35,16 @@ HERO_COLUMNS = [
 # row can be conditional while its siblings are not (Soraka heals an ally, and heals them again
 # only if they are below 50% HP: same action, one row gated, one not). While Condition was merged
 # it could only gate a whole action, which forced that bonus heal to be faked as a separate step.
-ACTION_BLOCK = ["Step", "Skill Type", "Trigger", "Action Source", "Action",
-                "Count", "Spread", "Collision", "Aim Target"]
+# `Count`/`Spread` are NOT here either, for the same reason as Condition: Karma's 1st cast fires
+# ONE burst and her 3rd fires THREE, from the same action. A merged Count cannot say that, which
+# is the only reason those were ever two separate steps.
+#
+# ROUND 8 finished the job: a Step is a MOMENT in the cast, and its rows are BRANCHES of it, which
+# may run different ACTIONS (Swain casts if untransformed and bursts if not; Azir summons unless he
+# already has 3 Soldiers). So Trigger/Action/Collision/Aim went per-row too, and only these two are
+# left. Merging is now done by VALUE RUNS — see remerge() in tft-review-round8.py — so a merge is a
+# display of the data rather than a claim about it.
+ACTION_BLOCK = ["Step", "Skill Type"]
 
 # Count/Spread defaults. A single instance has nothing to arrange - but the cell must still say
 # so. Blank would read as "unknown"; the em-dash says "there is only one".
@@ -107,6 +115,45 @@ def merge_request(sheet_id, start, end, col):
                   "startColumnIndex": col, "endColumnIndex": col + 1},
         "mergeType": "MERGE_COLUMNS",
     }}
+
+
+NOTES_TAB = "Design Notes"
+
+
+def sync_notes(sh, notes=(), edits=None):
+    """Append/update rows in the `Design Notes` tab. The ONE place notes are written.
+
+    Notes used to live in `Column Explain`, and grew to 20 of its 41 rows - half the tab had
+    stopped explaining columns. A column legend ("what does this cell mean") and a decision log
+    ("why is the schema this shape, what did we rule out") are different documents.
+
+    Every script routes its notes through here. If any of them still appended to Column Explain,
+    it would re-append on every run - the note is no longer there to be found, so its "already
+    present?" check would never be satisfied. That is exactly what broke when the tab was split.
+    """
+    ws = sh.worksheet(NOTES_TAB)
+    vals = [r for r in ws.get_all_values() if r]
+    have = {r[0].strip() for r in vals if r[0].strip()}
+
+    pending = [n for n in notes if n[0].strip() not in have]
+    if pending:
+        need = len(vals) + len(pending) + 2
+        if ws.row_count < need:
+            ws.add_rows(need - ws.row_count)
+        ws.append_rows([(list(n) + ["", "", ""])[:3] for n in pending], value_input_option="RAW")
+        vals = [r for r in ws.get_all_values() if r]
+
+    cells = []
+    for label, columns in (edits or {}).items():
+        i = next((k for k, r in enumerate(vals) if r[0].strip() == label), None)
+        if i is None:
+            raise SystemExit(f"{NOTES_TAB}: row '{label}' not found")
+        for col, text in columns.items():
+            if (vals[i][col] if col < len(vals[i]) else "") != text:
+                cells.append({"range": f"{col_letter(col)}{i + 1}", "values": [[text]]})
+    if cells:
+        ws.batch_update(cells, value_input_option="RAW")
+    print(f"{NOTES_TAB}: {len(pending)} notes appended, {len(cells)} cells updated")
 
 
 def post_replies(replies, warn_unmatched=True):

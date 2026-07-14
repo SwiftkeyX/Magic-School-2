@@ -16,7 +16,7 @@ Source of every number: tft-set9 -> Champions -> Skill Description.
 """
 
 from tft_sheet import (D, SAME, ACTION_BLOCK, IDENTITY_BLOCK, col_letter, cols, find_row,
-                       merge_request, open_sheet)
+                       merge_request, open_sheet, sync_notes)
 
 # Zed's rows still carry the Zed-specific names; the archetype is now shared with Azir.
 RENAMES = {
@@ -331,11 +331,6 @@ def fix_reference_tabs(sh):
                 edits.append({"range": f"{col_letter(c)}{i + 1}", "values": [[text]]})
     if edits:
         ws.batch_update(edits, value_input_option="RAW")
-    seen = {r[0].strip() for r in vals if r}
-    notes = [n for n in COLUMN_EXPLAIN_NOTES if n[0] not in seen]
-    if notes:
-        ws.append_rows(notes, value_input_option="RAW")
-    print(f"Column Explain: {len(edits)} cells updated, {len(notes)} note rows appended")
 
 
 def main():
@@ -346,6 +341,7 @@ def main():
     fix_reference_tabs(sh)
     print("\nAction Types is owned by tft-apply-comments.py — run it to land the Summon rename "
           "and the Knock Back row.")
+    sync_notes(sh, COLUMN_EXPLAIN_NOTES)
 
 
 if __name__ == "__main__":

@@ -26,7 +26,7 @@ Run from repo-root cwd:  python .claude/scripts/tft-review-round5.py
      conditions gate an action, some gate a single effect, and only a per-row column can say which.
 """
 
-from tft_sheet import D, SAME, col_letter, cols, open_sheet, post_replies
+from tft_sheet import D, SAME, col_letter, cols, open_sheet, post_replies, sync_notes
 
 # (champion, step) -> {column: value}
 HERO_FIXES = {
@@ -61,7 +61,7 @@ COLUMN_EXPLAIN_NOTES = [
 
 # The note above is appended once; if its text changes later, notes-append will not update it - so
 # it is also listed here, where it IS rewritten in place.
-COLUMN_EXPLAIN_EDITS = {
+NOTE_EDITS = {
     "Note - Condition is PER-EFFECT": {
         1: "Condition is NOT part of the action block. A single effect row can be gated while its "
            "siblings are not.",
@@ -117,26 +117,29 @@ REPLIES = [
 SORAKA_ROWS = [
     # step 1, row A - the base heal
     {"Step": "1", "Skill Type": "Active", "Trigger": "On Cast", "Condition": D,
-     "Action Source": "Self", "Action": "Cast", "Count": "1", "Spread": D, "Collision": "None",
+     "Action Source": "Self", "Action": "Cast", "Count": D, "Spread": D, "Collision": "None",
      "Aim Target": "Lowest-HP Ally",
      "Effect Recipient": SAME, "Effect Category": "Buff", "Effect Detail": "Heal",
-     "Amount": "140/160/180% AP", "Scaling": D, "Cadence": "Once", "Duration": D, "AOE": D,
-     "Cast": D},
+     "Amount": "140/160/180% AP", "Scaling Type": D, "Scaling": D, "Cadence": "Once",
+     "Duration": D, "AOE": D, "Cast": D},
     # step 1, row B - the SAME heal again, gated. Only a per-effect Condition can say this.
+    # Scaling is an em-dash, not "additional heal": round 6 gave Scaling a fixed vocabulary, and
+    # "additional heal" was not a scaling - it just restated what the Condition already says.
     {"Step": "", "Skill Type": "", "Trigger": "", "Condition": "If Ally Below 50% HP",
-     "Action Source": "", "Action": "", "Count": "", "Spread": "", "Collision": "",
+     "Action Source": "", "Action": "", "Count": D, "Spread": D, "Collision": "",
      "Aim Target": "",
      "Effect Recipient": SAME, "Effect Category": "Buff", "Effect Detail": "Heal",
-     "Amount": "140/160/180% AP", "Scaling": "additional heal", "Cadence": "Once", "Duration": D,
-     "AOE": D, "Cast": D},
+     "Amount": "140/160/180% AP", "Scaling Type": D, "Scaling": D, "Cadence": "Once",
+     "Duration": D, "AOE": D, "Cast": D},
     # step 2 - the falling stars (was step 3, before the heals became one step)
     {"Step": "2", "Skill Type": "Active", "Trigger": "After Cast", "Condition": D,
      "Action Source": "Self", "Action": "Spawn At Target", "Count": "5",
-     "Spread": "Re-picked per instance", "Collision": "Target-Only",
+     # Renamed in round 6: the spread answers WHERE the instances go, not WHEN the aim is picked.
+     "Spread": "Each to its own target", "Collision": "Target-Only",
      "Aim Target": "Nearest enemy to the healed ally",
      "Effect Recipient": SAME, "Effect Category": "Attack", "Effect Detail": "Damage",
-     "Amount": "120/180/280% AP", "Scaling": D, "Cadence": "Over Time", "Duration": "5", "AOE": D,
-     "Cast": D},
+     "Amount": "120/180/280% AP", "Scaling Type": D, "Scaling": D, "Cadence": "Over Time",
+     "Duration": "5", "AOE": D, "Cast": D},
 ]
 
 # merged down step 1's two rows. Condition is NOT here - that is the whole point.
@@ -155,11 +158,30 @@ def rebuild_soraka(sh):
         raise SystemExit(f"Soraka has {len(rows)} rows, expected {len(SORAKA_ROWS)} — not touching")
     top, bottom = rows[0], rows[-1]
 
+    # Compare EFFECTIVE values, not raw ones. Round 8 merges cells wherever consecutive rows agree,
+    # and a merged cell reads back as "" on every row but its first — so a spec that names the value
+    # on every row would mismatch for ever: rewrite, re-merge, rewrite. Treat a blank in a mergeable
+    # column as "same as the row above", on BOTH sides of the comparison.
+    MERGEABLE = {"Step", "Skill Type", "Trigger", "Condition", "Action Source", "Action",
+                 "Count", "Spread", "Collision", "Aim Target"}
+
+    def fill(get, col):
+        out, last = [], ""
+        for k in range(len(rows)):
+            v = get(k, col)
+            if v.strip():
+                last = v
+            out.append(last if col in MERGEABLE else v)
+        return out
+
     edits = []
-    for i, spec in zip(rows, SORAKA_ROWS):
-        for name, value in spec.items():
-            if vals[i][c[name]] != value:
-                edits.append({"range": f"{col_letter(c[name])}{i + 1}", "values": [[value]]})
+    for name in SORAKA_ROWS[0]:
+        have = fill(lambda k, cc: vals[rows[k]][c[cc]], name)
+        want = fill(lambda k, cc: SORAKA_ROWS[k][cc], name)
+        for k in range(len(rows)):
+            if have[k] != want[k]:
+                edits.append({"range": f"{col_letter(c[name])}{rows[k] + 1}",
+                              "values": [[want[k]]]})
     if not edits:
         print("Hero: Soraka's block already correct")
         return
@@ -209,33 +231,13 @@ def fix_hero(sh):
     print(f"Hero: {len(edits)} cells corrected (Kalista Count 1, 6 spears -> Amount)")
 
 
-def add_notes(sh):
-    ws = sh.worksheet("Column Explain")
-    vals = ws.get_all_values()
-    seen = {r[0].strip() for r in vals if r}
-    notes = [n for n in COLUMN_EXPLAIN_NOTES if n[0] not in seen]
-    if notes:
-        ws.append_rows(notes, value_input_option="RAW")
-        vals = ws.get_all_values()
-
-    edits = []
-    for label, columns in COLUMN_EXPLAIN_EDITS.items():
-        i = next((k for k, r in enumerate(vals) if r[0].strip() == label), None)
-        if i is None:
-            raise SystemExit(f"Column Explain: row '{label}' not found")
-        for col, text in columns.items():
-            if vals[i][col] != text:
-                edits.append({"range": f"{col_letter(col)}{i + 1}", "values": [[text]]})
-    if edits:
-        ws.batch_update(edits, value_input_option="RAW")
-    print(f"Column Explain: {len(notes)} notes appended, {len(edits)} cells updated")
 
 
 def main():
     sh = open_sheet()
     fix_hero(sh)
     rebuild_soraka(sh)
-    add_notes(sh)
+    sync_notes(sh, COLUMN_EXPLAIN_NOTES, NOTE_EDITS)
     post_replies(REPLIES, warn_unmatched=False)
 
 

@@ -34,7 +34,7 @@ Source of every number: tft-set9 -> Champions -> Skill Description.
 """
 
 from tft_sheet import (ACTION_BLOCK, D, IDENTITY_BLOCK, SAME, col_letter, cols, merge_request,
-                       open_sheet)
+                       open_sheet, sync_notes)
 
 # identity (A-J) + actions
 # action = (step, skill_type, trigger, condition, source, action, count, spread, collision, aim,
@@ -384,11 +384,6 @@ def fix_reference_tabs(sh):
     if edits:
         ws.batch_update(edits, value_input_option="RAW")
 
-    seen = {r[0].strip() for r in vals if r}
-    notes = [n for n in COLUMN_EXPLAIN_NOTES if n[0] not in seen]
-    if notes:
-        ws.append_rows(notes, value_input_option="RAW")
-    print(f"Column Explain: {len(edits)} cells updated, {len(notes)} note rows appended")
 
 
 def main():
@@ -398,6 +393,7 @@ def main():
     fix_reference_tabs(sh)
     print("\nGwen's 'Cone Slash' is registered by the tabs' owners: run tft-apply-comments.py "
           "(Action Types) and tft-action-templates.py (Action Templates / Spread Types).")
+    sync_notes(sh, COLUMN_EXPLAIN_NOTES)
 
 
 if __name__ == "__main__":

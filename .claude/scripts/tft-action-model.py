@@ -68,8 +68,17 @@ ACTIONS = [
      "Not specify",
      "Projectile that flies at the aim target and DETONATES on impact, hitting everyone in an "
      "X-hex circle.",
-     "Has travel speed. = First hit Projectile + Circle AOE. The circle is centred on the IMPACT "
-     "hex, not on the caster (Aphelios' moon blast)."],
+     "Has travel speed. = First hit Projectile + Circle AOE. It detonates on the FIRST body it "
+     "meets, which may not be the unit it was aimed at, and the circle is centred on that IMPACT "
+     "hex. If the projectile instead passes THROUGH and detonates on its aim target, that is "
+     "Homing Burst (Aphelios), not this."],
+    ["Homing Burst", "Projectile (spawns on unit, travels)", "Area", "Circle", "Not specify",
+     "Projectile that HOMES on the aim target, passing through everything on the way, and "
+     "detonates on it in an X-hex circle.",
+     "Has travel speed. = Homing Projectile + Circle AOE. Do NOT confuse with Burst Projectile, "
+     "which is First-Hit: that one detonates on the FIRST body it meets, which may not be the unit "
+     "it was aimed at. Aphelios' moon blast passes THROUGH heroes and explodes on the clustered "
+     "target it was aimed at - the user's correction. Same circle, different delivery."],
     ["Spawn At Target", "Spawn At Target (spawns on target, no travel)", "Target-Only", "Single",
      "Not specify",
      "The hitbox appears directly ON the aim target's hex - nothing is fired and nothing travels.",

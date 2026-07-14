@@ -28,8 +28,8 @@ signed off on it ("Let's use this one from now on"), so tft-promote-template.py 
 the old tab: the template IS `Hero` now, and there is nothing left to duplicate.
 """
 
-from tft_sheet import (COUNT_DEFAULT, D, SPREAD_DEFAULT, action_groups, col_letter, cols,
-                       merge_request, open_sheet, post_replies)
+from tft_sheet import (COUNT_DEFAULT, D, SPREAD_DEFAULT, col_letter, cols, open_sheet,
+                       post_replies)
 
 SPREAD_TAB = "Spread Types"
 
@@ -74,13 +74,15 @@ SPREADS = [
      "'Same target'."],
     # The first spread whose aim is NOT fixed at cast. See 'Note - Mid-action change' - this and
     # Gwen's sweeping hitbox are the same gap seen twice.
-    ["Re-picked per instance", "Each instance CHOOSES ITS OWN TARGET when it fires, so the "
-     "instances can walk from body to body.",
-     "Re-evaluated per instance — NOT fixed at cast", "Soraka (5 stars, over 5s)",
-     "The only spread where the aim is re-evaluated DURING the action. Soraka's stars each ask "
-     "again 'which enemy is closest to the healed ally NOW?', and over 5 seconds the board moves, "
-     "so star 5 can land on a different enemy than star 1. Contrast 'Same target', which fixes the "
-     "target once at cast and sends every instance there regardless."],
+    ["Each to its own target", "The instances do NOT converge and form no shape - each one goes "
+     "to its own target.",
+     "One aim per instance, re-picked as it fires", "Soraka (5 stars, over 5s)",
+     "Named for WHERE the instances go, like every other spread. What is unusual is WHEN the aim "
+     "is decided: each of Soraka's stars asks again 'which enemy is closest to the healed ally "
+     "NOW?', and over 5 seconds the board moves, so star 5 can land on a different enemy than "
+     "star 1. Contrast 'Same target', which fixes one target at cast and sends every instance "
+     "there regardless. (This was called 'Re-picked per instance' - a WHEN answer wearing a WHERE "
+     "column's clothes, which is why it never sat right.)"],
     ["360° radial", "One instance expanding from the caster in ALL directions at once.",
      "Self - it is not aimed at anything", "Ahri (2nd-cast wave)",
      "Count stays 1: it is a single expanding hitbox, not N instances. It earns a Spread anyway "
@@ -89,16 +91,20 @@ SPREADS = [
 ]
 
 # (champion, step) -> {column: value}. Multiplicity lifted out of Scaling, plus the Ahri fix.
+# Keyed by (champion, STEP) — and round 7 renumbered the steps (passives went to 0), so these keys
+# all had to move with them. A stale key here does not error: it silently matches nothing, and the
+# invariant it was enforcing quietly stops being enforced. Karma is gone from this table entirely —
+# her two casts became ONE step with a per-row Count, and tft-review-round7.py declares her block.
 TEMPLATE_FIXES = {
     ("Ashe", "1"): {"Count": "8", "Spread": "Cone", "Scaling": D},
     ("Akshan", "1"): {"Count": "6", "Spread": "Same target", "Scaling": D},
-    ("Karma", "3"): {"Count": "3", "Spread": "Current + Left + Right", "Scaling": D},
-    # The Summon step spawns up to 3 soldiers; the strike is 3 auto-attacks on one target.
-    ("Azir", "2"): {"Count": "3", "Spread": D, "Scaling": "max 3 Soldiers on the board"},
-    ("Azir", "3"): {"Count": "3", "Spread": "Same target", "Scaling": D},
-    # Ahri's wave does not travel AT anything: it erupts from her in every direction, and its
-    # hitbox is big enough to catch the whole board. Aim is Self, not Current.
-    ("Ahri", "3"): {"Count": "1", "Spread": "360° radial", "Aim Target": "Self",
+    # was step 2: the Summon spawns up to 3 Soldiers.
+    ("Azir", "1"): {"Count": "3", "Spread": D, "Scaling": "max 3 Soldiers on the board"},
+    # was step 3: all 3 Soldiers strike one target at once.
+    ("Azir", "2"): {"Count": "3", "Spread": "Same target", "Scaling": D},
+    # was step 3. Her wave does not travel AT anything: it erupts from her in every direction, and
+    # its hitbox is big enough to catch the whole board. Aim is Self, not Current.
+    ("Ahri", "2"): {"Count": "1", "Spread": "360° radial", "Aim Target": "Self",
                     "Effect Recipient": "All enemies",
                     "Scaling": "+33% if essence stolen"},
 }
@@ -193,17 +199,10 @@ def backfill_hero(sh):
     vals = ws.get_all_values()
     c = cols(vals[0])
 
-    # A column inserted mid-table is UNMERGED inside every multi-row action, so a continuation
-    # row would read as an action of its own. Only merge what is not merged already.
-    groups = [(a, b) for a, b in action_groups(vals, c) if b - a > 1]
-    meta = sh.fetch_sheet_metadata({"includeGridData": False})
-    sheet = next(s for s in meta["sheets"] if s["properties"]["sheetId"] == ws.id)
-    merged_cols = {m["startColumnIndex"] for m in sheet.get("merges", [])}
-    todo = [n for n in ("Count", "Spread") if c[n] not in merged_cols]
-    if todo:
-        sh.batch_update({"requests": [merge_request(ws.id, a, b, c[n])
-                                      for a, b in groups for n in todo]})
-        print(f"Hero: re-merged {todo} across {len(groups)} multi-row actions")
+    # NO MERGING HERE ANY MORE. Count/Spread used to be part of the merged action block, and this
+    # function re-merged them down each multi-row action. Round 7 made them PER-EFFECT (Karma's 1st
+    # cast fires 1 burst, her 3rd fires 3 — one action, two Counts), so merging them back would
+    # erase exactly the distinction that change exists to express. It did, on the first run after.
 
     edits, champ = [], ""
     for i, r in enumerate(vals):

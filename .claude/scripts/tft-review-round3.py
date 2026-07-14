@@ -34,7 +34,7 @@ import json
 from google.auth.transport.requests import AuthorizedSession
 from google.oauth2.service_account import Credentials
 
-from tft_sheet import CRED, D, KEY, col_letter, cols, open_sheet, post_replies
+from tft_sheet import CRED, D, KEY, col_letter, cols, open_sheet, post_replies, sync_notes
 
 # (champion, step) -> {column: value}
 HERO_FIXES = {
@@ -45,11 +45,10 @@ HERO_FIXES = {
 }
 
 # (champion, category, detail) -> {column: value}
-EFFECT_FIXES = {
-    # To HIM, not to his shield. The shield is incidental - it is merely what is standing between
-    # the redirected damage and his health when it lands.
-    ("Taric", "Buff", "Damage Redirect"): {"Scaling": "redirected onto Taric himself"},
-}
+# Taric's Scaling used to read "redirected into Taric's shield". Round 6 emptied the cell
+# entirely: it was never a scaling, just a restatement of what Damage Redirect already means, and
+# Scaling now has a fixed vocabulary. The correction lives in the Effect Types definition below.
+EFFECT_FIXES = {}
 
 EFFECT_REDEFS = {
     ("Buff", "Damage Redirect"):
@@ -193,11 +192,6 @@ def fix_reference_tabs(sh):
 
     ws = sh.worksheet("Column Explain")
     vals = ws.get_all_values()
-    seen = {r[0].strip() for r in vals if r}
-    notes = [n for n in COLUMN_EXPLAIN_NOTES if n[0] not in seen]
-    if notes:
-        ws.append_rows(notes, value_input_option="RAW")
-    print(f"Column Explain: {len(notes)} note rows appended")
 
 
 def ask_at_cells(sh):
@@ -254,6 +248,7 @@ def main():
     fix_reference_tabs(sh)
     post_replies(REPLIES, warn_unmatched=False)
     ask_at_cells(sh)
+    sync_notes(sh, COLUMN_EXPLAIN_NOTES)
 
 
 if __name__ == "__main__":

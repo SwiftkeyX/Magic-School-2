@@ -23,24 +23,27 @@ Source of every number: tft-set9 -> Champions -> Skill Description.
 """
 
 from tft_sheet import (D, SAME, ACTION_BLOCK, IDENTITY_BLOCK, action_groups, champion_blocks,
-                       col_letter, cols, merge_request, open_sheet)
+                       col_letter, cols, merge_request, open_sheet, sync_notes)
 
 SOURCE = "Action Source"
 
 # (champion, step) -> {column name: value}. The whole point of the new column: these three rows
 # had their action SOURCE smuggled into another column, and can now say it plainly.
+# Keyed by (champion, STEP) — and round 7 renumbered every champion whose kit opens with a passive.
+# These keys HAD to move with it. This is not cosmetic: with the old keys, ("Azir", "1") — which
+# used to be his passive auto-attack — landed on his SUMMON step instead and overwrote it with
+# Auto-Attack. A stale step key does not fail loudly; it silently corrupts a different row.
 RETRO = {
-    # Zed's shadow slashes around ITSELF, so the AOE is centred on the summon's hex.
+    # Zed's shadow slashes around ITSELF, so the AOE is centred on the summon's hex. (was step 4)
     # Aim Target is ABSOLUTE, never relative to the Action Source: writing "Self" here would mean
     # "self as seen by the summon", which is exactly the kind of implicit reading this schema
-    # exists to stamp out. The two columns say different things - Source = who acts, Aim = where
-    # it lands - and for Zed they happen to coincide.
-    ("Zed", "4"): {SOURCE: "Summon", "Aim Target": "Summon",
+    # exists to stamp out. Source = who acts, Aim = where it lands; for Zed they coincide.
+    ("Zed", "3"): {SOURCE: "Summon", "Aim Target": "Summon",
                    "Effect Recipient": "Enemies in area"},
     # Azir's Sand Soldier auto-attacks AZIR's target - here Source and Aim genuinely differ.
     # "Summon Attack" was a fake action invented only to smuggle the source.
-    ("Azir", "1"): {SOURCE: "Summon", "Action": "Auto-Attack"},
-    ("Azir", "3"): {SOURCE: "Summon", "Action": "Auto-Attack"},
+    ("Azir", "0"): {SOURCE: "Summon", "Action": "Auto-Attack"},   # was step 1 (his passive)
+    ("Azir", "2"): {SOURCE: "Summon", "Action": "Auto-Attack"},   # was step 3
 }
 
 # (champion, Effect Category, Effect Detail) -> {column: value}. Keyed on the effect rather than
@@ -207,7 +210,11 @@ COLUMN_EXPLAIN_EDITS = {
     # by the LATEST origin pass, which is now tft-add-shadowisles-targon.py. It adds On Enemy Cast,
     # On Spear Removal, Farthest and 'Nearest enemy to the healed ally'. Leaving a copy here would
     # mean two scripts writing the same cell - the bug that has bitten twice.
-    # was a known-gap warning; the gap is now closed, so the note describes the column instead
+}
+
+# Note ROWS live in the Design Notes tab now. Leaving this in COLUMN_EXPLAIN_EDITS made
+# the "row not found" branch INSERT it back into Column Explain on every run.
+NOTE_EDITS = {
     "Note - Action Source": {
         1: "CLOSED (was a known gap): the schema now records who performs an action.",
         2: "Before the Action Source column, the source had to be smuggled: Zed's Shadow into Aim "
@@ -378,11 +385,6 @@ def fix_reference_tabs(sh):
     if edits:
         ws.batch_update(edits, value_input_option="RAW")
 
-    seen = {r[0].strip() for r in vals if r}
-    notes = [n for n in COLUMN_EXPLAIN_NOTES if n[0] not in seen]
-    if notes:
-        ws.append_rows(notes, value_input_option="RAW")
-    print(f"Column Explain: {len(edits)} cells updated, {len(notes)} note rows appended")
 
 
 def main():
@@ -393,6 +395,7 @@ def main():
     fix_hero(sh, ws)
     fix_reference_tabs(sh)
     print("\nAction Types is owned by tft-apply-comments.py — run it to retire 'Summon Attack'.")
+    sync_notes(sh, COLUMN_EXPLAIN_NOTES, NOTE_EDITS)
 
 
 if __name__ == "__main__":
