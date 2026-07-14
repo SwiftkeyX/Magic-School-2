@@ -15,6 +15,8 @@ Source of every number: tft-set9 -> Champions -> Skill Description.
 
 import gspread
 
+from tft_sheet import sync_notes
+
 SKILL_KEY = "1X5glHjVcgv3yYG4Q2SyV9YJS3sv_wH5XAg3RLOHnUa4"
 
 D = "—"  # em-dash: the sheet's "not applicable" marker
@@ -193,19 +195,6 @@ CHAMPIONS = [
     ),
 ]
 
-ACTION_TYPES = [
-    ["Burst Projectile", "Area", "Not specify",
-     "Projectile flies at the aim target and DETONATES on impact; the effect hits everyone in an "
-     "X-hex circle centred on the IMPACT hex, not on the caster. (Karma's energy burst)"],
-    ["Grab & Slam", "Flank-Pair", "Once",
-     "Self grabs one enemy from EACH side and slams them together; the effect applies only to the "
-     "grabbed enemies. If only one side is occupied, only one is grabbed - and the effect is "
-     "amplified. (Sett)"],
-    ["Summon Shadow", "None", "Not specify",
-     "Self spawns a clone at a target hex. The clone becomes a SECOND action source for the "
-     "following step - its AOE is centred on the clone, not on Self. (Zed)"],
-]
-
 EFFECT_TYPES = [
     ["Buff", "Armor", "Increase the recipient's Armor (Defense)."],
     ["Buff", "MR", "Increase the recipient's Magic Resist."],
@@ -217,7 +206,13 @@ EFFECT_TYPES = [
     ["Buff", "Mana Regen", "Recipient gains Mana per second."],
     ["Debuff", "Mana Reave",
      "Increase the recipient's max Mana until its next cast - delays its next ability."],
-    ["Movement", "(summon)",
+    # `Summon` is its own Effect Category. It was originally written as `Movement` here, and
+    # tft-apply-comments.py later renamed it (a summon is not a repositioning). This row is keyed on
+    # (Category, Detail), so while it still said "Movement" the key never matched the renamed row —
+    # it appended a fresh duplicate on EVERY run, which apply-comments then renamed to Summon,
+    # growing the tab by one row for ever. A declaration must state CURRENT truth, not the truth it
+    # was written under.
+    ["Summon", "(summon)",
      "Spawns a clone/summon that acts as a SECOND action source for the following step."],
 ]
 
@@ -232,24 +227,7 @@ COLLISION_TYPES = [
      "occupied, only that one is grabbed - and the effect is amplified by 50%."],
 ]
 
-# Column Explain: (row label to find, column index to rewrite, new text)
-COLUMN_EXPLAIN_EDITS = [
-    ("Trigger (When)", 2,
-     "e.g. On Cast, While Channeling, After Cast, After Leap, On Kill, On Death, Game Start, "
-     "On Attack, On 3rd Attack, On 2nd Cast, On 3rd Cast, On Bonus-HP Expire, On Shield Expire, "
-     "When Transformed, After Summon, After Whirlwind, After Slash, After Shielding Allies."),
-    ("Condition (Only if)", 2,
-     "Lvl 1-5 / Lvl 6-8 / Lvl 9+, If Target Wounded, If Already Transformed, If Ally Hit, "
-     "If Ionia Active, Every 2/2/0 casts. (Trigger = when; Condition = only-if.)"),
-    ("Aim Target", 2,
-     "e.g. Current / Farthest (within N hex) / Clustered / Self / Shadow / Lowest-HP Allies / "
-     "Adjacent (both sides)."),
-    ("Effect Recipient", 2,
-     "Aimed enemy / Enemies in area / Enemies in path / Allies in path / Self / Grabbed enemies / "
-     "2 lowest-HP allies / Enemies adjacent to Shadow."),
-]
-
-COLUMN_EXPLAIN_NOTES = [
+NOTES = [
     ["Note - Ionia Bonus",
      "Each Ionia unit's unique per-unit bonus is modelled as a skill step.",
      "Encoded as Passive / Game Start / Condition = If Ionia Active, Action = Cast, Recipient = "
@@ -342,8 +320,19 @@ def main():
 
 
 def write_reference_tabs(sh):
-    for tab, new_rows, key_cols in [("Action Types", ACTION_TYPES, 1),
-                                    ("Effect Types", EFFECT_TYPES, 2),
+    # This script only owns the reference ROWS the Ionia champions introduced. It used to own more,
+    # and both of those claims went stale without anyone noticing, because the FIRST of them threw
+    # and hid the second:
+    #
+    #   - `Action Types` was DELETED in round 6 (folded into `Action Model`, owned by
+    #     tft-action-model.py). Writing to it raised WorksheetNotFound on every run.
+    #   - the `Column Explain` VALUE LISTS (Trigger/Condition/Aim/Recipient) are owned by the
+    #     LATEST origin pass — tft-add-shadowisles-targon.py. This script listing them too was two
+    #     scripts writing one cell, which overwrite each other for ever.
+    #   - the NOTES moved to the `Design Notes` tab (round 6). Appending them to `Column Explain`
+    #     meant the "already present?" check could never be satisfied, so they re-appended on
+    #     every run.
+    for tab, new_rows, key_cols in [("Effect Types", EFFECT_TYPES, 2),
                                     ("Collision Types", COLLISION_TYPES, 1)]:
         ws = sh.worksheet(tab)
         vals = ws.get_all_values()
@@ -364,23 +353,7 @@ def write_reference_tabs(sh):
             ws.append_rows(pending, value_input_option="RAW")
         print(f"{tab}: added {len(pending)} rows after row {cut}")
 
-    ce = sh.worksheet("Column Explain")
-    vals = ce.get_all_values()
-    updates = []
-    for label, col, text in COLUMN_EXPLAIN_EDITS:
-        for i, row in enumerate(vals):
-            if row and row[0].strip() == label:
-                updates.append({"range": f"{col_letter(col)}{i + 1}", "values": [[text]]})
-                break
-        else:
-            raise SystemExit(f"Column Explain: row '{label}' not found")
-    ce.batch_update(updates, value_input_option="RAW")
-
-    seen = {r[0].strip() for r in vals if r}
-    notes = [n for n in COLUMN_EXPLAIN_NOTES if n[0] not in seen]
-    if notes:
-        ce.append_rows(notes, value_input_option="RAW")
-    print(f"Column Explain: {len(updates)} cells rewritten, {len(notes)} note rows appended")
+    sync_notes(sh, NOTES)
 
 
 if __name__ == "__main__":
