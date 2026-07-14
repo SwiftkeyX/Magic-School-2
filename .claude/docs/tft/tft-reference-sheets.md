@@ -9,4 +9,5 @@ These are the **canonical sources** whenever a design doc or note refers to "the
 | `tft-set9` | Set 9 heroes / traits data | https://docs.google.com/spreadsheets/d/1xj6em5XlvIN1gWHTKOPDsssmkgnS3jIsaLnAMjYyPUA/edit?gid=1947605367#gid=1947605367 |
 | `tft-set9-skill` | Set 9 hero skill data | https://docs.google.com/spreadsheets/d/1X5glHjVcgv3yYG4Q2SyV9YJS3sv_wH5XAg3RLOHnUa4/edit?usp=sharing |
 | `tft-set10` | Set 10 heroes / traits data | https://docs.google.com/spreadsheets/d/1Eutkil9U8RJ4Lqo3l6wk9pbUeVVH80M4JmcRyMEqa2E/edit?usp=sharing |
+| `tft-set10-skill` | Set 10 hero skill data — *currently empty (one blank tab)* | https://docs.google.com/spreadsheets/d/1ryfD6_rTZzg2dyQYun2qdhZNN24GpVziksmA7Ty0f1M/edit?usp=sharing |
 | `tft-set11` | Set 11 heroes / traits data | https://docs.google.com/spreadsheets/d/1BCFZRFebGd2O41ZvbJcNZ7LdVBWH3ssBliTQGMVN3cI/edit?usp=sharing |
