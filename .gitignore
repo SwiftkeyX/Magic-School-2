@@ -50,3 +50,7 @@ Thumbs.db
 google-service-credential.json
 *credential*.json
 *-credentials.json
+
+# Python bytecode from .claude/scripts/
+__pycache__/
+*.pyc
