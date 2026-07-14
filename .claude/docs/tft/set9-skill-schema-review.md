@@ -434,3 +434,101 @@ All 20 moved to a new **`Design Notes`** tab. `Column Explain` is back to one ro
 ### L.5 Kalista's condition was redundant
 
 Lethal is the *only* thing that pulls a spear, so `Trigger = On Spears Lethal` says it and `Condition = If Lethal` said it twice. Condition collapsed to an em-dash; `If Lethal` removed from the value list.
+
+---
+
+## M. Rounds 7–9 — what a *Step* actually is
+
+Three rounds that all answer one question, because the user kept asking it from different angles: **what is a Step?** The answer the sheet now gives:
+
+> **A Step is a MOMENT in the cast. Each ROW is one branch of it: condition → action → effect.**
+
+Everything in §M falls out of that sentence.
+
+### M.1 Round 7 — a passive is not part of the cast
+
+*"Isn't it weird to have Passive as Step 1? Passive should be Step 0."* If `Step` is the order of events **within one cast**, then a passive is not in that sequence at all. **15 champions opened with a passive at Step 1; 19 renumbered in total.**
+
+`Count`/`Spread` also became **per-effect** here. Karma's 1st cast fires ONE burst and her 3rd fires THREE — from the same action. A merged `Count` cannot say that, and *that limitation was the only reason those had ever been two steps.* A schema limit had been mistaken for a design fact.
+
+⚠ **Renumbering is the most dangerous edit in this sheet.** Steps are *referenced* by other cells (`Step 2 Aim target`), so renumbering one means rewriting whatever points at it. Round 7 broke three things at once by not doing so — a stale `("Azir","1")` key overwrote his Summon, Irelia's *"insert if no step 4"* guard fired twice and duplicated a row, and Yasuo's three re-aims pointed at the wrong step. **A step number is a POSITION, not an IDENTITY. Never key on one, never guard on one.**
+
+### M.2 Round 8 — the action block dissolves
+
+*"Same step, but with if-else condition"*, on five champions. They were right, and it costs more than Karma did. Karma's two branches fired the **same** action; these five fire **different** ones:
+
+| Champion | branch A | branch B |
+|---|---|---|
+| Swain | not transformed → `Cast` (gain HP) | already transformed → `Circle AOE` burst |
+| Azir | fewer than 3 Soldiers → `Summon` | already 3 → they all `Auto-Attack` |
+| K'Sante | target at edge → knock off | not at edge → `Leap` after it |
+| Kayle | Lvl 1–5 → `Auto-Attack` | Lvl 6+ → `Pierce Projectile` |
+| Ahri | every cast → `Circle AOE` | 2nd cast → **also** a `Pierce Projectile` |
+
+So `Action`, `Collision`, `Aim Target` and `Trigger` cannot be properties of the **step** any more. The merged action block is gone: only `Step` and `Skill Type` span a step, and **everything else merges by VALUE RUN** — wherever consecutive rows happen to agree.
+
+**A merge is now a *display of* the data, not a *claim about* it.** That is the only form of merging that survives a schema where any column may differ per row.
+
+**Not all branches are exclusive.** Ahri's wave is *additional* to her Circle AOE, not instead of it, so her first branch keeps an em-dash rather than a false `If not 2nd Cast`. Encoding an either/or where the game has an *and* would be a lie that reads as rigour.
+
+### M.3 Round 9 — the test that falls out of it
+
+If a Step is a moment, then **two steps triggered by the same event are one step.** Applying that test found four more champions whose Step 2 fired on `On Cast` — the same instant as Step 1:
+
+| Champion | Step 1 | Step 2 (collapsed up) |
+|---|---|---|
+| Shen | shields himself | shields the lowest-HP allies |
+| Orianna | shields an ally | empowers her own next attack |
+| Jayce | buffs his attack speed | buffs adjacent allies' AP |
+| Viego | fires his beam | stacks his on-hit damage |
+
+A *consequence* still earns its own step — Jayce's burst is `After Cast`, so it survives as Step 2.
+
+### M.4 Karma's actions were wrong, and the source text is what misled me
+
+*"1st, 2nd cast: do circle AOE. 3rd cast: do Pierce Projectile. The description is misleading, but believe me on this one."*
+
+Round 7 had collapsed Karma on the explicit claim that her branches were *"the same action, same amount, same AOE — they only ever differed by Count and Spread."* **The first half of that was false.** The collapse still stands, but for a better reason than the one given: round 8 later established that the rows of one step may run *different actions*, which is exactly what her correction describes.
+
+Collision and shape came from `Action Model`, not from guesswork: `Pierce Projectile` is Pierce-All / Line, so her 3rd cast hits `Enemies in path` and its AOE is an em-dash — **a line has no circle radius.**
+
+### M.5 Maokai's heal was never a passive
+
+He had it as a separate always-on step (`0.2`) gated by `If Empowered`. That step **claimed he heals on attack whether or not he ever cast** — which is false — and the condition existed only to take the claim back. *A condition that exists to undo its own Step number is a workaround for a missing word, not a design.*
+
+The word now exists: a new Effect Detail, **`Empowered Attack (Maokai)`** — the next auto-attack also heals. This preserves the split settled in round 2: Orianna and Maokai get ONE empowered attack, spent on the next hit; Viego's stacks forever (`On-Hit Damage`). Maokai's now differs in **what it does**, not in how long it lasts.
+
+### M.6 Swain's burn was never a step either
+
+Same shape as Maokai. It ticks for as long as he is transformed, whether or not he casts again — so it is `Step 0`, `Passive`. Its `Condition` stays an em-dash because the Trigger `When Transformed` already says it (the §L.5 Kalista rule: the sheet does not say a thing twice). **Flagged to the user in case they want the Condition column filled literally — which would mean bringing Kalista's back too.**
+
+---
+
+## N. The tooling bugs — three cell-fights, all the same shape
+
+Every one of these was caught by the same test, and by nothing else:
+
+> **Run every script TWICE. The second run must report ZERO changes.**
+
+### N.1 `tft-add-ionia.py` was crashing on every single run
+
+It wrote to the `Action Types` tab that **round 6 deleted**, so it raised `WorksheetNotFound` every time. **The crash was load-bearing** — it aborted the function before two further staleness bugs could fire, which is why nobody had seen them:
+
+- It rewrote the `Column Explain` value lists that `tft-add-shadowisles-targon.py` owns. Two scripts, one cell, overwriting each other for ever.
+- Its `Effect Types` row was keyed `("Movement","(summon)")`, but `tft-apply-comments.py` had renamed that category to `Summon` (a summon is not a repositioning). **The key never matched, so the row was re-appended on every run** and then renamed — the tab grew 37 → 38 → 39 before it was caught.
+
+**Lesson: a declared block must state CURRENT truth.** A declaration written under one version of the schema silently rots when another script changes what it declares.
+
+### N.2 The filled-value trick is fatal on `Step`
+
+Round 8 established a rule for converging rewrites: *write the FILLED value into a continuation row, and let the re-merge absorb the duplicate.* That is right for every column **except `Step`** — because `Step` is what `remerge()` reads to find the step **boundaries**.
+
+Writing `"1"` into a continuation row instead of a blank made that row look like a **new step start**. The re-merge then refused to merge it away, round 7's renumber saw *two steps both numbered 1*, and renumbered everything below them — which round 9 undid on its next run. **A stable, infinite fight**, invisible to any check except running twice.
+
+`Step` and `Skill Type` are now compared **raw** and written **literally**. A blank continuation row must genuinely *be* blank.
+
+### N.3 A reply key is a SUBSTRING, and a short one grabs the wrong comment
+
+Round 9's match key `"same step"` also matched Soraka's *"This are the same heal, so it should be combine into same step"* — a comment answered back in round 5. It collected a reply about Shen and Jayce that had nothing to do with it. The reply was deleted by hand and a guard added.
+
+**Match keys are substrings of the comment's own text, and a mismatch fails SILENTLY.** Longer keys must be listed first, and any already-answered comment whose text contains a shorter key must be listed *ahead* of it with its existing reply body, so it matches there and is skipped.
