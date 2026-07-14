@@ -1,6 +1,6 @@
-"""Write `.claude/scripts/data/*.csv` to the `tft-set9-skill` sheet. THE one writer.
+"""Write `data/*.csv` to the `tft-set9-skill` sheet. THE one writer.
 
-Run from repo-root cwd:  python .claude/scripts/tft-sync.py
+Run from repo-root cwd:  python .claude/scripts/tft/sync.py
 
 This replaces 17 scripts and ~5,000 lines. The CSVs under `data/` are the source of truth; this
 script makes the sheet match them, derives every merge from the values, and then checks the sheet's
@@ -34,9 +34,9 @@ THE THREE RULES THIS SCRIPT IS BUILT AROUND
 import csv
 import pathlib
 
-from tft_sheet import D, HERO_COLUMNS, col_letter, cols, open_sheet, remerge_hero
+from sheet import D, HERO_COLUMNS, col_letter, cols, open_sheet, remerge_hero
 
-DATA = pathlib.Path(".claude/scripts/data")
+DATA = pathlib.Path(".claude/scripts/tft/data")
 
 HERO = "Hero"
 # Reference tabs are plain tables - synced positionally. Only `Hero` has a logical column schema.

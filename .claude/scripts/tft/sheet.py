@@ -1,12 +1,13 @@
-"""Shared helpers for the tft-set9-skill sheet scripts.
+"""Shared helpers for the tft-set9-skill sheet. Imported by export.py and sync.py.
 
 Columns are resolved BY HEADER NAME, never by hard-coded index. The Hero tab has had columns
-inserted into the middle of it (Action Source, before Action), and every script that addressed
-cells as `r[14]` silently started writing into the wrong column the moment that happened. Look
-the index up from row 1 instead and the whole class of bug goes away.
+inserted into the middle of it (Action Source, before Action), and the user renames headers as they
+go (`Trigger` is really `Trigger (When)` in the sheet). Every script that addressed cells as `r[14]`
+silently started writing into the wrong column the moment that happened. Look the index up from
+row 1 instead and the whole class of bug goes away.
 
-Imported by tft-add-*.py and tft-apply-comments.py, which run from repo-root cwd:
-    python .claude/scripts/<name>.py
+Everything here runs from repo-root cwd:
+    python .claude/scripts/tft/sync.py
 """
 
 import gspread

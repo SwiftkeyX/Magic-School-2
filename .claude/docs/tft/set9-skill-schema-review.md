@@ -241,7 +241,7 @@ The user reviewed the trial and signed off: *"I am satisfied with the Hero (temp
 
 **Renamed, not copied back.** Copying the template's values into the old tab would have preserved its gid, but it would also have meant rebuilding by hand the ~570 vertical merges (champion identity blocks, per-action blocks) that make the tab readable — and a merge rebuilt by hand is exactly the kind of thing that goes wrong quietly. The rename keeps the sheet the user actually reviewed, merges and all. The cost is the dead gid, noted at the top of this doc.
 
-`Count`/`Spread` are now first-class `Hero` columns in `HERO_COLUMNS` and `ACTION_BLOCK` (`tft_sheet.py`), so every script resolves them like any other column. Because `append_champions()` fills rows **by column name** and knows nothing about them, a newly-added region would otherwise land with both cells blank — and blank reads as *"unknown"*, not *"fires once"*. `backfill_hero()` closes that: it fills only the blanks with `COUNT_DEFAULT` / `SPREAD_DEFAULT`, so a region script that sets them itself is never overwritten, and one that forgets cannot leave a hole.
+`Count`/`Spread` are now first-class `Hero` columns in `HERO_COLUMNS` and `ACTION_BLOCK` (`tft/sheet.py`), so every script resolves them like any other column. Because `append_champions()` fills rows **by column name** and knows nothing about them, a newly-added region would otherwise land with both cells blank — and blank reads as *"unknown"*, not *"fires once"*. `backfill_hero()` closes that: it fills only the blanks with `COUNT_DEFAULT` / `SPREAD_DEFAULT`, so a region script that sets them itself is never overwritten, and one that forgets cannot leave a hole.
 
 ### I.2 `Spread` earned its own tab
 
@@ -296,7 +296,7 @@ The first ruling here was that Gwen's cone is a real collider. **That was wrong*
 
 The `Column Explain` value lists were split across two scripts — `tft-add-freljord-piltover.py` held Trigger/Aim/Recipient, `tft-add-shurima.py` held Condition. They did not yet fight (different keys), but this pass adds values to **all four**, and a third writer would have restarted the exact overwrite-each-other bug that bit twice. All four now have a single owner: the latest origin pass.
 
-All share `.claude/scripts/tft_sheet.py`, which resolves **columns by header name, never by index**. That is not cosmetic: every script addressed cells as `r[14]`, and inserting `Action Source` mid-table would have silently redirected every one of those writes into the wrong column. The header lookup kills the whole class of bug.
+All share `.claude/scripts/tft/sheet.py`, which resolves **columns by header name, never by index**. That is not cosmetic: every script addressed cells as `r[14]`, and inserting `Action Source` mid-table would have silently redirected every one of those writes into the wrong column. The header lookup kills the whole class of bug.
 
 **Idempotence is the acceptance test.** Run all three scripts twice; the second pass must report **zero changes**. That is what caught both cell-fighting bugs.
 
@@ -394,7 +394,7 @@ Recorded as `Note - Count vs Amount`.
 
 **`Condition` is now PER-EFFECT, not per-action.** *"This are the same heal, so it should be combined into same step."* Soraka's base heal and her below-50%-HP bonus heal are one cast on one ally — but `Condition` sat in the **merged action block**, so it could only gate a *whole* action. That is the only reason the bonus heal had been faked as a separate step: a workaround for a missing capability, not a modelling decision.
 
-`Condition` is removed from `ACTION_BLOCK` (`tft_sheet.py`) and is no longer merged. A condition gating a whole action simply repeats down its rows; one gating a single effect sits on that row alone. Recorded as `Note - Condition is PER-EFFECT`.
+`Condition` is removed from `ACTION_BLOCK` (`tft/sheet.py`) and is no longer merged. A condition gating a whole action simply repeats down its rows; one gating a single effect sits on that row alone. Recorded as `Note - Condition is PER-EFFECT`.
 
 ### L.7 `Action Model` promoted; the two old tabs deleted
 
@@ -429,7 +429,7 @@ Renamed to **`Each to its own target`**: a where-answer, so it belongs in the fa
 
 All 20 moved to a new **`Design Notes`** tab. `Column Explain` is back to one row per column.
 
-**This broke idempotence, which is the point of running twice.** Seven scripts appended notes to `Column Explain`; once the notes were gone, their "already present?" check could never be satisfied, so they re-added them on every run. Fixed by routing every script through one `sync_notes()` helper (`tft_sheet.py`) pointed at the new tab — one writer, one place.
+**This broke idempotence, which is the point of running twice.** Seven scripts appended notes to `Column Explain`; once the notes were gone, their "already present?" check could never be satisfied, so they re-added them on every run. Fixed by routing every script through one `sync_notes()` helper (`tft/sheet.py`) pointed at the new tab — one writer, one place.
 
 ### L.5 Kalista's condition was redundant
 
@@ -556,13 +556,18 @@ The suite had reached **17 scripts, 5,257 lines, and ~13 minutes** per acceptanc
 The sheet's state was verified correct at round 9, so **the sheet became the source of truth, and then the truth moved into the repo:**
 
 ```
-.claude/scripts/
-  tft_sheet.py   helpers: cols(), remerge_hero(), post_replies()
-  tft-export.py  sheet   -> data/*.csv    (snapshot)
-  tft-sync.py    data/*.csv -> sheet      (THE one writer) + validate
-  data/*.csv     the source of truth, one file per tab
-  archive/       the 17 retired scripts — kept for history, never run
+.claude/scripts/tft/
+  README.md    the entry point: "edit a CSV, run sync.py"
+  sheet.py     helpers: cols(), remerge_hero(), post_replies()
+  export.py    sheet -> data/*.csv        (snapshot)
+  sync.py      data/*.csv -> sheet        (THE one writer) + validate
+  data/*.csv   the source of truth, one file per tab
+  archive/     the 17 retired scripts — kept for history, never run
 ```
+
+It is a self-contained folder on purpose. `data/` and `archive/` are generic names, and
+`.claude/scripts/` is shared with other work — namespacing them under `tft/` is what stops a future
+collision.
 
 **5,007 lines retired. 523 lines live. ~13 minutes → 68 seconds.**
 
