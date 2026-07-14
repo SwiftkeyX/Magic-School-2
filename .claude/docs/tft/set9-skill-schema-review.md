@@ -402,6 +402,35 @@ Recorded as `Note - Count vs Amount`.
 
 The delete is guarded: `promote()` refuses to drop the old tabs unless `Action Model` is present and fully populated.
 
+### L.8 Round 6 — `Scaling` was the last free-text field, and it leaked
+
+**35 rows carry a `Scaling` value and 27 are distinct.** That ratio is the tell: it was prose, not a vocabulary. Sorting the values showed the column fusing **four** different things:
+
+| What it actually was | Example | Where it belongs |
+|---|---|---|
+| a real **modifier** | `stacking`, `decaying 20/13/0%/s`, `per Chakram equipped` | this is Scaling |
+| a **duration** | `rest of combat` (Sona), `until next cast` (Ahri) | `Duration` |
+| **multiplicity** | `×8 arrows in a cone` (Ashe) | `Count` / `Spread` |
+| prose that isn't scaling | `redirected onto Taric himself` | nowhere — `Effect Types` already defines it |
+
+Fixed the way this sheet always fixes it: **split the column.** `Scaling Type` is a 10-value vocabulary (new `Scaling Types` tab) and `Scaling` keeps the specifics — the same `Effect Category` / `Effect Detail` idiom sitting two columns to its left.
+
+⚠ **The Ashe row is the finding.** `×8 arrows in a cone` is exactly the multiplicity `Count`/`Spread` was built to eliminate — and it **survived that cleanup**, because the fix only rewrote each action's *first* row and never its continuation rows. It was the last leak in the sheet, and it sat there undetected for three rounds.
+
+### L.9 `Re-picked per instance` was a bad spread value
+
+*"The rest is spread but this one isn't."* Correct. The other four spreads answer **where** the instances go (a geometry). That one answered **when** the aim is decided — which is why no name for it was ever going to sit right in that column.
+
+Renamed to **`Each to its own target`**: a where-answer, so it belongs in the family. The re-picking is now the point of its Clarify text, not of its name. The underlying mid-action gap (§L.1) is unchanged.
+
+### L.10 `Column Explain` had become half decision-log
+
+20 of its 41 rows were Notes. A **column legend** ("what does this cell mean") and a **decision log** ("why is the schema this shape, what did we rule out") are different documents, and mixing them buries the legend.
+
+All 20 moved to a new **`Design Notes`** tab. `Column Explain` is back to one row per column.
+
+**This broke idempotence, which is the point of running twice.** Seven scripts appended notes to `Column Explain`; once the notes were gone, their "already present?" check could never be satisfied, so they re-added them on every run. Fixed by routing every script through one `sync_notes()` helper (`tft_sheet.py`) pointed at the new tab — one writer, one place.
+
 ### L.5 Kalista's condition was redundant
 
 Lethal is the *only* thing that pulls a spear, so `Trigger = On Spears Lethal` says it and `Condition = If Lethal` said it twice. Condition collapsed to an em-dash; `If Lethal` removed from the value list.
