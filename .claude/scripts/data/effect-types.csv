@@ -1,0 +1,38 @@
+Effect Category,Effect Detail,Meaning
+Attack,Damage,Deal damage to the recipient.
+Status,Stun,Recipient cannot act for the duration.
+Status,Wound,Reduce the healing the recipient receives.
+Status,Slow,Reduce the recipient's speed. (taxonomy — not used by a Set 9 unit here)
+Status,Silence,Prevent the recipient from casting. (taxonomy — not used by a Set 9 unit here)
+Buff,Attack Speed,Increase the recipient's attack speed.
+Buff,Bonus HP,Grant bonus / max health.
+Buff,Shield,Grant a temporary damage-absorbing shield.
+Buff,Heal,Restore health.
+Buff,Damage Reduction,Reduce incoming damage taken.
+Debuff,DEF,Shred the recipient's Defense (armor). TFT calls this 'Sunder' (Vi) or 'Shred' when it is Magic Resist - see Debuff -> MR.
+Debuff,MR,Shred the recipient's Magic Resist.
+Movement,(reposition),A movement / setup step with no direct combat effect.
+Buff,Armor,Increase the recipient's Armor (Defense).
+Buff,MR,Increase the recipient's Magic Resist.
+Buff,AD,Increase the recipient's Attack Damage.
+Buff,AP,Increase the recipient's Ability Power.
+Buff,Crit Chance,Increase the recipient's Critical Strike Chance.
+Buff,Crit Damage,Increase the recipient's Critical Strike Damage.
+Buff,Omnivamp,Recipient heals for a percentage of the damage it deals.
+Buff,Mana Regen,Recipient gains Mana per second.
+Debuff,Mana Reave,Increase the recipient's max Mana until its next cast - delays its next ability.
+Summon,(summon),"Spawns a clone/summon that acts as a SECOND action source for the following step - its own action is centred on the clone, not on Self."
+Movement,(setup / daggers),A setup step (Katarina throwing her daggers) with no direct combat effect of its own; the damage comes from the step that follows.
+Debuff,Max HP,Reduce the recipient's maximum Health.
+Debuff,AD,Reduce the recipient's Attack Damage.
+Status,Knock Off,"Recipient is knocked clean off the battlefield - removed from combat entirely. An execute, not a Stun (K'Sante, when the target has no room left to be pushed)."
+Status,Chill,Reduce the recipient's Attack Speed by 30%.
+Attack,True Damage,Damage that ignores both Armor and Magic Resist.
+Debuff,Damage Amplification,Recipient takes more damage from ALL sources for the duration (Lissandra).
+Buff,Empowered Attack,"The recipient's NEXT attack deals bonus damage - ONE attack, then the buff is spent. If every attack is buffed for a duration, that is On-Hit Damage, not this (Orianna, Maokai)."
+Buff,Mana,"Instantly grants the recipient flat Mana. Distinct from Mana Regen, which grants it per second."
+Status,Impale,"A spear left standing in the target. It does nothing until removed - and the ONLY thing that removes it is lethality: the spears stack until their combined true damage would kill the target, and Kalista rips them all out at that moment. There is no other way for a spear to come out."
+Buff,Damage Redirect,"A share of the damage the recipient takes is dealt to the CASTER instead. It is not a shield on the recipient and not damage prevention - the damage still happens, it just happens to someone else. Taric takes it himself; his own Shield is incidental, merely what it lands on."
+Buff,Chakram,A stack resource held by the caster. It is not a stat and does nothing on its own - other effects scale off how many are equipped (Aphelios).
+Buff,On-Hit Damage,"EVERY attack by the recipient deals bonus damage, for as long as the buff lasts. Distinct from Empowered Attack, which is spent on the NEXT attack and then gone. Viego's stacks and never expires (Duration = Permanent); Aphelios' lasts 7s."
+Buff,Empowered Attack (Maokai),"The recipient's NEXT auto-attack also HEALS the recipient for the Amount. One attack, then spent - the same lifetime as Empowered Attack, but it heals instead of dealing bonus damage. Maokai only. Distinct from On-Hit Damage (Viego), which stacks and never falls off."

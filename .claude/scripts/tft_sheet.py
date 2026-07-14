@@ -125,58 +125,77 @@ RUN_COLUMNS = ["Trigger", "Condition", "Action Source", "Action", "Count", "Spre
                "Aim Target"]
 
 
-def remerge(sh):
-    """Merge the Hero tab by VALUE RUNS, not by schema. The ONE place merges are laid out.
+def remerge_hero(sh):
+    """Lay out EVERY merge on the Hero tab. The ONE place merges are computed.
 
-    Step/Skill Type span a whole step. Every other column merges only where CONSECUTIVE ROWS AGREE,
-    because any of them may differ between the branches of one step (Swain casts if untransformed
-    and bursts if not).
+    MERGES ARE DERIVED FROM THE VALUES, never stored. That is what lets the sheet's data live in a
+    plain CSV: re-running this reconstructs the layout exactly. Three layers:
 
-    This lives here rather than in one round script because TWO scripts now change Step cells, and
-    two implementations of a merge layout is a merge FIGHT waiting to happen: one would unmerge what
-    the other merged, on every run, for ever. The algorithm is deterministic on the data, so a single
-    shared copy means whoever runs last computes the same layout.
+      1. IDENTITY BLOCK  - Champion..Skill Description, merged down every row a champion owns.
+      2. STEP BLOCK      - Step/Skill Type, spanning a whole step.
+      3. VALUE RUNS      - Trigger..Aim Target, merged wherever CONSECUTIVE ROWS AGREE, because any
+                           of them may differ between the branches of one step (Swain casts if
+                           untransformed and bursts if not).
+
+    A merge is therefore a DISPLAY of the data, not a CLAIM about it - the only form of merging that
+    survives a schema where any column may differ per row.
+
+    This is one function, in one file, on purpose. Two implementations of a merge layout is a merge
+    FIGHT waiting to happen: one unmerges what the other merged, on every run, for ever.
     """
     ws = sh.worksheet("Hero")
     vals = ws.get_all_values()
     c = cols(vals[0])
-
-    starts = [i for i, r in enumerate(vals) if i > 0 and r[c["Step"]].strip()]
-    groups = list(zip(starts, starts[1:] + [len(vals)]))
-
-    reqs = [{"unmergeCells": {"range": {
-        "sheetId": ws.id, "startRowIndex": 1, "endRowIndex": len(vals),
-        "startColumnIndex": c["Step"], "endColumnIndex": c["Aim Target"] + 1}}}]
+    last_col = c["Aim Target"]
 
     def merge(a, b, col):
         return {"mergeCells": {"range": {
             "sheetId": ws.id, "startRowIndex": a, "endRowIndex": b,
             "startColumnIndex": col, "endColumnIndex": col + 1}, "mergeType": "MERGE_COLUMNS"}}
 
-    for a, b in groups:
+    def spans(col):
+        """(start, end) row pairs, split wherever `col` holds a value. A merged cell reads back ""
+        on every row but its first, so a non-blank cell IS the start of a new block."""
+        starts = [i for i, r in enumerate(vals) if i > 0 and len(r) > col and r[col].strip()]
+        return list(zip(starts, starts[1:] + [len(vals)]))
+
+    # Clear the whole region first, or a stale merge silently swallows the cells under it.
+    reqs = [{"unmergeCells": {"range": {
+        "sheetId": ws.id, "startRowIndex": 1, "endRowIndex": len(vals),
+        "startColumnIndex": 0, "endColumnIndex": last_col + 1}}}]
+
+    champions = spans(c["Champion"])
+    for a, b in champions:
+        if b - a > 1:
+            reqs += [merge(a, b, c[n]) for n in IDENTITY_BLOCK]
+
+    steps = spans(c["Step"])
+    for a, b in steps:
         if b - a > 1:
             reqs += [merge(a, b, c[n]) for n in STEP_BLOCK]
         for n in RUN_COLUMNS:
-            # Compare EFFECTIVE values: a merged cell reads back "" on every row but its first, so a
-            # blank continuation row means "same as the row above" and must merge WITH it. Comparing
-            # the raw cells would see "" != "Knock Back" and split them — silently destroying the
-            # merge on every multi-effect action in the sheet.
-            eff, last = [], ""
+            # Compare EFFECTIVE values: a blank continuation row means "same as the row above" and
+            # must merge WITH it. Comparing the raw cells would see "" != "Knock Back" and split
+            # them - silently destroying the merge on every multi-effect action in the sheet.
+            eff, prev = [], ""
             for i in range(a, b):
-                v = vals[i][c[n]]
+                v = vals[i][c[n]] if len(vals[i]) > c[n] else ""
                 if v.strip():
-                    last = v
-                eff.append(last)
-            run_start = 0
+                    prev = v
+                eff.append(prev)
+            run = 0
             for k in range(1, b - a + 1):
-                if k == b - a or eff[k] != eff[run_start]:
-                    if k - run_start > 1:
-                        reqs.append(merge(a + run_start, a + k, c[n]))
-                    run_start = k
+                if k == b - a or eff[k] != eff[run]:
+                    if k - run > 1:
+                        reqs.append(merge(a + run, a + k, c[n]))
+                    run = k
 
     sh.batch_update({"requests": reqs})
-    print(f"Hero: re-merged by value runs across {len(groups)} steps "
-          f"(only Step/Skill Type span a whole step)")
+    print(f"Hero: re-merged — {len(champions)} champion blocks, {len(steps)} steps")
+
+
+# The round scripts import this name. Kept as an alias so they keep working until they are archived.
+remerge = remerge_hero
 
 
 NOTES_TAB = "Design Notes"

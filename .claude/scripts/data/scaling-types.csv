@@ -1,0 +1,15 @@
+Scaling Type,What it means,Examples
+Stacking,"The amount GROWS each time it is applied, and is permanent.","Viego (every attack adds another stack, permanently), Kled, Kalista's spears."
+Decay,The amount SHRINKS over time until it is gone.,Sion's bonus HP decays 20/13/0% per second; Irelia's shield decays.
+Falloff per hit,The amount SHRINKS with each unit it passes through.,"Sona -33% per hit, Jhin -56% per hit. A pierce that is worth less the deeper it goes."
+Per Stack,The amount is MULTIPLIED by a counter the caster is holding.,Aphelios deals bonus damage per Chakram equipped; Kalista's true damage is per spear removed. The counter itself is an Effect (see 'Note - Stacks').
+Per Tick,The amount is applied REPEATEDLY while the action runs.,"Garen per spin, Swain per second. Pairs with Cadence = Over Time."
+Burst,"The accumulated amount lands ALL AT ONCE, at the end.",Swain and Shen. The opposite of Per Tick.
+Conditional Bonus,A bonus that applies ONLY when a condition holds.,"Cassiopeia +30% if Wounded, Sett +50% if only one enemy was grabbed, Ahri +33% if essence stolen. The condition is in the Condition column; the size of the bonus is here."
+Derived,The amount SCALES OFF some OTHER quantity — on top of its own per-star Amount.,"Sejuani increases with max Health, Irelia with the damage her shield absorbed, Samira and Aphelios with AP. NOTE: this does not mean 'not a stat'. The per-star Amount already carries the ordinary AD/AP scaling (e.g. '200/300/450% AP'); Derived is for a SECOND quantity layered on top of it. Samira's flat 10/15/20 shred that also grows with AP is exactly that."
+Per Target Hit,The amount scales with HOW MANY targets were hit.,"Renekton +30% AP per additional enemy, Nasus steals from each enemy hit, Aphelios gains +1 Chakram per enemy hit by the blast."
+Cap,"An upper BOUND on the effect, not a multiplier.",Azir may have at most 3 Sand Soldiers on the board.
+,,
+How to read this tab,,
+"Scaling Type says HOW the amount changes; the Scaling column beside it says by how much. Same split as Effect Category / Effect Detail: a vocabulary, then the specifics.",,
+"If a cell here would say how LONG something lasts, it belongs in Duration. If it would say how MANY instances fire, it belongs in Count / Spread. If it just restates what the effect is, it belongs nowhere - Effect Types already defines that. Scaling had been holding all three, which is why it needed a vocabulary.",,
