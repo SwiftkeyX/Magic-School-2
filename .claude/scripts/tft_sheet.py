@@ -117,6 +117,68 @@ def merge_request(sheet_id, start, end, col):
     }}
 
 
+# Only these two span a whole step. Every other column merges by VALUE RUN — see remerge().
+STEP_BLOCK = ACTION_BLOCK
+
+# The columns that merge wherever consecutive rows happen to agree.
+RUN_COLUMNS = ["Trigger", "Condition", "Action Source", "Action", "Count", "Spread", "Collision",
+               "Aim Target"]
+
+
+def remerge(sh):
+    """Merge the Hero tab by VALUE RUNS, not by schema. The ONE place merges are laid out.
+
+    Step/Skill Type span a whole step. Every other column merges only where CONSECUTIVE ROWS AGREE,
+    because any of them may differ between the branches of one step (Swain casts if untransformed
+    and bursts if not).
+
+    This lives here rather than in one round script because TWO scripts now change Step cells, and
+    two implementations of a merge layout is a merge FIGHT waiting to happen: one would unmerge what
+    the other merged, on every run, for ever. The algorithm is deterministic on the data, so a single
+    shared copy means whoever runs last computes the same layout.
+    """
+    ws = sh.worksheet("Hero")
+    vals = ws.get_all_values()
+    c = cols(vals[0])
+
+    starts = [i for i, r in enumerate(vals) if i > 0 and r[c["Step"]].strip()]
+    groups = list(zip(starts, starts[1:] + [len(vals)]))
+
+    reqs = [{"unmergeCells": {"range": {
+        "sheetId": ws.id, "startRowIndex": 1, "endRowIndex": len(vals),
+        "startColumnIndex": c["Step"], "endColumnIndex": c["Aim Target"] + 1}}}]
+
+    def merge(a, b, col):
+        return {"mergeCells": {"range": {
+            "sheetId": ws.id, "startRowIndex": a, "endRowIndex": b,
+            "startColumnIndex": col, "endColumnIndex": col + 1}, "mergeType": "MERGE_COLUMNS"}}
+
+    for a, b in groups:
+        if b - a > 1:
+            reqs += [merge(a, b, c[n]) for n in STEP_BLOCK]
+        for n in RUN_COLUMNS:
+            # Compare EFFECTIVE values: a merged cell reads back "" on every row but its first, so a
+            # blank continuation row means "same as the row above" and must merge WITH it. Comparing
+            # the raw cells would see "" != "Knock Back" and split them — silently destroying the
+            # merge on every multi-effect action in the sheet.
+            eff, last = [], ""
+            for i in range(a, b):
+                v = vals[i][c[n]]
+                if v.strip():
+                    last = v
+                eff.append(last)
+            run_start = 0
+            for k in range(1, b - a + 1):
+                if k == b - a or eff[k] != eff[run_start]:
+                    if k - run_start > 1:
+                        reqs.append(merge(a + run_start, a + k, c[n]))
+                    run_start = k
+
+    sh.batch_update({"requests": reqs})
+    print(f"Hero: re-merged by value runs across {len(groups)} steps "
+          f"(only Step/Skill Type span a whole step)")
+
+
 NOTES_TAB = "Design Notes"
 
 

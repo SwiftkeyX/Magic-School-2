@@ -42,8 +42,21 @@ from tft_sheet import D, col_letter, cols, open_sheet, post_replies, sync_notes
 # em-dash. NOT Summon: Azir spawns 3 Soldiers, so Summon genuinely counts.
 NO_COUNT_ACTIONS = {"Cast", "Leap"}
 
-# Karma, declared outright. Two steps become one: same action, same amount, same AOE - they only
-# ever differed by Count/Spread, which is exactly what a per-effect Count now expresses.
+# Karma, declared outright. Two steps become one: they are one moment in the cast, split by a
+# condition.
+#
+# ROUND 9 CORRECTED WHAT THIS SCRIPT ORIGINALLY CLAIMED. It said her two branches were "the same
+# action, same amount, same AOE - they only ever differed by Count/Spread". The user: "It should be
+# 1st, 2nd cast: do circle AOE. 3rd cast: do Pierce Projectile. The description is misleading, but
+# believe me on this one."
+#
+# So the branches fire DIFFERENT ACTIONS, and the source text is what misled me. That is exactly
+# the case round 8 later built for (a Step is a MOMENT; its rows may run different actions), so the
+# collapse into one step still stands - only the actions were wrong.
+#
+# Collision/Shape come from `Action Model`, not from guesswork: Circle AOE is Area/Circle, so it
+# keeps an AOE radius and hits "Enemies in area"; Pierce Projectile is Pierce-All/Line, so it hits
+# "Enemies in path" and its AOE is an em-dash - a line has no circle radius.
 KARMA_ROWS = [
     {"Step": "0", "Skill Type": "Passive", "Trigger": "Game Start",
      "Condition": "If Ionia Active", "Action Source": "Self", "Action": "Cast", "Count": D,
@@ -52,21 +65,23 @@ KARMA_ROWS = [
      "Amount": "25", "Scaling Type": D, "Scaling": D, "Cadence": "Once",
      "Duration": "Permanent", "AOE": D, "Cast": D},
     {"Step": "1", "Skill Type": "Active", "Trigger": "On Cast", "Condition": "If not 3rd Cast",
-     "Action Source": "Self", "Action": "Burst Projectile", "Count": "1", "Spread": D,
+     "Action Source": "Self", "Action": "Circle AOE", "Count": "1", "Spread": D,
      "Collision": "Area", "Aim Target": "Current",
      "Effect Recipient": "Enemies in area", "Effect Category": "Attack",
      "Effect Detail": "Damage", "Amount": "200/300/470% AP", "Scaling Type": D, "Scaling": D,
      "Cadence": "Once", "Duration": D, "AOE": "1", "Cast": D},
     {"Step": "", "Skill Type": "", "Trigger": "", "Condition": "If 3rd Cast",
-     "Action Source": "", "Action": "", "Count": "3", "Spread": "Current + Left + Right",
-     "Collision": "", "Aim Target": "",
-     "Effect Recipient": "Enemies in area", "Effect Category": "Attack",
+     "Action Source": "", "Action": "Pierce Projectile", "Count": "3",
+     "Spread": "Current + Left + Right", "Collision": "Pierce-All", "Aim Target": "",
+     "Effect Recipient": "Enemies in path", "Effect Category": "Attack",
      "Effect Detail": "Damage", "Amount": "200/300/470% AP", "Scaling Type": D, "Scaling": D,
-     "Cadence": "Once", "Duration": D, "AOE": "1", "Cast": D},
+     "Cadence": "Once", "Duration": D, "AOE": D, "Cast": D},
 ]
-# merged down Karma's one active step. Count/Spread are NOT here - they differ per row now.
-KARMA_MERGE = ["Step", "Skill Type", "Trigger", "Action Source", "Action", "Collision",
-               "Aim Target"]
+# Merged down Karma's one active step. Action and Collision LEFT this list in round 9: her two
+# branches now fire different actions, so merging those columns would assert a sameness that is no
+# longer there - and round 8's value-run remerge would tear the merge back down on its next run.
+# Only the columns her branches genuinely share stay here.
+KARMA_MERGE = ["Step", "Skill Type", "Trigger", "Action Source", "Aim Target"]
 
 APHELIOS_FIX = {"Action": "Homing Burst", "Collision": "Area"}
 

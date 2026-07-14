@@ -34,12 +34,8 @@ first branch keeps an em-dash condition rather than a false "if not 2nd cast". E
 either/or where the game has an and would be a lie that reads as rigour.
 """
 
-from tft_sheet import D, SAME, col_letter, cols, open_sheet, post_replies, sync_notes
-
-# Merged across the WHOLE step. Everything else merges only where consecutive rows agree.
-STEP_BLOCK = ["Step", "Skill Type"]
-RUN_COLUMNS = ["Trigger", "Condition", "Action Source", "Action", "Count", "Spread", "Collision",
-               "Aim Target"]
+from tft_sheet import (D, RUN_COLUMNS, SAME, STEP_BLOCK, col_letter, cols, open_sheet, post_replies,
+                       remerge, sync_notes)
 
 # Each champion's rows, declared outright. Mutating what is already there is how the Soraka and
 # Azir bugs happened; a declaration cannot drift.
@@ -78,8 +74,8 @@ BLOCKS = {
              **{"Effect Recipient": "Enemies in path (farther)", "Effect Category": "Attack",
                 "Effect Detail": "Damage"}, Amount="30/45/70% AP", Cadence="Once"),
     ],
-    # One cast, two outcomes. The "When Transformed" AOE is a CONSEQUENCE of branch A, so it is a
-    # step of its own and moves BELOW both branches - a step's rows must be contiguous.
+    # One cast, two outcomes. (The "When Transformed" burn was a step of its own here; round 9
+    # demoted it to the passive it always was - see the last row of this block.)
     "Swain": [
         _row(Step="1", **{"Skill Type": "Active"}, Trigger="On Cast",
              Condition="If not Transformed", **{"Action Source": "Self"}, Action="Cast", Count=D,
@@ -97,7 +93,16 @@ BLOCKS = {
              **{"Effect Recipient": "Enemies in area", "Effect Category": "Attack",
                 "Effect Detail": "Damage"}, Amount="100/160/300% AP",
              **{"Scaling Type": "Burst"}, Scaling="burst", Cadence="Once"),
-        _row(Step="2", **{"Skill Type": "Active"}, Trigger="When Transformed", Condition=D,
+        # ROUND 9 MADE THIS A PASSIVE. The user: "Step 2 should be passive with condition when he
+        # was transformed." They are right, and it is the same mistake as Karma's: this burn is not
+        # a MOMENT IN THE CAST at all. It is always-on for as long as he is transformed - it ticks
+        # (Cadence = Over Time) whether or not he casts again. A cast sequence is not where it
+        # belongs, so it is Step 0.
+        #
+        # Its Condition stays an em-dash, by the rule Kalista's row established in round 5: the
+        # Trigger "When Transformed" ALREADY says the only thing a Condition "If Transformed" would
+        # say, and the sheet does not say a thing twice.
+        _row(Step="0", **{"Skill Type": "Passive"}, Trigger="When Transformed", Condition=D,
              **{"Action Source": "Self"}, Action="Circle AOE", Count="1", Spread=D,
              Collision="Area", **{"Aim Target": "Self"},
              **{"Effect Recipient": "Enemies in area", "Effect Category": "Attack",
@@ -256,7 +261,14 @@ def rebuild(sh):
     # ever. Compare EFFECTIVE against EFFECTIVE: in both the sheet and the spec, a blank in a
     # mergeable column means "same as the row above". Idempotence is the only test that has ever
     # caught these bugs, so the comparison has to survive its own merging.
-    MERGEABLE = set(RUN_COLUMNS + STEP_BLOCK)
+    #
+    # STEP_BLOCK IS DELIBERATELY EXCLUDED. `Step` is what remerge() reads to find the step
+    # BOUNDARIES, so a blank continuation row must genuinely BE blank: fill it with the value above
+    # and that row starts to look like a new step, remerge refuses to merge it away, and round 7's
+    # renumber_steps() then sees two steps with the same number and renumbers everything below.
+    # Round 9 hit exactly that. Step and Skill Type are compared RAW and written LITERALLY, which is
+    # what KSANTE_FIX below has always done.
+    MERGEABLE = set(RUN_COLUMNS)
 
     def fill_down(getter, n, col):
         out, last = [], ""
@@ -300,53 +312,6 @@ def rebuild(sh):
     ws.batch_update(edits, value_input_option="RAW")
     print(f"Hero: {len(edits)} cells rewritten — 5 champions collapsed into branching steps")
     return True
-
-
-def remerge(sh):
-    """Merge by VALUE RUNS, not by schema.
-
-    Step/Skill Type span a whole step. Every other column merges only where CONSECUTIVE ROWS
-    AGREE - because any of them may now differ between the branches of one step.
-    """
-    ws = sh.worksheet("Hero")
-    vals = ws.get_all_values()
-    c = cols(vals[0])
-
-    starts = [i for i, r in enumerate(vals) if i > 0 and r[c["Step"]].strip()]
-    groups = list(zip(starts, starts[1:] + [len(vals)]))
-
-    reqs = [{"unmergeCells": {"range": {
-        "sheetId": ws.id, "startRowIndex": 1, "endRowIndex": len(vals),
-        "startColumnIndex": c["Step"], "endColumnIndex": c["Aim Target"] + 1}}}]
-
-    def merge(a, b, col):
-        return {"mergeCells": {"range": {
-            "sheetId": ws.id, "startRowIndex": a, "endRowIndex": b,
-            "startColumnIndex": col, "endColumnIndex": col + 1}, "mergeType": "MERGE_COLUMNS"}}
-
-    for a, b in groups:
-        if b - a > 1:
-            reqs += [merge(a, b, c[n]) for n in STEP_BLOCK]
-        for n in RUN_COLUMNS:
-            # Compare EFFECTIVE values: a blank continuation row means "same as the row above", so
-            # it must merge with it. Comparing the raw cells would see "" != "Knock Back" and split
-            # them — silently destroying the merge on every multi-effect action in the sheet.
-            eff, last = [], ""
-            for i in range(a, b):
-                v = vals[i][c[n]]
-                if v.strip():
-                    last = v
-                eff.append(last)
-            run_start = 0
-            for k in range(1, b - a + 1):
-                if k == b - a or eff[k] != eff[run_start]:
-                    if k - run_start > 1:
-                        reqs.append(merge(a + run_start, a + k, c[n]))
-                    run_start = k
-
-    sh.batch_update({"requests": reqs})
-    print(f"Hero: re-merged by value runs across {len(groups)} steps "
-          f"(only Step/Skill Type span a whole step)")
 
 
 def main():

@@ -149,9 +149,12 @@ HEADER = ["Action", "Delivery (where it spawns / does it travel)", "Collision", 
 
 PROSE = [
     "How to read this tab",
-    "This tab REPLACES 'Action Types' and 'Action Templates', which described the same 18 actions "
-    "in two places and disagreed on nothing - one was just less precise. Both are left in the "
-    "sheet untouched until this one is signed off; then they go.",
+    # This said the two old tabs were "left in the sheet untouched until this one is signed off".
+    # They were signed off and DELETED in round 6 - so the tab was describing a sheet that no longer
+    # existed. Prose in the sheet is data like any other cell: it goes stale, and nothing catches it.
+    "This tab is the single definition of every Action. It replaced 'Action Types' and 'Action "
+    "Templates', which described the same actions in two places - one of them less precisely - and "
+    "that is how two tabs drift apart until nobody knows which is true. Both are now deleted.",
     "An Action is not a primitive - it is a COMPOSITION: Delivery x Collision x Shape. That is why "
     "Burst Projectile = First hit Projectile + Circle AOE, and why Circle AOE has the SAME "
     "delivery as Spawn At Target and differs only in shape.",
