@@ -53,8 +53,8 @@ Zed,2 Gold,Carry,Ionia,,Rogue,Slayer,1,Shadow Twin Assassin,Ionia Bonus: +15% Cr
 ,,,,,,,,,,2,Active,After Summon,—,Self,Circle AOE,1,—,Area,Self,Enemies in area,Attack,Damage,140/140/150% AD + 25/40/50% AP,—,—,Once,—,1,—
 ,,,,,,,,,,,,,,Summon,,,,,Summon,Enemies in area,Attack,Damage,140/140/150% AD + 25/40/50% AP,—,—,Once,—,1,—
 Karma,3 Gold,Carry,Ionia,,Invoker,,4,Burst Spell Spammer,"Ionia Bonus: +25 Ability Power. Active: fire a burst of energy that explodes on impact, dealing magic damage to enemies adjacent to the target. Every third cast launches 3 bursts.",0,Passive,Game Start,If Ionia Active,Self,Cast,—,—,None,Self,Same to Aim Target,Buff,AP,25,—,—,Once,Permanent,—,—
-,,,,,,,,,,1,Active,On Cast,If 1st or 2nd Cast,Self,Circle AOE,1,—,Area,Current,Enemies in area,Attack,Damage,200/300/470% AP,—,—,Once,—,1,—
-,,,,,,,,,,,,,If 3rd Cast,,Pierce Projectile,3,Current + Left + Right,Pierce-All,,Enemies in path,Attack,Damage,200/300/470% AP,—,—,Once,—,—,—
+,,,,,,,,,,1,Active,On Cast,If 1st or 2nd Cast,Self,Burst Projectile,1,—,First-Hit,Current,Enemies in area,Attack,Damage,200/300/470% AP,—,—,Once,—,1,—
+,,,,,,,,,,,,,If 3rd Cast,,Burst Projectile,3,Current + Left + Right,First-Hit,,Enemies in area,Attack,Damage,200/300/470% AP,—,—,Once,—,1,—
 Shen,4 Gold,Tank,Ionia,,Bastion,Invoker,1,Ally-Shielding Burst Tank,"Ionia Bonus: +8% Damage Reduction. Active: shield self and the 2 lowest-Health allies for 4s. After ally's shield duration expire, Shen's Shield refreshes and burst, dealing magic damage to adjacent enemies.",0,Passive,Game Start,If Ionia Active,Self,Cast,—,—,None,Self,Same to Aim Target,Buff,Damage Reduction,8%,—,—,Once,Permanent,—,—
 ,,,,,,,,,,1,Active,On Cast,—,Self,Cast,—,—,None,Self,Same to Aim Target,Buff,Shield,350/450/2000% AP,—,—,Once,4,—,—
 ,,,,,,,,,,,,,,,,,,,Lowest-HP Allies,Same to Aim Target,Buff,Shield,225/275/1500% AP,—,—,Once,4,—,—
@@ -65,10 +65,10 @@ Yasuo,4 Gold,Carry,Ionia,,Challenger,,1,Whirlwind Dash Carry,"Ionia Bonus: +15% 
 ,,,,,,,,,,2,Active,After Whirlwind,—,Self,Leap,—,—,None,Step 1 Aim target,Self,Movement,(reposition),—,—,—,—,—,—,—
 ,,,,,,,,,,3,Active,After Leap,—,Self,Cast,—,—,None,Step 1 Aim target,Same to Aim Target,Attack,Damage,500/500/1500% AD + 55/85/300% AP,—,—,Once,—,—,—
 ,,,,,,,,,,4,Active,After Slash,—,Self,Circle AOE,1,—,Area,Step 1 Aim target,Enemies in area,Attack,Damage,300/300/750% AD,—,—,Once,—,1,—
-Ahri,5 Gold,Carry,Ionia,,Sorcerer,,4,Essence-Steal Spell Carry,"Ionia Bonus: +3 Mana per second. Active: steal essence from enemies around the current target, dealing magic damage and Mana Reaving them. Every 2/2/0 casts, unleash a wave that damages all enemies hit, dealing 33% more to enemies whose essence has been stolen.",0,Passive,Game Start,If Ionia Active,Self,Cast,—,—,None,Self,Same to Aim Target,Buff,Mana Regen,3 /s,—,—,Once,Permanent,—,—
-,,,,,,,,,,1,Active,On Cast,—,Self,Circle AOE,1,—,Area,Current,Enemies in area,Attack,Damage,105/150/1000% AP,—,—,Once,—,—,—
+Ahri,5 Gold,Carry,Ionia,,Sorcerer,,4,Essence-Steal Spell Carry,"Ionia Bonus: +3 Mana per second. Active: steal essence from enemies around the current target, dealing magic damage and Mana Reaving them. Every third cast instead unleashes a wave that damages all enemies hit, dealing 33% more to enemies whose essence has been stolen.",0,Passive,Game Start,If Ionia Active,Self,Cast,—,—,None,Self,Same to Aim Target,Buff,Mana Regen,3 /s,—,—,Once,Permanent,—,—
+,,,,,,,,,,1,Active,On Cast,If 1st or 2nd Cast,Self,Circle AOE,1,—,Area,Current,Enemies in area,Attack,Damage,105/150/1000% AP,—,—,Once,—,—,—
 ,,,,,,,,,,,,,,,,,,,,Enemies in area,Debuff,Mana Reave,20%,—,—,Once,Until next cast,—,—
-,,,,,,,,,,,,,If 2nd Cast,,Pierce Projectile,,360° radial,Pierce-All,Self,All enemies,Attack,Damage,260/390/1999% AP,Conditional Bonus,+33% if essence stolen,Once,—,—,—
+,,,,,,,,,,,,,If 3rd Cast,,Pierce Projectile,,360° radial,Pierce-All,Self,All enemies,Attack,Damage,260/390/1999% AP,Conditional Bonus,+33% if essence stolen,Once,—,—,—
 Renekton,1 Gold,Tank,Shurima,,Bruiser,,1,Healing AOE Bruiser,"Deal magic damage to adjacent enemies. Heal for the first enemy hit, and a further 30% Ability Power for every additional enemy caught in the same swing.",1,Active,On Cast,—,Self,Circle AOE,1,—,Area,Self,Enemies in area,Attack,Damage,180/270/400% AP,—,—,Once,—,1,—
 ,,,,,,,,,,,,,,,,,,,,Same to Aim Target,Buff,Heal,220/270/320% AP,Per Target Hit,+30% AP per additional enemy hit,Once,—,1,—
 Taliyah,2 Gold,Carry,Shurima,,Multicaster,,4,Knock-up Punisher Mage,"Passive: whenever ANY enemy is knocked up or back - by anything, not just her - throw a boulder towards them; it damages the first enemy it hits. Active: damage the current target and knock them up, Stunning them for 2s.",0,Passive,On Enemy Knocked Up,—,Self,First hit Projectile,1,—,First-Hit,Knocked-up enemy,First hit enemy,Attack,Damage,120/180/270% AP,—,—,Once,—,—,—
@@ -112,7 +112,7 @@ Ekko,3 Gold,Carry,Zaun,Piltover,Rogue,,1,Retroactive-Heal Assassin,"Heal for 20%
 ,,,,,,,,,,2,Active,After Cast,—,Self,Cast,—,—,None,Current,Same to Aim Target,Attack,Damage,255/380/570% AP,—,—,Once,—,—,—
 Jayce,3 Gold,Support,Piltover,,Gunner,,4,Flank-Buff Gunner,"Grant himself Attack Speed and his left and right neighbours Ability Power for 3s, then fire a blast that detonates on the first enemy hit, damaging everyone near the blast.",1,Active,On Cast,—,Self,Cast,—,—,None,Self,Same to Aim Target,Buff,Attack Speed,30/40/50% AP,—,—,Once,3,—,—
 ,,,,,,,,,,,,,,,,,,,,Adjacent allies (left & right),Buff,AP,15%,—,—,Once,3,—,—
-,,,,,,,,,,2,Active,After Cast,—,Self,Burst Projectile,1,—,Area,Current,Enemies in area,Attack,Damage,275/275/295% AD,—,—,Once,—,1,—
+,,,,,,,,,,2,Active,After Cast,—,Self,Burst Projectile,1,—,First-Hit,Current,Enemies in area,Attack,Damage,275/275/295% AD,—,—,Once,—,1,—
 Viego,1 Gold,Carry,Shadow Isles,,Rogue,,1,Stacking Melee Assassin,"Deal 110/165/250% Ability Power magic damage to the current target. For the rest of combat, Viego's attacks deal 20/30/45% Ability Power bonus stacking magic damage.",1,Active,On Cast,—,Self,Laser Shot,1,—,Pierce-All,Current,Enemies in path,Attack,Damage,110/165/250% AP,—,—,Once,—,—,—
 ,,,,,,,,,,,,,,,,—,,,Self,Enemies in path,Buff,On-Hit Damage,20/30/45% AP,Stacking,stacking,Once,Permanent,—,—
 Maokai,1 Gold,Tank,Shadow Isles,,Bastion,,1,Mana-Leeching Healing Tank,"Sap Magic: Passive: Whenever an enemy casts an Ability, gain 5 Mana. Active: On his next attack, heal for 220/260/300% Ability Power.",0,Passive,On Enemy Cast,—,Self,Cast,—,—,None,Self,Same to Aim Target,Buff,Mana,5,—,—,Once,—,—,—
