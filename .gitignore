@@ -54,3 +54,6 @@ google-service-credential.json
 # Python bytecode from .claude/scripts/
 __pycache__/
 *.pyc
+
+# Transient sheet dump written at repo root by sheet_sync.py (dated copies live in .claude/reference/json/)
+/sheet_dump.json
