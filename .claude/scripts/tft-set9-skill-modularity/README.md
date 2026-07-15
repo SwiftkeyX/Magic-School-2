@@ -26,6 +26,10 @@ point, and something the old 300-line-patch-script-per-round approach could neve
 | `export.py` | Sheet → CSV. Use only to re-snapshot if the sheet is edited by hand. |
 | `reply.py` | Replies to the review comments. Holds **the current round's** replies; overwrite it each round. |
 | `sheet.py` | Shared helpers: `cols()`, `remerge_hero()`, `post_replies()`. |
+| `context.py` | One batched read for the `/add-champion` skill: schema + conventions + reference vocab (`--origin X` adds source rows, `--missing` lists un-added champions, `--validate` runs the local check). |
+| `builder.py` | Reusable `build(identity, steps)` → 31-col rows with the blanking rules baked in. `from builder import build`. |
+| `fix_append.py` | Reconcile the append-merge quirk after adding NEW champions, then sync to 0. |
+| `force_full.py` | Deterministic escape hatch: write every Hero cell to the CSV literal + one re-merge, when sync/fix_append fight (e.g. after a mid-file insert). |
 | `archive/` | 17 retired scripts (~5,000 lines). Kept for history. **Never run them.** |
 
 ## Renaming a column

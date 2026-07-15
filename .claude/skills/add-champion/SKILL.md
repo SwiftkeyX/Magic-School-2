@@ -16,9 +16,12 @@ re-derived interactively every time — re-deriving it is what burned tokens on 
 - **Source of truth:** `.claude/scripts/tft-set9-skill-modularity/data/*.csv` — one file per sheet tab.
 - **The one writer:** `sync.py` — CSV → sheet, derives every merge, then VALIDATEs.
 - **Source champion data:** `tft-set9 → Champions → Skill Description` (a read-only reference sheet).
-- **Schema / merge model:** the `Hero` tab is 30 columns. Only `Step` + `Skill Type` span a whole
-  step; `Trigger / Condition / Action Source / Action / Count / Spread / Collision / Aim Target`
-  merge by value-run (a blank inherits the row above); effect columns are per-row.
+- **Schema / merge model:** the `Hero` tab is **31 columns** (`context.py` prints the LIVE schema —
+  never hard-code the count). Only `Step` + `Skill Type` span a whole step;
+  `Trigger / Condition / Action Source / Action / Count / Spread / Collision / Skill Range / Aim Target`
+  **and `AOE`** merge by value-run (a blank inherits the row above); the other effect columns are per-row.
+- **Remaining roster:** run `context.py --missing`. As of the last session, **11 Set 9.0 champions**
+  remain — Bilgewater, Darkin, Ixtal, Wanderer, **Zaun**; Fiora/Quinn/Xayah stay excluded (9.5-only).
 
 ## Procedure
 
@@ -26,29 +29,28 @@ re-derived interactively every time — re-deriving it is what burned tokens on 
 ```
 python .claude/scripts/tft-set9-skill-modularity/context.py --origin <OriginName>
 ```
-Prints, in one shot: the 30-column schema, the merge model, the conventions that bite, every
-reference value `sync.py` enforces, and the source rows for the origin. **Do not** run separate
-queries per fact — that is the anti-pattern this replaces.
+Prints, in one shot: the live schema, the merge model, the conventions that bite, every reference
+value `sync.py` enforces, and the source rows for the origin. **Do not** run separate queries per
+fact — that is the anti-pattern this replaces. (`context.py --missing` first shows which champions
+are still un-added, grouped by origin.)
 
 ### 2. Resolve novel mechanics with the user up front
 If a champion needs a hitbox shape / spread the taxonomy lacks, ask in **one** batched
 `AskUserQuestion` (one question per champion), *before* writing any rows. Prefer composing existing
 Actions over inventing new ones; only add a taxonomy term when the user picks it.
 
-### 3. Build in ONE script (the builder pattern)
-Generate rows in a script — never hand-write CSV rows in the chat. Blanking rules:
-- **Identity** (cols 0-9): only the champion's **first** row.
-- **Step + Skill Type**: only the **first row of each step** (compared raw — a filled continuation
-  row reads as a new step).
-- **Run columns** on each **action's first row**; **`Condition = "—"` on a no-condition defining row**
-  (blank would inherit the champion above via `fill_down`); blank on continuation effect rows.
-- **Effect columns** (20-29): every row.
-- `Cast` / `Leap` → `Count "—"`. Star-varying counts use slash notation (`6/6/25`).
-- Register any **new** Action / Collision / Spread / Scaling Type / `(Category, Detail)` pair in its
-  reference CSV, or `sync.py` VALIDATE fails.
+### 3. Build in ONE script — import the builder, don't re-derive it
+`from builder import build` (`.claude/scripts/tft-set9-skill-modularity/builder.py`) bakes in every
+blanking rule for the 31-col schema: identity first-row only; Step/Skill Type on step-start; run-cols
+with `Condition = "—"` on a no-condition defining row (blank inherits the champion above via
+`fill_down`) and blank on continuations; **Skill Range** = the hero's Range on action-starts; **AOE**
+on the action's first effect and blank on continuations (so it merges); effect cols every row.
+`Cast`/`Leap` → `Count "—"`; star-varying counts use slash notation (`6/6/25`). Supply champion data
+only — **never hand-write CSV rows in the chat**.
 
-Append to `hero.csv`; make the builder **idempotent** (cut the block by champion name, re-append) so a
-re-run is safe. Existing rows must not move — text-splice or append, don't rewrite the whole CSV.
+Register any **new** Action / Collision / Spread / Scaling Type / `(Category, Detail)` pair in its
+reference CSV, or `sync.py` VALIDATE fails. Append/splice into `hero.csv` **idempotently** (cut the
+block by champion name, re-append) so a re-run is safe; existing rows must not move.
 
 ### 4. Validate locally before pushing
 ```
@@ -82,6 +84,18 @@ Print champion count + the new block's key columns **only** — never re-dump al
 ### 8. Optional — reply to review comments
 Overwrite `reply.py`'s `REPLIES` (match keys are a **substring of the comment root**, longest first)
 and run it. Leave threads **unresolved** — resolving is the user's call.
+
+## Troubleshooting — if `sync.py` won't reach 0 (see `[[tft-sheet-scripts]]` #7-9)
+
+- **Block count wrong / oscillates** → a **basic filter on Hero** blocks merges. Clear it:
+  `clearBasicFilter` on the Hero sheetId, then re-merge. (The user adds filters while reviewing.)
+- **A reference tab reports the same N cells every sync** → a row you inserted landed under the tab's
+  **doc-block horizontal merge**, which swallows writes to columns 2+. Unmerge that tab's region, sync.
+- **You inserted a row MID-FILE** (not appended) → sync rewrites everything below it (it compares by
+  position) and can fight `fix_append`. The deterministic reset is **`force_full.py`** (writes every
+  Hero cell to the CSV literal, then one re-merge), then `sync.py` to 0.
+- **Added a new COLUMN** → also insert it on the sheet (`insertDimension` + set the header — sync never
+  writes the header row) and add it to `HERO_COLUMNS`/`RUN_COLUMNS` in `sheet.py`.
 
 ## Token discipline (why this skill exists)
 

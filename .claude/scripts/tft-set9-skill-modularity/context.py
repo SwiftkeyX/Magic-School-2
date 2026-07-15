@@ -5,6 +5,7 @@ Run from repo-root cwd (set PYTHONIOENCODING=utf-8 — the data has em-dashes an
     python .claude/scripts/tft-set9-skill-modularity/context.py            # conventions + reference lists
     python .claude/scripts/tft-set9-skill-modularity/context.py --validate # local used-vs-defined check
     python .claude/scripts/tft-set9-skill-modularity/context.py --origin Void   # + source rows (network)
+    python .claude/scripts/tft-set9-skill-modularity/context.py --missing       # champions not yet added
 
 This exists so the `/add-champion` workflow does NOT re-derive the schema with ~7 separate queries
 (that is what burned tokens). One command prints the header, the merge model, the conventions that
@@ -125,8 +126,33 @@ def print_source(origin):
         print("      %s" % (r[skill] or "").replace("\n", " "))
 
 
+EXCLUDED_95 = {"Fiora", "Quinn", "Xayah"}  # Set 9.5-only, deliberately excluded (design-notes 'Note - Roster')
+
+
+def print_missing():
+    """Which source champions are NOT in hero.csv yet, grouped by origin (the live remaining roster)."""
+    import gspread
+    from collections import defaultdict
+    ch = gspread.service_account(filename=CRED).open_by_key(SOURCE_KEY).worksheet("Champions").get_all_values()
+    h = ch[0]
+    nm, o1, o2 = h.index("Champion Name"), h.index("Origin 1"), h.index("Origin 2")
+    have = {r[0].strip() for r in hero()[1:] if r and r[0].strip()}
+    src = [(r[nm].strip(), r[o1].strip(), r[o2].strip()) for r in ch[1:] if len(r) > o2 and r[nm].strip()]
+    missing = [(n, a, b) for n, a, b in src if n not in have]
+    to_add = [n for n, a, b in missing if n not in EXCLUDED_95]
+    print("=== ROSTER: %d in sheet, %d in source, %d missing (%d to add + %d excluded 9.5) ==="
+          % (len(have), len(src), len(missing), len(to_add), len(missing) - len(to_add)))
+    by = defaultdict(list)
+    for n, a, b in missing:
+        by[a].append(n + ("/" + b if b else "") + ("  [excluded 9.5]" if n in EXCLUDED_95 else ""))
+    for o in sorted(by):
+        print("  %-14s %s" % (o, ", ".join(by[o])))
+
+
 def main():
     args = sys.argv[1:]
+    if "--missing" in args:
+        print_missing(); return
     if "--validate" in args:
         sys.exit(0 if validate() else 1)
     print_schema()
