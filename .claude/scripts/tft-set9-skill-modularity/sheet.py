@@ -27,7 +27,7 @@ HERO_COLUMNS = [
     "Summary", "Skill Description",
     "Step", "Skill Type", "Trigger", "Condition", "Action Source", "Action",
     "Count", "Spread", "Collision",
-    "Aim Target", "Effect Recipient", "Effect Category", "Effect Detail",
+    "Skill Range", "Aim Target", "Effect Recipient", "Effect Category", "Effect Detail",
     # `Effect Cadence` / `Effect Duration` were plain `Cadence` / `Duration (s)`. The user renamed
     # them for clarity: both describe the EFFECT, not the action, which puts them in the same family
     # as Effect Recipient / Category / Detail. The names here MUST track the sheet's header text —
@@ -128,7 +128,7 @@ STEP_BLOCK = ACTION_BLOCK
 
 # The columns that merge wherever consecutive rows happen to agree.
 RUN_COLUMNS = ["Trigger", "Condition", "Action Source", "Action", "Count", "Spread", "Collision",
-               "Aim Target"]
+               "Skill Range", "Aim Target"]
 
 
 def remerge_hero(sh):
@@ -152,7 +152,10 @@ def remerge_hero(sh):
     ws = sh.worksheet("Hero")
     vals = ws.get_all_values()
     c = cols(vals[0])
-    last_col = c["Aim Target"]
+    # AOE (col 28) merges too — it is a per-ACTION property, so it spans an action's effect rows. It
+    # is non-contiguous with the run block, but the unmerge below simply covers up to it (the effect
+    # columns 20-27 in between are never merged, so unmerging them is a no-op).
+    last_col = c["AOE"]
 
     def merge(a, b, col):
         return {"mergeCells": {"range": {
@@ -179,7 +182,7 @@ def remerge_hero(sh):
     for a, b in steps:
         if b - a > 1:
             reqs += [merge(a, b, c[n]) for n in STEP_BLOCK]
-        for n in RUN_COLUMNS:
+        for n in RUN_COLUMNS + ["AOE"]:
             # Compare EFFECTIVE values: a blank continuation row means "same as the row above" and
             # must merge WITH it. Comparing the raw cells would see "" != "Knock Back" and split
             # them - silently destroying the merge on every multi-effect action in the sheet.
