@@ -36,3 +36,7 @@ Buff,Damage Redirect,"A share of the damage the recipient takes is dealt to the 
 Buff,Chakram,A stack resource held by the caster. It is not a stat and does nothing on its own - other effects scale off how many are equipped (Aphelios).
 Buff,On-Hit Damage,"EVERY attack by the recipient deals bonus damage, for as long as the buff lasts. Distinct from Empowered Attack, which is spent on the NEXT attack and then gone. Viego's stacks and never expires (Duration = Permanent); Aphelios' lasts 7s."
 Buff,Empowered Attack (Maokai),"The recipient's NEXT auto-attack also HEALS the recipient for the Amount. One attack, then spent - the same lifetime as Empowered Attack, but it heals instead of dealing bonus damage. Maokai only. Distinct from On-Hit Damage (Viego), which stacks and never falls off."
+Status,Disarm,"Recipient cannot move or attack, but CAN still cast spells. Distinct from Stun (cannot act at all) and Chill (attack-speed only). Kassadin."
+Status,Mark,A mark left on the target that later effects check for; it does nothing by itself. Rek'Sai's conditions read it — she deals bonus true damage to a marked target.
+Debuff,Shield Destroy,"Removes a percentage of the recipient's active Shield value outright, before damage is applied. Malzahar destroys 50%."
+Status,Child of the Star,The recipient hosts a Child of the Star for the duration - a summon (Action Source 'Child of the Star') that auto-attacks the nearest enemy to its owner every second. Soraka; replaced her old 5-stars / 'Each to its own target' model at the user's request.
