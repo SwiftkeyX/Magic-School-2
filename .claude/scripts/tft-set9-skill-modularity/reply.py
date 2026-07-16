@@ -65,6 +65,18 @@ AOE_TAXONOMY = (
     "edge', Kassadin's cone 'front edge'. Shape size stays in AOE (hex); odd shapes (MF's X) use "
     "Custom AOE. Migrated every instant/spawned AOE user; projectiles + lasers left untouched.")
 
+V2_MOVE = "Done — moved the axes explanation below the table (doc-block style, like the other tabs)."
+
+V2_ASSESS = (
+    "Deleted Burst + Homing Burst Projectile — they're just First-Hit/Homing + Circle now. On "
+    "'finished?': the action PRIMITIVE is complete, and Collision is now DERIVED from "
+    "Delivery+Behavior+Shape, so it stops being a column. What is NOT here (stays per-row in Hero, not "
+    "part of an action's definition): Count, Spread, Aim Target, Action Source, Skill Range. On 'Hero "
+    "v2 — really similar?': yes, mostly — same champion-centric layout; the only real change is the "
+    "single 'Action' column exploding into ~5 (Apply/Delivery/Behavior/Shape/Motion) and Collision "
+    "dropping out. Wider, but more modular. See my note for a side-by-side; migrating Hero is a real "
+    "cost/benefit call, not a must.")
+
 DASHBOARD_DITCH = (
     "Done — ditched it for now: deleted the Dashboard tab and un-wired it from sync. Kept dashboard.py "
     "(and the 'Columns used' profiles it reads) parked in the tooling, so we can switch it back on any "
@@ -111,6 +123,8 @@ REPLIES = [
     ("group those action together", ACTION_GROUPING),
     ("define which column each Action", COLUMN_PROFILES),
     ("ditch it for now", DASHBOARD_DITCH),
+    ("Move the explanation below", V2_MOVE),
+    ("Now deleting Burst Projectile", V2_ASSESS),
 ]
 
 
