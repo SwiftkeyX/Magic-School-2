@@ -65,6 +65,21 @@ AOE_TAXONOMY = (
     "edge', Kassadin's cone 'front edge'. Shape size stays in AOE (hex); odd shapes (MF's X) use "
     "Custom AOE. Migrated every instant/spawned AOE user; projectiles + lasers left untouched.")
 
+AA_WHAT = (
+    "Done — set Auto-Attack's 'What it does' to 'Basic attack on the aimed enemy. Apply direct damage "
+    "without relying on hitbox' (that's the melee case = DirectApply).")
+
+AA_CLARIFY_DEL = (
+    "Deleted — removed the old 'Mechanically this IS a homing projectile' clarify from Auto-Attack. "
+    "The axes now say it: melee AA = DirectApply, ranged AA = at-User / Projectile / Homing.")
+
+V2_REFINE = (
+    "Reworked v2, and yes it makes sense. Shape/Size moved OUT to the Hero tab (per row); 'Delivery' → "
+    "'Spawn' (at-User | at-Target); 'Projectile' moved into Motion. You confirmed spawn-at-User can be "
+    "static, so Laser = at-User · Motion — · Box-in-Hero · rear edge. Consequence: Circle/Cone/Box/"
+    "Custom AOE collapse into ONE action (Hitbox · at-Target · static) — the shape distinguishes them "
+    "in Hero; projectiles differ only by Behavior. So the action set shrinks to ~9 mechanic-combos.")
+
 TRIGGER_TAB = (
     "Noted — and agreed: I won't invent triggers, and a dedicated Trigger tab (a controlled vocabulary "
     "of the triggers we actually use) is the right way to keep them from proliferating. Holding off per "
@@ -137,6 +152,9 @@ REPLIES = [
     ("Now deleting Burst Projectile", V2_ASSESS),
     ("make its own tab", TRIGGER_TAB),
     ("clean up action mess", V2_ENRICH),
+    ("Apply direct damage without relying on hitbox", AA_WHAT),
+    ("Shape for AA", V2_REFINE),
+    ("Delete", AA_CLARIFY_DEL),
 ]
 
 
