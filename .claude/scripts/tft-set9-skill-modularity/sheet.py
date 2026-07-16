@@ -284,7 +284,10 @@ def post_replies(replies, warn_unmatched=True):
         if c.get("resolved"):
             skipped += 1
             continue
-        body = next((t for k, t in replies if k in c["content"]), None)
+        # The user's comments routinely contain non-breaking spaces (\xa0) where a normal space is
+        # expected ("better\xa0name"), which silently breaks substring keys. Normalise before matching.
+        content = c["content"].replace(" ", " ")
+        body = next((t for k, t in replies if k in content), None)
         if body is None:
             if warn_unmatched:
                 print(f"  !! no reply drafted for: {c['content'][:60]!r}")
