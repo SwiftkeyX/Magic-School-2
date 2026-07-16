@@ -65,6 +65,16 @@ AOE_TAXONOMY = (
     "edge', Kassadin's cone 'front edge'. Shape size stays in AOE (hex); odd shapes (MF's X) use "
     "Custom AOE. Migrated every instant/spawned AOE user; projectiles + lasers left untouched.")
 
+TRIGGER_TAB = (
+    "Noted — and agreed: I won't invent triggers, and a dedicated Trigger tab (a controlled vocabulary "
+    "of the triggers we actually use) is the right way to keep them from proliferating. Holding off per "
+    "'Don't do this yet' — say the word and I'll build it.")
+
+V2_ENRICH = (
+    "Done — folded v1's Collision, What it does, and Clarify more into the v2 tab, matched per action. "
+    "v2 now carries both the decomposed axes AND the v1 prose, so it can stand in for v1. (Collision is "
+    "still derivable from Delivery+Behavior+Shape; kept as a reference column.)")
+
 V2_MOVE = "Done — moved the axes explanation below the table (doc-block style, like the other tabs)."
 
 V2_ASSESS = (
@@ -125,6 +135,8 @@ REPLIES = [
     ("ditch it for now", DASHBOARD_DITCH),
     ("Move the explanation below", V2_MOVE),
     ("Now deleting Burst Projectile", V2_ASSESS),
+    ("make its own tab", TRIGGER_TAB),
+    ("clean up action mess", V2_ENRICH),
 ]
 
 
