@@ -65,6 +65,24 @@ AOE_TAXONOMY = (
     "edge', Kassadin's cone 'front edge'. Shape size stays in AOE (hex); odd shapes (MF's X) use "
     "Custom AOE. Migrated every instant/spawned AOE user; projectiles + lasers left untouched.")
 
+GROUP_HEADERS = (
+    "Done — added a two-row header: 'Action' merged over Apply..Shape, and 'Effect' merged over the "
+    "effect columns (Effect Recipient..Effect Duration). The real column names are on row 2, and both "
+    "rows are frozen. The tooling now reads the header below the super-header (via a header_row() "
+    "helper), so sync stays at 0; the CSV source stays single-header — the super-header is display-only.")
+
+CLEAN_PROSE = (
+    "Done — stripped hero-name mentions from the What/Clarify prose (17 cells): removed the "
+    "'(Poppy, Cassiopeia, Samira)'-style asides and the hero-example sentences, so the descriptions "
+    "read generically now.")
+
+SUMMON_SPAWN = (
+    "Done — set Spawn = at-Target on the Summon rows (Zed, Azir). Heads-up: the decomposition folded "
+    "Summon into DirectApply, so a summon now reads Apply=DirectApply · Spawn=at-Target + the Summon "
+    "effect. Tell me if you'd rather it carry a distinct Apply value.")
+
+TAB_RENAME = "Done — renamed the tab to 'Action Model' (v1 is retired, so the name is free)."
+
 AA_WHAT = (
     "Done — set Auto-Attack's 'What it does' to 'Basic attack on the aimed enemy. Apply direct damage "
     "without relying on hitbox' (that's the melee case = DirectApply).")
@@ -154,6 +172,11 @@ REPLIES = [
     ("clean up action mess", V2_ENRICH),
     ("Apply direct damage without relying on hitbox", AA_WHAT),
     ("Shape for AA", V2_REFINE),
+    ("No need to mention hero", CLEAN_PROSE),
+    ("Spawn at target for Summon", SUMMON_SPAWN),
+    ("Change the tab name", TAB_RENAME),
+    ("group together under", GROUP_HEADERS),
+    ("should be replaced by", GROUP_HEADERS),
     ("Delete", AA_CLARIFY_DEL),
 ]
 
