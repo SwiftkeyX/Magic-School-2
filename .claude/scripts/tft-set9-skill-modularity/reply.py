@@ -65,6 +65,13 @@ AOE_TAXONOMY = (
     "edge', Kassadin's cone 'front edge'. Shape size stays in AOE (hex); odd shapes (MF's X) use "
     "Custom AOE. Migrated every instant/spawned AOE user; projectiles + lasers left untouched.")
 
+COLUMN_ORDER = (
+    "Done — regrouped the columns for readability. The action region now reads: Action Source | "
+    "Action | Aim Target | Offset | AOE (hex) | Skill Range | Count | Spread | Collision, then the "
+    "effect block, then Cast. Applied on the sheet and in the source CSV + tooling (the merge logic no "
+    "longer assumes AOE/Offset are the rightmost columns). sync converges to 0 cells with VALIDATE ok.")
+
+
 # LONGEST / MOST DISTINCTIVE KEY FIRST. Each is a substring of exactly one open comment root.
 REPLIES = [
     ("Do we have a better", SPREAD_NAME),   # NB: reviewer's text has a non-breaking space before 'name'
@@ -78,6 +85,7 @@ REPLIES = [
     ("Use Leap behind", QIYANA_LEAPBEHIND),
     ("condition for the action", QIYANA_COND),
     ("should also have Range AOE", AOE_TAXONOMY),
+    ("I want column to have this format", COLUMN_ORDER),
 ]
 
 
