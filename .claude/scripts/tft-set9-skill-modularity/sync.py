@@ -79,9 +79,9 @@ def check_rows(tab, sheet_rows, csv_rows):
 
 # Columns that get MERGED, and so read back as "" on every row but the first of their run. A blank
 # in one of these means "same as the row above" - on BOTH sides of the comparison.
-# AOE joins the merged set: it is a per-ACTION property, blank on an action's continuation effect
-# rows (which inherit it) and merged across them for display.
-MERGED_COLUMNS = set(IDENTITY_BLOCK) | set(RUN_COLUMNS) | {"AOE"}
+# AOE and Offset join the merged set: both are per-ACTION properties, blank on an action's
+# continuation effect rows (which inherit them) and merged across them for display.
+MERGED_COLUMNS = set(IDENTITY_BLOCK) | set(RUN_COLUMNS) | {"AOE", "Offset"}
 
 
 def fill_down(seq):
@@ -141,7 +141,7 @@ def sync_hero(sh):
         # layout from the values afterwards.
         sh.batch_update({"requests": [{"unmergeCells": {"range": {
             "sheetId": ws.id, "startRowIndex": 1, "endRowIndex": len(sheet),
-            "startColumnIndex": 0, "endColumnIndex": sc["AOE"] + 1}}}]})
+            "startColumnIndex": 0, "endColumnIndex": max(sc["AOE"], sc["Offset"]) + 1}}}]})
         ws.batch_update(edits, value_input_option="RAW")
     print(f"{HERO}: {len(edits)} cells updated ({len(want) - 1} rows)")
     return bool(edits)

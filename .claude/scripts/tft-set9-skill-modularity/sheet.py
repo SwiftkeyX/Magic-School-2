@@ -33,7 +33,10 @@ HERO_COLUMNS = [
     # as Effect Recipient / Category / Detail. The names here MUST track the sheet's header text —
     # cols() matches exact-then-prefix, and "Effect Duration (s)".startswith("Duration") is False, so
     # a stale name here does not fall back gracefully. It raises, which is the behaviour we want.
-    "Amount", "Scaling Type", "Scaling", "Effect Cadence", "Effect Duration", "AOE", "Cast",
+    # `Offset` (added when the AOE actions became shape templates) is a per-ACTION property like AOE:
+    # it says where the shape sits relative to its derived centre (centred / rear edge / front edge /
+    # detached +N). It sits between AOE and Cast, and merges by value-run the same way AOE does.
+    "Amount", "Scaling Type", "Scaling", "Effect Cadence", "Effect Duration", "AOE", "Offset", "Cast",
 ]
 
 # The action-instance block: these cells are vertically merged across the rows of one action.
@@ -152,10 +155,10 @@ def remerge_hero(sh):
     ws = sh.worksheet("Hero")
     vals = ws.get_all_values()
     c = cols(vals[0])
-    # AOE (col 28) merges too — it is a per-ACTION property, so it spans an action's effect rows. It
-    # is non-contiguous with the run block, but the unmerge below simply covers up to it (the effect
-    # columns 20-27 in between are never merged, so unmerging them is a no-op).
-    last_col = c["AOE"]
+    # AOE and Offset are per-ACTION properties, so they span an action's effect rows and merge like
+    # the run block. They are non-contiguous with it, but the unmerge below simply covers up to the
+    # rightmost merged column (the effect columns in between are never merged, so unmerging is a no-op).
+    last_col = max(c["AOE"], c["Offset"])
 
     def merge(a, b, col):
         return {"mergeCells": {"range": {
@@ -182,7 +185,7 @@ def remerge_hero(sh):
     for a, b in steps:
         if b - a > 1:
             reqs += [merge(a, b, c[n]) for n in STEP_BLOCK]
-        for n in RUN_COLUMNS + ["AOE"]:
+        for n in RUN_COLUMNS + ["AOE", "Offset"]:
             # Compare EFFECTIVE values: a blank continuation row means "same as the row above" and
             # must merge WITH it. Comparing the raw cells would see "" != "Knock Back" and split
             # them - silently destroying the merge on every multi-effect action in the sheet.

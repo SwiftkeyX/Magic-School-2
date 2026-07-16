@@ -16,10 +16,13 @@ re-derived interactively every time — re-deriving it is what burned tokens on 
 - **Source of truth:** `.claude/scripts/tft-set9-skill-modularity/data/*.csv` — one file per sheet tab.
 - **The one writer:** `sync.py` — CSV → sheet, derives every merge, then VALIDATEs.
 - **Source champion data:** `tft-set9 → Champions → Skill Description` (a read-only reference sheet).
-- **Schema / merge model:** the `Hero` tab is **31 columns** (`context.py` prints the LIVE schema —
+- **Schema / merge model:** the `Hero` tab is **32 columns** (`context.py` prints the LIVE schema —
   never hard-code the count). Only `Step` + `Skill Type` span a whole step;
   `Trigger / Condition / Action Source / Action / Count / Spread / Collision / Skill Range / Aim Target`
-  **and `AOE`** merge by value-run (a blank inherits the row above); the other effect columns are per-row.
+  **and `AOE` and `Offset`** merge by value-run (a blank inherits the row above); the other effect
+  columns are per-row. `Offset` is the AOE anchor label (`centred` / `rear edge` / `front edge` /
+  `detached +N`, `—` for non-AOE); AOE actions are shape templates (`Circle/Cone/Box/Custom AOE`)
+  whose centre is derived from `Action Source` + `Aim Target` (there is no `Melee AOE`).
 - **Remaining roster:** run `context.py --missing`. As of the last session, **11 Set 9.0 champions**
   remain — Bilgewater, Darkin, Ixtal, Wanderer, **Zaun**; Fiora/Quinn/Xayah stay excluded (9.5-only).
 
@@ -41,10 +44,11 @@ Actions over inventing new ones; only add a taxonomy term when the user picks it
 
 ### 3. Build in ONE script — import the builder, don't re-derive it
 `from builder import build` (`.claude/scripts/tft-set9-skill-modularity/builder.py`) bakes in every
-blanking rule for the 31-col schema: identity first-row only; Step/Skill Type on step-start; run-cols
+blanking rule for the 32-col schema: identity first-row only; Step/Skill Type on step-start; run-cols
 with `Condition = "—"` on a no-condition defining row (blank inherits the champion above via
 `fill_down`) and blank on continuations; **Skill Range** = the hero's Range on action-starts; **AOE**
-on the action's first effect and blank on continuations (so it merges); effect cols every row.
+and **Offset** on the action's first effect and blank on continuations (so they merge); effect cols
+every row. The effect tuple carries `… aoe, offset, cast` (Offset right after AOE).
 `Cast`/`Leap` → `Count "—"`; star-varying counts use slash notation (`6/6/25`). Supply champion data
 only — **never hand-write CSV rows in the chat**.
 
