@@ -31,7 +31,7 @@ DATA = pathlib.Path(".claude/scripts/tft-set9-skill-modularity/data")
 TABS = {
     "Hero": "hero.csv",
     "Column Explain": "column-explain.csv",
-    "Action Model": "action-model.csv",
+    # `Action Model` retired when Hero migrated to the decomposed axes (Apply/Spawn/Motion/Behavior/Shape).
     "Effect Types": "effect-types.csv",
     "Collision Types": "collision-types.csv",
     "Scaling Types": "scaling-types.csv",

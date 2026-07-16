@@ -41,9 +41,11 @@ DATA = pathlib.Path(".claude/scripts/tft-set9-skill-modularity/data")
 
 HERO = "Hero"
 # Reference tabs are plain tables - synced positionally. Only `Hero` has a logical column schema.
+# The lumped v1 `Action Model` tab retired when Hero migrated to the decomposed axes (Apply/Spawn/
+# Motion/Behavior/Shape). Those axes' vocab lives in the *-types.csv files below, checked by validate();
+# they are validation-only (no sheet mirror yet — a combined vocab tab can come later).
 REFERENCE = {
     "Column Explain": "column-explain.csv",
-    "Action Model": "action-model.csv",
     "Effect Types": "effect-types.csv",
     "Collision Types": "collision-types.csv",
     "Scaling Types": "scaling-types.csv",
@@ -197,7 +199,11 @@ def validate(sh):
 
     problems = []
     for label, missing in (
-        ("Action",       used("Action") - defined("action-model.csv")),
+        ("Apply",        used("Apply") - defined("apply-types.csv")),
+        ("Spawn",        used("Spawn") - defined("spawn-types.csv")),
+        ("Motion",       used("Motion") - defined("motion-types.csv")),
+        ("Behavior",     used("Behavior") - defined("behavior-types.csv")),
+        ("Shape",        used("Shape") - defined("shape-types.csv")),
         ("Collision",    used("Collision") - defined("collision-types.csv")),
         ("Scaling Type", used("Scaling Type") - defined("scaling-types.csv")),
         ("Spread",       used("Spread") - defined("spread-types.csv")),

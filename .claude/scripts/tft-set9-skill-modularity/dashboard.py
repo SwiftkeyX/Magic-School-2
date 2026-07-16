@@ -1,9 +1,9 @@
 """Generate the read-only `Dashboard` tab — a comprehensive, champion-centric view of the Hero data.
 
-STATUS: PARKED. The user tried it and set it aside ("ditch it for now, keep it for later") — so it is
-NOT wired into sync.py and the Dashboard tab was removed from the sheet. Kept here, runnable
-standalone (`python .../dashboard.py`), for whenever they want it back; re-wire by calling
-`dashboard.generate(sh)` at the end of sync.py's main().
+STATUS: PARKED and STALE. The user set it aside ("ditch it for now"), and it has since gone stale: it
+reads `action-model.csv` (its `Columns used` profiles), which was RETIRED when Hero migrated to the
+decomposed v2 axes (Apply/Spawn/Motion/Behavior/Shape). To revive it, first rework `_profiles()` /
+`_targeting()` around the v2 axis columns, then re-wire `dashboard.generate(sh)` into sync.py's main().
 
 DERIVED, never edited. Built from `data/hero.csv` (the source of truth) + each Action's `Columns used`
 profile in `data/action-model.csv`. Idempotent: a second run writes 0 cells (it diffs against the tab).

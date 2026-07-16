@@ -23,7 +23,7 @@ point, and something the old 300-line-patch-script-per-round approach could neve
 |---|---|
 | `data/*.csv` | **The source of truth.** One file per tab. |
 | `sync.py` | **THE one writer.** CSV → sheet, derives every merge, then validates. |
-| `dashboard.py` | **Parked** (user set it aside for now). Generates a read-only champion-centric **Dashboard** tab from the source + each action's `Columns used` profile. Not wired into `sync.py`; runnable standalone. Re-enable by calling `dashboard.generate(sh)` in `sync.py`'s `main()`. |
+| `dashboard.py` | **Parked & stale.** Generated a read-only champion-centric Dashboard from `action-model.csv`'s `Columns used` profiles — which were RETIRED when Hero migrated to the decomposed v2 axes (Apply/Spawn/Motion/Behavior/Shape). Needs reworking around the v2 columns before it can be re-wired into `sync.py`. |
 | `export.py` | Sheet → CSV. Use only to re-snapshot if the sheet is edited by hand. |
 | `reply.py` | Replies to the review comments. Holds **the current round's** replies; overwrite it each round. |
 | `sheet.py` | Shared helpers: `cols()`, `remerge_hero()`, `post_replies()`. |

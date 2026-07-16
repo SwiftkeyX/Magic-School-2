@@ -71,7 +71,11 @@ def print_schema():
 
 def print_reference():
     print("\n=== REFERENCE VALUES (sync.py VALIDATE enforces these) ===")
-    print("  Actions      :", col0("action-model.csv"))
+    print("  Apply        :", col0("apply-types.csv"))
+    print("  Spawn        :", col0("spawn-types.csv"))
+    print("  Motion       :", col0("motion-types.csv"))
+    print("  Behavior     :", col0("behavior-types.csv"))
+    print("  Shape        :", col0("shape-types.csv"))
     print("  Collisions   :", col0("collision-types.csv"))
     print("  Spreads      :", col0("spread-types.csv"))
     print("  Scaling Types:", col0("scaling-types.csv"))
@@ -90,7 +94,9 @@ def validate():
         i = c[name]
         return {r[i].strip() for r in h[1:] if len(r) > i} - {"", D}
 
-    defined = {"Action": set(col0("action-model.csv")), "Collision": set(col0("collision-types.csv")),
+    defined = {"Apply": set(col0("apply-types.csv")), "Spawn": set(col0("spawn-types.csv")),
+               "Motion": set(col0("motion-types.csv")), "Behavior": set(col0("behavior-types.csv")),
+               "Shape": set(col0("shape-types.csv")), "Collision": set(col0("collision-types.csv")),
                "Scaling Type": set(col0("scaling-types.csv")), "Spread": set(col0("spread-types.csv"))}
     pairs = {(r[c["Effect Category"]].strip(), r[c["Effect Detail"]].strip())
              for r in h[1:] if len(r) > c["Effect Detail"]} - {("", "")}

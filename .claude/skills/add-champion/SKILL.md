@@ -16,13 +16,17 @@ re-derived interactively every time — re-deriving it is what burned tokens on 
 - **Source of truth:** `.claude/scripts/tft-set9-skill-modularity/data/*.csv` — one file per sheet tab.
 - **The one writer:** `sync.py` — CSV → sheet, derives every merge, then VALIDATEs.
 - **Source champion data:** `tft-set9 → Champions → Skill Description` (a read-only reference sheet).
-- **Schema / merge model:** the `Hero` tab is **32 columns** (`context.py` prints the LIVE schema —
-  never hard-code the count). Only `Step` + `Skill Type` span a whole step;
-  `Trigger / Condition / Action Source / Action / Count / Spread / Collision / Skill Range / Aim Target`
-  **and `AOE` and `Offset`** merge by value-run (a blank inherits the row above); the other effect
-  columns are per-row. `Offset` is the AOE anchor label (`centred` / `rear edge` / `front edge` /
-  `detached +N`, `—` for non-AOE); AOE actions are shape templates (`Circle/Cone/Box/Custom AOE`)
-  whose centre is derived from `Action Source` + `Aim Target` (there is no `Melee AOE`).
+- **Schema / merge model:** the `Hero` tab is **36 columns** (`context.py` prints the LIVE schema —
+  never hard-code the count). Only `Step` + `Skill Type` span a whole step; the run columns
+  `Trigger / Condition / Action Source / Apply / Spawn / Motion / Behavior / Shape / Count / Spread /
+  Collision / Skill Range / Aim Target` **and `AOE` and `Offset`** merge by value-run (a blank
+  inherits the row above); the effect columns are per-row.
+- **The action is DECOMPOSED (v2), not one lumped name** — five axes: **Apply** (DirectApply | Hitbox)
+  · **Spawn** (at-User | at-Target) · **Motion** (— | Projectile | Arc | Forward N hex) · **Behavior**
+  (First-Hit | Homing | Pierce | Returning, Projectile only) · **Shape** (1-hex | circle | cone | box |
+  custom). Their vocab lives in `apply/spawn/motion/behavior/shape-types.csv`. `Collision` is KEPT.
+  `Offset` is the hitbox anchor (`centred` / `rear edge` / `front edge` / `detached +N`). Auto-Attack:
+  melee (Range==1) = DirectApply, ranged = Hitbox/at-User/Projectile/Homing.
 - **Remaining roster:** run `context.py --missing`. As of the last session, **11 Set 9.0 champions**
   remain — Bilgewater, Darkin, Ixtal, Wanderer, **Zaun**; Fiora/Quinn/Xayah stay excluded (9.5-only).
 
@@ -44,11 +48,13 @@ Actions over inventing new ones; only add a taxonomy term when the user picks it
 
 ### 3. Build in ONE script — import the builder, don't re-derive it
 `from builder import build` (`.claude/scripts/tft-set9-skill-modularity/builder.py`) bakes in every
-blanking rule for the 32-col schema: identity first-row only; Step/Skill Type on step-start; run-cols
+blanking rule for the 36-col schema: identity first-row only; Step/Skill Type on step-start; run-cols
 with `Condition = "—"` on a no-condition defining row (blank inherits the champion above via
 `fill_down`) and blank on continuations; **Skill Range** = the hero's Range on action-starts; **AOE**
 and **Offset** on the action's first effect and blank on continuations (so they merge); effect cols
-every row. The effect tuple carries `… aoe, offset, cast` (Offset right after AOE).
+every row. The **action tuple** is now `(trigger, source, apply, spawn, motion, behavior, shape,
+count, spread, collision, aim, effects)` — the five decomposed axes replace the old lumped `action`;
+the effect tuple is `(cond, recip, cat, det, amt, scaltype, scaling, cadence, dur, aoe, offset, cast)`.
 `Cast`/`Leap` → `Count "—"`; star-varying counts use slash notation (`6/6/25`). Supply champion data
 only — **never hand-write CSV rows in the chat**.
 

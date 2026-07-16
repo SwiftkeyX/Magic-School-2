@@ -36,7 +36,9 @@ HERO_COLUMNS = [
     "Champion", "Cost", "Role", "Origin 1", "Origin 2", "Class 1", "Class 2", "Range",
     "Summary", "Skill Description",
     "Step", "Skill Type", "Trigger", "Condition",
-    "Action Source", "Action", "Aim Target", "Offset", "AOE",
+    # v2 action model: the lumped `Action` was decomposed into these orthogonal axes (Apply/Spawn/
+    # Motion/Behavior/Shape). Collision is KEPT (not fully derivable — Grab & Slam = Flank-Pair).
+    "Action Source", "Apply", "Spawn", "Motion", "Behavior", "Shape", "Aim Target", "Offset", "AOE",
     "Skill Range", "Count", "Spread", "Collision",
     "Effect Recipient", "Effect Category", "Effect Detail",
     "Amount", "Scaling Type", "Scaling", "Effect Cadence", "Effect Duration", "Cast",
@@ -133,8 +135,8 @@ def merge_request(sheet_id, start, end, col):
 STEP_BLOCK = ACTION_BLOCK
 
 # The columns that merge wherever consecutive rows happen to agree.
-RUN_COLUMNS = ["Trigger", "Condition", "Action Source", "Action", "Count", "Spread", "Collision",
-               "Skill Range", "Aim Target"]
+RUN_COLUMNS = ["Trigger", "Condition", "Action Source", "Apply", "Spawn", "Motion", "Behavior",
+               "Shape", "Count", "Spread", "Collision", "Skill Range", "Aim Target"]
 
 
 def remerge_hero(sh):
