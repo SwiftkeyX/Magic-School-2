@@ -96,6 +96,17 @@ def cols(header):
     return out
 
 
+def header_row(vals):
+    """Index of the REAL (column-name) header row. The Hero tab carries a merged super-header row
+    ('Action' / 'Effect') ABOVE its names for readability, so its names live on row 1; the single-
+    header CSVs and every other tab keep them on row 0. Locate by the one column that is always a name
+    (`Champion`), so the same code works with or without the super-header. Data starts at header+1."""
+    for i, row in enumerate(vals[:3]):
+        if any(c.strip() == "Champion" for c in row):
+            return i
+    return 0
+
+
 def find_row(vals, col, value):
     for i, r in enumerate(vals):
         if len(r) > col and r[col].strip() == value:
@@ -159,7 +170,8 @@ def remerge_hero(sh):
     """
     ws = sh.worksheet("Hero")
     vals = ws.get_all_values()
-    c = cols(vals[0])
+    hr = header_row(vals)          # real header row; data starts at hr+1 (super-header above it stays)
+    c = cols(vals[hr])
     # The unmerge must cover EVERY merged column, wherever it physically sits. AOE + Offset merge like
     # the run block; since the action region was regrouped they may now sit LEFT of Skill Range / Count
     # / Spread / Collision, so take the max over all of them rather than assuming AOE/Offset are last.
@@ -174,12 +186,13 @@ def remerge_hero(sh):
     def spans(col):
         """(start, end) row pairs, split wherever `col` holds a value. A merged cell reads back ""
         on every row but its first, so a non-blank cell IS the start of a new block."""
-        starts = [i for i, r in enumerate(vals) if i > 0 and len(r) > col and r[col].strip()]
+        starts = [i for i, r in enumerate(vals) if i > hr and len(r) > col and r[col].strip()]
         return list(zip(starts, starts[1:] + [len(vals)]))
 
-    # Clear the whole region first, or a stale merge silently swallows the cells under it.
+    # Clear the whole region first, or a stale merge silently swallows the cells under it. Start below
+    # the header rows so the merged super-header ('Action'/'Effect') on row 0 is left untouched.
     reqs = [{"unmergeCells": {"range": {
-        "sheetId": ws.id, "startRowIndex": 1, "endRowIndex": len(vals),
+        "sheetId": ws.id, "startRowIndex": hr + 1, "endRowIndex": len(vals),
         "startColumnIndex": 0, "endColumnIndex": last_col + 1}}}]
 
     champions = spans(c["Champion"])

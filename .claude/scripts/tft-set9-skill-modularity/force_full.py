@@ -16,7 +16,7 @@ import pathlib
 
 import gspread
 
-from sheet import CRED, KEY, HERO_COLUMNS, col_letter, cols, remerge_hero
+from sheet import CRED, KEY, HERO_COLUMNS, col_letter, cols, header_row, remerge_hero
 
 DATA = pathlib.Path(".claude/scripts/tft-set9-skill-modularity/data")
 
@@ -29,26 +29,30 @@ def main():
         want = [r for r in csv.reader(f)]
     while want and not any(x.strip() for x in want[-1]):
         want.pop()
-    c = cols(vals[0])
-    wc = cols(want[0])
+    # Hero has a merged super-header above its names; the CSV is single-header. Align by DATA row.
+    shr, whr = header_row(vals), header_row(want)
+    c, wc = cols(vals[shr]), cols(want[whr])
+    ds, dw = shr + 1, whr + 1
     last = max(c[n] for n in HERO_COLUMNS)
+    n = len(want) - dw
 
-    if len(want) > len(vals):
-        if ws.row_count < len(want):
-            ws.add_rows(len(want) - ws.row_count)
-        vals += [[""] * len(vals[0]) for _ in range(len(want) - len(vals))]
+    if ds + n > len(vals):
+        if ws.row_count < ds + n:
+            ws.add_rows(ds + n - ws.row_count)
+        vals += [[""] * len(vals[shr]) for _ in range(ds + n - len(vals))]
 
     sh.batch_update({"requests": [{"unmergeCells": {"range": {
-        "sheetId": ws.id, "startRowIndex": 1, "endRowIndex": len(vals),
+        "sheetId": ws.id, "startRowIndex": ds, "endRowIndex": len(vals),
         "startColumnIndex": 0, "endColumnIndex": last + 1}}}]})
 
     edits = []
-    for i in range(1, len(want)):
+    for k in range(n):
+        si, wi_row = ds + k, dw + k
         for name in HERO_COLUMNS:
-            lit = want[i][wc[name]] if len(want[i]) > wc[name] else ""
-            cur = vals[i][c[name]] if len(vals[i]) > c[name] else ""
+            lit = want[wi_row][wc[name]] if len(want[wi_row]) > wc[name] else ""
+            cur = vals[si][c[name]] if len(vals[si]) > c[name] else ""
             if cur != lit:
-                edits.append({"range": f"{col_letter(c[name])}{i + 1}", "values": [[lit]]})
+                edits.append({"range": f"{col_letter(c[name])}{si + 1}", "values": [[lit]]})
     if edits:
         ws.batch_update(edits, value_input_option="RAW")
     print(f"force_full: wrote {len(edits)} cells to CSV literal")

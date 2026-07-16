@@ -23,7 +23,7 @@ continuation row makes it look like a new step.
 import csv
 import pathlib
 
-from sheet import open_sheet
+from sheet import header_row, open_sheet
 
 DATA = pathlib.Path(".claude/scripts/tft-set9-skill-modularity/data")
 
@@ -54,6 +54,10 @@ def main():
         # Trim trailing all-blank rows: the grid is padded out with empties, and they are not data.
         while vals and not any(cell.strip() for cell in vals[-1]):
             vals.pop()
+        # Hero carries a display-only merged super-header ('Action'/'Effect') above its column names.
+        # The CSV is single-header, so drop everything above the real header row on the way out.
+        if tab == "Hero":
+            vals = vals[header_row(vals):]
         width = max(len(r) for r in vals)
         vals = [r + [""] * (width - len(r)) for r in vals]
 

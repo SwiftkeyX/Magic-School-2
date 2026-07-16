@@ -34,8 +34,8 @@ THE THREE RULES THIS SCRIPT IS BUILT AROUND
 import csv
 import pathlib
 
-from sheet import (D, HERO_COLUMNS, IDENTITY_BLOCK, RUN_COLUMNS, col_letter, cols, open_sheet,
-                   remerge_hero)
+from sheet import (D, HERO_COLUMNS, IDENTITY_BLOCK, RUN_COLUMNS, col_letter, cols, header_row,
+                   open_sheet, remerge_hero)
 
 DATA = pathlib.Path(".claude/scripts/tft-set9-skill-modularity/data")
 
@@ -118,35 +118,40 @@ def sync_hero(sh):
     sheet = trim(ws.get_all_values())
     want = trim(read_csv("hero.csv"))
 
-    sc = cols(sheet[0])     # logical name -> column index in the SHEET
-    wc = cols(want[0])      # logical name -> column index in the CSV
-    check_rows(HERO, len(sheet), len(want))
+    # The Hero tab carries a merged super-header ('Action'/'Effect') ABOVE its column names, so its
+    # real header is row `shr` and data starts at `shr+1`. The CSV stays single-header (row 0). Align
+    # the two by DATA row, not by absolute index — otherwise the super-header shifts everything by one.
+    shr, whr = header_row(sheet), header_row(want)
+    sc = cols(sheet[shr])   # logical name -> column index in the SHEET
+    wc = cols(want[whr])    # logical name -> column index in the CSV
+    n = len(want) - (whr + 1)                       # number of DATA rows (from the CSV)
+    check_rows(HERO, len(sheet) - (shr + 1), n)
 
-    if len(want) > len(sheet):
-        need = len(want) + 1
-        if ws.row_count < need:
-            ws.add_rows(need - ws.row_count)
-        sheet += [[""] * len(sheet[0]) for _ in range(len(want) - len(sheet))]
+    need = shr + 1 + n                              # header rows + data rows
+    if need + 1 > ws.row_count:
+        ws.add_rows(need + 1 - ws.row_count)
+    if len(sheet) < need:
+        sheet += [[""] * len(sheet[shr]) for _ in range(need - len(sheet))]
 
     edits = []
-    for name in HERO_COLUMNS:                       # row 0 is the header - NEVER written
-        have = [cell(sheet[i], sc[name]) for i in range(1, len(want))]
-        mine = [cell(want[i], wc[name]) for i in range(1, len(want))]
+    for name in HERO_COLUMNS:                       # the header rows are NEVER written
+        have = [cell(sheet[shr + 1 + k], sc[name]) for k in range(n)]
+        mine = [cell(want[whr + 1 + k], wc[name]) for k in range(n)]
         if name in MERGED_COLUMNS:
             have, mine = fill_down(have), fill_down(mine)
         for k, (a, b) in enumerate(zip(have, mine)):
             if a != b:
-                edits.append({"range": f"{col_letter(sc[name])}{k + 2}", "values": [[b]]})
+                edits.append({"range": f"{col_letter(sc[name])}{shr + 2 + k}", "values": [[b]]})
 
     if edits:
         # Unmerge first, or a merged cell silently eats the write. remerge_hero() rebuilds the
-        # layout from the values afterwards.
+        # layout afterwards. Start below the header rows so the super-header merge is left intact.
         sh.batch_update({"requests": [{"unmergeCells": {"range": {
-            "sheetId": ws.id, "startRowIndex": 1, "endRowIndex": len(sheet),
+            "sheetId": ws.id, "startRowIndex": shr + 1, "endRowIndex": need,
             "startColumnIndex": 0,
-            "endColumnIndex": max(sc[n] for n in RUN_COLUMNS + ["AOE", "Offset"]) + 1}}}]})
+            "endColumnIndex": max(sc[n2] for n2 in RUN_COLUMNS + ["AOE", "Offset"]) + 1}}}]})
         ws.batch_update(edits, value_input_option="RAW")
-    print(f"{HERO}: {len(edits)} cells updated ({len(want) - 1} rows)")
+    print(f"{HERO}: {len(edits)} cells updated ({n} rows)")
     return bool(edits)
 
 
