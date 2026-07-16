@@ -65,6 +65,28 @@ AOE_TAXONOMY = (
     "edge', Kassadin's cone 'front edge'. Shape size stays in AOE (hex); odd shapes (MF's X) use "
     "Custom AOE. Migrated every instant/spawned AOE user; projectiles + lasers left untouched.")
 
+DASHBOARD_DITCH = (
+    "Done — ditched it for now: deleted the Dashboard tab and un-wired it from sync. Kept dashboard.py "
+    "(and the 'Columns used' profiles it reads) parked in the tooling, so we can switch it back on any "
+    "time by calling dashboard.generate(sh) in sync's main().")
+
+COLUMN_PROFILES = (
+    "Built it — both parts. (1) Each Action now declares a 'Columns used' profile in the Action Model "
+    "tab: e.g. Circle AOE → Aim Target, Offset, AOE, Collision, Skill Range; Homing Projectile → "
+    "Count, Spread, Collision (no AOE/Offset); Leap → Aim Target, Offset. (2) A new generated, "
+    "read-only 'Dashboard' tab shows each champion's full kit, and each action's Targeting cell shows "
+    "ONLY the columns its profile declares — so the '—' clutter is gone. The champion-centric Hero "
+    "stays the source you edit; the Dashboard is derived from it and regenerates every sync "
+    "(idempotent). I went with the dashboard-only option you picked; per-type tabs can come later off "
+    "the same profiles.")
+
+ACTION_GROUPING = (
+    "Done — grouped the Action Model rows by delivery family (adjacency only, no header rows; the doc "
+    "block stays at the bottom): Basic attack (Auto-Attack, QuickAA) · Projectile (Homing, First hit, "
+    "Pierce, Burst, Homing Burst, Receive) · AOE (Spawn At Target, Circle, Cone, Box, Custom) · Laser "
+    "(Laser Shot, Sweep, Standard, Current Target) · Movement/body (Charge Into, Knock Back, Grab & "
+    "Slam, Leap, Leap Behind) · Other (Cast, Summon).")
+
 COLUMN_ORDER = (
     "Done — regrouped the columns for readability. The action region now reads: Action Source | "
     "Action | Aim Target | Offset | AOE (hex) | Skill Range | Count | Spread | Collision, then the "
@@ -86,6 +108,9 @@ REPLIES = [
     ("condition for the action", QIYANA_COND),
     ("should also have Range AOE", AOE_TAXONOMY),
     ("I want column to have this format", COLUMN_ORDER),
+    ("group those action together", ACTION_GROUPING),
+    ("define which column each Action", COLUMN_PROFILES),
+    ("ditch it for now", DASHBOARD_DITCH),
 ]
 
 
