@@ -57,11 +57,13 @@ QIYANA_COND = (
     "0.5s), so Condition is free to mean an ACTION gate, as you said.")
 
 AOE_TAXONOMY = (
-    "This all makes sense, and it's a good direction — but it's a whole-sheet change: it would reclass "
-    "every Circle/Cone AOE user (Garen, Galio, Kassadin, Vi, Neeko, Warwick, …), not just the new 11, "
-    "and it interacts with your 'template action' idea. Let's FLAG it and do it as one clean migration "
-    "in a dedicated pass, rather than half-migrate now. Keeping the current actions (incl. the new "
-    "Melee AOE on Aatrox) as-is for this roster PR; leaving this thread open so we pick it up next.")
+    "Implemented (per our walk-through). AOE actions are now shape TEMPLATES — Circle AOE / Cone AOE / "
+    "Box AOE / Custom AOE — reused across heroes; 'Melee AOE' is gone. The caster-vs-target centre is "
+    "DERIVED from Action Source + Aim Target (Aim=Self → on the source, incl. a summon; else on the "
+    "target), so no Melee/Range naming is needed. Added a new 'Offset' column (an anchor label: "
+    "centred / rear edge / front edge / detached +N; '—' for non-AOE) — e.g. Aatrox's box is 'rear "
+    "edge', Kassadin's cone 'front edge'. Shape size stays in AOE (hex); odd shapes (MF's X) use "
+    "Custom AOE. Migrated every instant/spawned AOE user; projectiles + lasers left untouched.")
 
 # LONGEST / MOST DISTINCTIVE KEY FIRST. Each is a substring of exactly one open comment root.
 REPLIES = [
