@@ -22,21 +22,24 @@ SAME = "Same to Aim Target"    # recipient shorthand when it equals the Aim Targ
 
 # Logical name -> header text to look for. Headers carry parenthetical suffixes the user has
 # edited over time ("Collision (If it have one)"), so matching is exact-first, then prefix.
+# Order here MIRRORS the sheet's physical column order (CSV, sheet and builder all read left-to-right
+# the same way). cols() still resolves BY NAME, so order is not load-bearing for lookups — only
+# IDENTITY_BLOCK = HERO_COLUMNS[:10] depends on the first ten being the identity block. The action
+# region was regrouped for readability (the user's call): who/what/where first — Action Source,
+# Action, Aim Target, Offset, AOE — then the delivery detail (Skill Range, Count, Spread, Collision),
+# then the effect block. `Offset` is the AOE anchor label; it and `AOE` are per-ACTION merged columns.
+# `Effect Cadence` / `Effect Duration` were plain `Cadence` / `Duration (s)` — the user renamed them
+# for clarity (both describe the EFFECT). The names here MUST track the sheet's header text: cols()
+# matches exact-then-prefix, and "Effect Duration (s)".startswith("Duration") is False, so a stale
+# name does not fall back gracefully — it raises, which is the behaviour we want.
 HERO_COLUMNS = [
     "Champion", "Cost", "Role", "Origin 1", "Origin 2", "Class 1", "Class 2", "Range",
     "Summary", "Skill Description",
-    "Step", "Skill Type", "Trigger", "Condition", "Action Source", "Action",
-    "Count", "Spread", "Collision",
-    "Skill Range", "Aim Target", "Effect Recipient", "Effect Category", "Effect Detail",
-    # `Effect Cadence` / `Effect Duration` were plain `Cadence` / `Duration (s)`. The user renamed
-    # them for clarity: both describe the EFFECT, not the action, which puts them in the same family
-    # as Effect Recipient / Category / Detail. The names here MUST track the sheet's header text —
-    # cols() matches exact-then-prefix, and "Effect Duration (s)".startswith("Duration") is False, so
-    # a stale name here does not fall back gracefully. It raises, which is the behaviour we want.
-    # `Offset` (added when the AOE actions became shape templates) is a per-ACTION property like AOE:
-    # it says where the shape sits relative to its derived centre (centred / rear edge / front edge /
-    # detached +N). It sits between AOE and Cast, and merges by value-run the same way AOE does.
-    "Amount", "Scaling Type", "Scaling", "Effect Cadence", "Effect Duration", "AOE", "Offset", "Cast",
+    "Step", "Skill Type", "Trigger", "Condition",
+    "Action Source", "Action", "Aim Target", "Offset", "AOE",
+    "Skill Range", "Count", "Spread", "Collision",
+    "Effect Recipient", "Effect Category", "Effect Detail",
+    "Amount", "Scaling Type", "Scaling", "Effect Cadence", "Effect Duration", "Cast",
 ]
 
 # The action-instance block: these cells are vertically merged across the rows of one action.
@@ -155,10 +158,11 @@ def remerge_hero(sh):
     ws = sh.worksheet("Hero")
     vals = ws.get_all_values()
     c = cols(vals[0])
-    # AOE and Offset are per-ACTION properties, so they span an action's effect rows and merge like
-    # the run block. They are non-contiguous with it, but the unmerge below simply covers up to the
-    # rightmost merged column (the effect columns in between are never merged, so unmerging is a no-op).
-    last_col = max(c["AOE"], c["Offset"])
+    # The unmerge must cover EVERY merged column, wherever it physically sits. AOE + Offset merge like
+    # the run block; since the action region was regrouped they may now sit LEFT of Skill Range / Count
+    # / Spread / Collision, so take the max over all of them rather than assuming AOE/Offset are last.
+    # (Effect columns between merged ones are never merged, so unmerging across them is a no-op.)
+    last_col = max(c[n] for n in RUN_COLUMNS + ["AOE", "Offset"])
 
     def merge(a, b, col):
         return {"mergeCells": {"range": {

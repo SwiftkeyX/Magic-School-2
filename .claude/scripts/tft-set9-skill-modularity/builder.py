@@ -20,18 +20,18 @@ WHY EACH BLANKING RULE (each learned by breaking it — see [[tft-sheet-scripts]
   - identity (0-9): champion's FIRST row only; blank after (merged per champion).
   - Step + Skill Type (10,11): first row of each STEP only. Compared RAW, so a filled continuation
     row reads as a NEW step and never merges away.
-  - run columns (Trigger 12 .. Aim Target 20): on each ACTION's first row. Condition writes '—' on a
-    no-condition defining row — blank would inherit the champion above via sync's whole-column
-    fill_down. All run cols blank on continuation effect rows so they inherit + merge.
+  - run columns (Trigger 12 .. Collision 22, incl. AOE/Offset): on each ACTION's first row. Condition
+    writes '—' on a no-condition defining row — blank would inherit the champion above via sync's
+    whole-column fill_down. All run cols blank on continuation effect rows so they inherit + merge.
   - Skill Range (19): the hero's Range (identity[7]) on each action-start; blank on continuations.
-  - AOE (29) + Offset (30): the action's values on its first effect row; blank on continuations so
+  - AOE (18) + Offset (17): the action's values on its first effect row; blank on continuations so
     they merge (both are per-action).
   - effect columns: filled on every row.
 
-32-col layout (Offset inserted before Cast):
-  0-9 identity | 10 Step 11 SkillType | 12 Trigger 13 Cond 14 Src 15 Action 16 Count 17 Spread
-  18 Collision 19 SkillRange 20 Aim | 21 Recip 22 Cat 23 Detail 24 Amount 25 ScalType 26 Scaling
-  27 Cadence 28 Duration 29 AOE 30 Offset 31 Cast
+32-col layout (action region regrouped: who/what/where, then delivery detail, then effects):
+  0-9 identity | 10 Step 11 SkillType | 12 Trigger 13 Cond
+  14 ActionSource 15 Action 16 Aim 17 Offset 18 AOE 19 SkillRange 20 Count 21 Spread 22 Collision
+  23 Recip 24 Cat 25 Detail 26 Amount 27 ScalType 28 Scaling 29 Cadence 30 Duration 31 Cast
 """
 
 D = "—"
@@ -55,12 +55,13 @@ def build(identity, steps):
                     r[10], r[11] = step_no, skill_type
                     first_step = False
                 if ei == 0:                            # action-start row: run cols + skill range + AOE/Offset
-                    r[12], r[14], r[15], r[16] = trig, src, act, cnt
-                    r[17], r[18], r[19], r[20] = spr, col, skill_range, aim
-                    r[29], r[30] = aoe, offset
+                    r[12] = trig
+                    r[14], r[15], r[16] = src, act, aim
+                    r[17], r[18] = offset, aoe
+                    r[19], r[20], r[21], r[22] = skill_range, cnt, spr, col
                 r[13] = cond or (D if ei == 0 else "")
-                r[21], r[22], r[23], r[24] = recip, cat, det, amt
-                r[25], r[26], r[27], r[28], r[31] = st, sc, cad, dur, cast
+                r[23], r[24], r[25], r[26] = recip, cat, det, amt
+                r[27], r[28], r[29], r[30], r[31] = st, sc, cad, dur, cast
                 out.append(r)
     return out
 
@@ -72,6 +73,6 @@ if __name__ == "__main__":  # tiny self-test
             [("", "Enemies in area", "Attack", "Damage", "100% AP", D, D, "Once", D, "1", "centred", D),
              ("", "Enemies in area", "Status", "Stun", D, D, D, "Once", "2", D, "", D)])])])
     assert all(len(r) == 32 for r in rows)
-    assert rows[0][19] == "4" and rows[0][29] == "1" and rows[0][30] == "centred"  # range + AOE + offset
-    assert rows[1][29] == "" and rows[1][30] == "" and rows[1][0] == ""            # per-action cols blank on continuation
+    assert rows[0][19] == "4" and rows[0][18] == "1" and rows[0][17] == "centred"  # range + AOE + offset
+    assert rows[1][18] == "" and rows[1][17] == "" and rows[1][0] == ""            # per-action cols blank on continuation
     print("builder self-test ok:", len(rows), "rows")
