@@ -32,7 +32,7 @@ All calculations are derived from first principles using base stats sourced dire
 | **Jhin** | AD backliner, Big pierce AOE (avg to 2 target) | Not specify | 1★<br>2★<br>3★ | 54<br>81<br>122 | 0.70 | 34.6<br>51.9<br>78.1 | 35.5<br>53.2<br>80.1 | **70.1**<br>**105.1**<br>**158.2** |
 | **Malzahar** | AP backliner, 1x3 hex AOE (avg to 1.5 target) | Not specify | 1★<br>2★<br>3★ | 40<br>60<br>90 | 0.70 | 25.2<br>37.8<br>56.7 | 41.5<br>62.3<br>94.4 | **66.8**<br>**100.1**<br>**151.1** |
 | **Samira** | AD backliner, single-target focus | Not specify | 1★<br>2★<br>3★ | 45<br>68<br>101 | 0.70 | 26.5<br>40.1<br>59.6 | 16.8<br>25.4<br>39.7 | **43.3**<br>**65.5**<br>**99.3** |
-| **Tristana** | AD backliner, splash AOE (avg to 2 targets), single-focus | Not specify | 1★<br>2★<br>3★ | 45<br>68<br>101 | 0.70 | 40.6<br>61.3<br>91.1 | 13.2<br>20.0<br>29.7 | **53.8**<br>**81.3**<br>**120.8** |
+| **Tristana** | AD backliner, splash AOE (avg hit 2 on AOE), single-focus | Not specify | 1★<br>2★<br>3★ | 45<br>68<br>101 | 0.70 | 40.6<br>61.3<br>91.1 | 26.5<br>40.0<br>59.4 | **67.1**<br>**101.3**<br>**150.5** |
 | **Viego** | AP melee carry, single-target focus, stack scaling | 15s | 1★<br>2★<br>3★ | 45<br>68<br>101 | 0.75 | 30.1<br>45.5<br>67.6 | 21.4<br>32.1<br>48.6 | **51.5**<br>**77.6**<br>**116.2** |
 | **Viego** | AP melee carry, single-target focus, stack scaling | 30s | 1★<br>2★<br>3★ | 45<br>68<br>101 | 0.75 | 30.1<br>45.5<br>67.6 | 34.8<br>52.2<br>78.7 | **64.9**<br>**97.7**<br>**146.3** |
 
@@ -48,8 +48,8 @@ All calculations are derived from first principles using base stats sourced dire
 | **Jhin** | AD backliner, Big pierce AOE (avg to 2 target) | Not specify | 1★<br>2★<br>3★ | 114<br>171<br>257 | 0.77 | 99.5<br>149.3<br>224.3 | 87.6<br>131.4<br>197.4 | **187.1**<br>**280.7**<br>**421.7** |
 | **Malzahar** | AP backliner, 1x3 hex AOE (avg to 1.5 target) | Not specify | 1★<br>2★<br>3★ | 46<br>69<br>104 | 0.70 | 36.2<br>54.2<br>81.7 | 139.4<br>209.1<br>316.8 | **175.6**<br>**263.3**<br>**398.5** |
 | **Samira** | AD backliner, single-target focus | Not specify | 1★<br>2★<br>3★ | 65<br>98<br>146 | 0.77 | 47.8<br>72.9<br>107.4 | 45.4<br>69.2<br>107.4 | **93.2**<br>**142.1**<br>**214.8** |
-| **Tristana** (1.26 AS) | AD backliner, splash AOE (avg to 2 targets), single-focus | 15s | 1★<br>2★<br>3★ | 65<br>98<br>146 | 1.26 | 141.7<br>215.9<br>318.4 | 59.0<br>89.8<br>132.4 | **200.7**<br>**305.7**<br>**450.8** |
-| **Tristana** (1.63 AS) | AD backliner, splash AOE (avg to 2 targets), single-focus | 30s | 1★<br>2★<br>3★ | 65<br>98<br>146 | 1.63 | 175.5<br>267.3<br>394.2 | 76.3<br>116.3<br>171.4 | **251.8**<br>**383.6**<br>**565.6** |
+| **Tristana** (1.26 AS) | AD backliner, splash AOE (avg hit 2 on AOE), single-focus | 15s | 1★<br>2★<br>3★ | 65<br>98<br>146 | 1.26 | 141.7<br>215.9<br>318.4 | 117.9<br>179.5<br>264.8 | **259.6**<br>**395.4**<br>**583.2** |
+| **Tristana** (1.63 AS) | AD backliner, splash AOE (avg hit 2 on AOE), single-focus | 30s | 1★<br>2★<br>3★ | 65<br>98<br>146 | 1.63 | 175.5<br>267.3<br>394.2 | 152.6<br>232.3<br>342.6 | **328.1**<br>**499.6**<br>**736.8** |
 | **Viego** (RFC × 3 - 1.33s) | AP melee carry, single-target focus, stack scaling | 15s | 1★<br>2★<br>3★ | 45<br>68<br>101 | 1.49 | 83.8<br>126.6<br>188.1 | 90.5<br>135.7<br>204.6 | **174.3**<br>**262.3**<br>**392.7** |
 | **Viego** (RFC × 3 - 3.11s) | AP melee carry, single-target focus, stack scaling | 30s | 1★<br>2★<br>3★ | 45<br>68<br>101 | 1.49 | 83.8<br>126.6<br>188.1 | 156.8<br>235.2<br>353.7 | **240.6**<br>**361.8**<br>**541.8** |
 
@@ -152,10 +152,10 @@ All calculations are derived from first principles using base stats sourced dire
 
 #### 🧮 DPS Output Summary
 *   **Baseline (Unequipped)**:
-    *   15s / 30s Fight: 1★: **53.8** | 2★: **81.3** | 3★: **120.8**
+    *   15s / 30s Fight: 1★: **67.1** | 2★: **101.3** | 3★: **150.5**
 *   **Well-Equipped (Guinsoo's + Last Whisper + Infinity Edge)**:
-    *   15s Fight (1.26 AS avg): 1★: **200.7** | 2★: **305.7** | 3★: **450.8**
-    *   30s Fight (1.63 AS avg): 1★: **251.8** | 2★: **383.6** | 3★: **565.6**
+    *   15s Fight (1.26 AS avg): 1★: **259.6** | 2★: **395.4** | 3★: **583.2**
+    *   30s Fight (1.63 AS avg): 1★: **328.1** | 2★: **499.6** | 3★: **736.8**
 *   **Detailed DPS Calculations**: [Tristana DPS Calculations](file:///c:/Organized%20Files/Working/Unity/Unity%20Project/Magic%20School%202/.claude/docs/balance/calculations/tristana-dps-calculation.md)
 
 #### 🔍 Analyze DPS

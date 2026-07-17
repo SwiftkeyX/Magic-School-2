@@ -27,7 +27,7 @@ This document provides the step-by-step mathematical calculations for Tristana's
 *   **Skill**: Gain +70% Attack Speed for 4 seconds. During the duration, attacks explode on impact and deal **60% AD physical damage** to enemies within 1 hex (splash).
 *   **Steroid Rotation**: Tristana cannot gain mana during her active steroid. Her cycle consists of a 4-attack mana generation phase followed by a 4-second active steroid phase.
 *   **AS Steroid Buff**: She gains AS during her steroid, bringing her unequipped steroid AS to **1.19 AS** (generating 4.76 attacks), and her equipped steroid AS to **2.63 AS** (generating 10.52 attacks).
-*   **Splash Density**: Deals splash damage to 1 adjacent target, represented by a **1.00× splash multiplier**.
+*   **Splash Density**: Deals splash damage to an average of 2 adjacent targets, represented by a **2.00× splash multiplier**.
 
 ---
 
@@ -43,9 +43,9 @@ This document provides the step-by-step mathematical calculations for Tristana's
 | Total Cycle Attacks | `ATC + Steroid Attacks` | `4 + 4.76` | 8.76 | 8.76 | 8.76 |
 | Auto Attack DPS | `(Total Cycle Attacks × AD) / Cycle` | `(8.76 × [45, 68, 101]) / 9.714s` | 40.6 | 61.3 | 91.1 |
 | Spell Base (1 Target) | `0.60 × AD` | `0.60 × [45, 68, 101]` | 27.0 | 40.8 | 60.6 |
-| Spell Damage | `Steroid Attacks × Spell Base` | `4.76 × [27.0, 40.8, 60.6]` | 128.5 | 194.2 | 288.5 |
-| Spell DPS | `Spell Damage / Cycle` | `[128.5, 194.2, 288.5] / 9.714s` | 13.2 | 20.0 | 29.7 |
-| **Total DPS** | `Auto DPS + Spell DPS` | `Auto DPS + Spell DPS` | **53.8** | **81.3** | **120.8** |
+| Spell Damage | `Steroid Attacks × Spell Base × Splash` | `4.76 × [27.0, 40.8, 60.6] × 2.00` | 257.0 | 388.4 | 576.9 |
+| Spell DPS | `Spell Damage / Cycle` | `[257.0, 388.4, 576.9] / 9.714s` | 26.5 | 40.0 | 59.4 |
+| **Total DPS** | `Auto DPS + Spell DPS` | `Auto DPS + Spell DPS` | **67.1** | **101.3** | **150.5** |
 
 ---
 
@@ -83,17 +83,17 @@ This document provides the step-by-step mathematical calculations for Tristana's
 | Steroid Attacks (15s) | `Steroid Duration × AS_buffed(15s)` | `4.0 × 2.26` | 9.04 | 9.04 | 9.04 |
 | Total Cycle Attacks (15s) | `ATC + Steroid Attacks` | `4 + 9.04` | 13.04 | 13.04 | 13.04 |
 | Auto Attack DPS (15s) | `(Total Attacks × AD_equipped × Crit) / Cycle` | `(13.04 × [65, 99, 146] × 1.20) / 7.175s` | 141.7 | 215.9 | 318.4 |
-| Spell Damage (15s) | `Steroid Attacks × Spell Base × Crit` | `9.04 × [39.0, 59.4, 87.6] × 1.20` | 423.1 | 644.4 | 950.3 |
-| Spell DPS (15s) | `Spell Damage / Cycle` | `[423.1, 644.4, 950.3] / 7.175s` | 59.0 | 89.8 | 132.4 |
-| **Total DPS (15s)** | `Auto DPS + Spell DPS` | `Auto DPS + Spell DPS` | **200.7** | **305.7** | **450.8** |
+| Spell Damage (15s) | `Steroid Attacks × Spell Base × Splash × Crit` | `9.04 × [39.0, 59.4, 87.6] × 2.00 × 1.20` | 846.1 | 1288.1 | 1899.9 |
+| Spell DPS (15s) | `Spell Damage / Cycle` | `[846.1, 1288.1, 1899.9] / 7.175s` | 117.9 | 179.5 | 264.8 |
+| **Total DPS (15s)** | `Auto DPS + Spell DPS` | `Auto DPS + Spell DPS` | **259.6** | **395.4** | **583.2** |
 | **Case 2: 30s Fight (1.63 average AS)** | | | | | |
 | Cycle Duration (30s) | `ATC / AS_equipped(30s) + Steroid Duration` | `4 / 1.63 + 4.0` | 6.454s | 6.454s | 6.454s |
 | Steroid Attacks (30s) | `Steroid Duration × AS_buffed(30s)` | `4.0 × 2.63` | 10.52 | 10.52 | 10.52 |
 | Total Cycle Attacks (30s) | `ATC + Steroid Attacks` | `4 + 10.52` | 14.52 | 14.52 | 14.52 |
 | Auto Attack DPS (30s) | `(Total Attacks × AD_equipped × Crit) / Cycle` | `(14.52 × [65, 99, 146] × 1.20) / 6.454s` | 175.5 | 267.3 | 394.2 |
-| Spell Damage (30s) | `Steroid Attacks × Spell Base × Crit` | `10.52 × [39.0, 59.4, 87.6] × 1.20` | 492.3 | 750.3 | 1105.9 |
-| Spell DPS (30s) | `Spell Damage / Cycle` | `[492.3, 750.3, 1105.9] / 6.454s` | 76.3 | 116.3 | 171.4 |
-| **Total DPS (30s)** | `Auto DPS + Spell DPS` | `Auto DPS + Spell DPS` | **251.8** | **383.6** | **565.6** |
+| Spell Damage (30s) | `Steroid Attacks × Spell Base × Splash × Crit` | `10.52 × [39.0, 59.4, 87.6] × 2.00 × 1.20` | 984.7 | 1499.0 | 2211.3 |
+| Spell DPS (30s) | `Spell Damage / Cycle` | `[984.7, 1499.0, 2211.3] / 6.454s` | 152.6 | 232.3 | 342.6 |
+| **Total DPS (30s)** | `Auto DPS + Spell DPS` | `Auto DPS + Spell DPS` | **328.1** | **499.6** | **736.8** |
 
 ---
 
