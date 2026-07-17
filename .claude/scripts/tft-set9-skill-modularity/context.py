@@ -16,7 +16,8 @@ import csv
 import pathlib
 import sys
 
-from sheet import (CRED, D, HERO_COLUMNS, IDENTITY_BLOCK, RUN_COLUMNS, STEP_BLOCK, cols)
+from sheet import (CRED, D, HERO_COLUMNS, IDENTITY_BLOCK, RUN_COLUMNS, STEP_BLOCK, fill_down,
+                   validate_data)
 
 DATA = pathlib.Path(".claude/scripts/tft-set9-skill-modularity/data")
 SOURCE_KEY = "1xj6em5XlvIN1gWHTKOPDsssmkgnS3jIsaLnAMjYyPUA"  # tft-set9 (Champions/Origins/Classes)
@@ -64,52 +65,53 @@ def print_schema():
     print("  * A blank RUN cell inherits the row above (whole-column fill_down). So a DEFINING row")
     print("    with no condition must write '%s', NOT blank, or it inherits the champion above." % D)
     print("  * 'not applicable' is the em-dash '%s', never blank. Blank = 'same as above' / continuation." % D)
-    print("  * Cast/Leap -> Count '%s'. Star-varying counts use slash notation: '6/6/25'." % D)
+    print("  * Cast/Move -> Count '%s'. Star-varying counts use slash notation: '6/6/25'." % D)
     print("  * Continuation rows: blank cols 0..Aim Target, fill effect cols. Identity blank except row 1.")
     print("  * %d champions currently in hero.csv." % len({r[0].strip() for r in h[1:] if r and r[0].strip()}))
 
 
+def print_actions():
+    """The Action Model tab, printed as the lookup it is: pick a name, the axes come with it."""
+    rows = rd("action-model.csv")
+    hdr = rows[0]
+    show = [hdr.index(n) for n in ("Legacy Action", "Apply", "Spawn", "Motion", "Behavior", "Shape",
+                                   "Collision")]
+    print("\n=== ACTIONS (Hero's `Legacy action` must match one of these EXACTLY) ===")
+    print("  %-31s %-12s %-9s %-14s %-10s %-7s %s" % tuple(hdr[i] for i in show))
+    for r in rows[1:]:
+        if not any(c.strip() for c in r):
+            break                                    # the AXES doc block below is not data
+        if r[0].strip():
+            print("  %-31s %-12s %-9s %-14s %-10s %-7s %s" % tuple(r[i] for i in show))
+    print("  ('per row' = varies per Hero row; the Hero cell is the truth, not this tab.)")
+
+
 def print_reference():
     print("\n=== REFERENCE VALUES (sync.py VALIDATE enforces these) ===")
-    print("  Apply        :", col0("apply-types.csv"))
-    print("  Spawn        :", col0("spawn-types.csv"))
-    print("  Motion       :", col0("motion-types.csv"))
-    print("  Behavior     :", col0("behavior-types.csv"))
-    print("  Shape        :", col0("shape-types.csv"))
+    print("  Triggers     :", col0("trigger-types.csv"))
     print("  Collisions   :", col0("collision-types.csv"))
     print("  Spreads      :", col0("spread-types.csv"))
     print("  Scaling Types:", col0("scaling-types.csv"))
-    pairs = sorted({(r[0].strip(), r[1].strip()) for r in rd("effect-types.csv")[1:] if len(r) > 1 and r[0].strip()})
-    print("  Effect pairs (Category / Detail):")
+    # Effect Types is MERGED by category, so its Category cell is blank on every row but a block's
+    # first. Filtering on `r[0].strip()` here would silently print 6 pairs instead of 44 - the blank
+    # is data ("same as above"), not an empty row.
+    et = [r for r in rd("effect-types.csv")[1:] if len(r) > 1]
+    pairs = sorted(set(zip([v.strip() for v in fill_down([r[0] for r in et])],
+                           [r[1].strip() for r in et])))
+    print("  Effect pairs (Category / Detail), %d in %d merged blocks:"
+          % (len(pairs), len({c for c, _ in pairs})))
     for cat, det in pairs:
         print("      %-9s / %s" % (cat, det))
 
 
 def validate():
-    """Replicate sync.py's used-vs-defined check on the CSVs — no network round-trip."""
-    h = hero()
-    c = cols(h[0])
+    """sync.py's used-vs-defined check, run on the CSVs — no network round-trip.
 
-    def used(name):
-        i = c[name]
-        return {r[i].strip() for r in h[1:] if len(r) > i} - {"", D}
-
-    defined = {"Apply": set(col0("apply-types.csv")), "Spawn": set(col0("spawn-types.csv")),
-               "Motion": set(col0("motion-types.csv")), "Behavior": set(col0("behavior-types.csv")),
-               "Shape": set(col0("shape-types.csv")), "Collision": set(col0("collision-types.csv")),
-               "Scaling Type": set(col0("scaling-types.csv")), "Spread": set(col0("spread-types.csv"))}
-    pairs = {(r[c["Effect Category"]].strip(), r[c["Effect Detail"]].strip())
-             for r in h[1:] if len(r) > c["Effect Detail"]} - {("", "")}
-    effects = {(r[0].strip(), r[1].strip()) for r in rd("effect-types.csv")[1:] if len(r) > 1}
-
-    problems = []
-    for label in defined:
-        miss = used(label) - defined[label]
-        if miss:
-            problems.append("%s: %s used but not defined" % (label, sorted(miss)))
-    orphan = sorted(p for p in pairs if p not in effects and all(p))
-    if orphan:
-        problems.append("Effect pairs undefined: %s" % orphan)
+    It CALLS sync's check rather than restating it. This was a second copy, and it drifted the day
+    Effect Types gained a merge: sync learned that a blank category means 'same as above' and this did
+    not, so identical CSVs passed one and failed the other with 36 phantom errors.
+    """
+    problems = validate_data()
     print("\n=== LOCAL VALIDATE ===")
     print("  PROBLEMS:", problems if problems else "NONE — ok")
     return not problems
@@ -132,7 +134,8 @@ def print_source(origin):
         print("      %s" % (r[skill] or "").replace("\n", " "))
 
 
-EXCLUDED_95 = {"Fiora", "Quinn", "Xayah"}  # Set 9.5-only, deliberately excluded (design-notes 'Note - Roster')
+EXCLUDED_95 = set()  # nothing is excluded any more: the tab covers the FULL Set 9 roster (9.0
+                    # + 9.5, all 75). Fiora/Quinn/Xayah were held out while it was 9.0-only.
 
 
 def print_missing():
@@ -162,6 +165,7 @@ def main():
     if "--validate" in args:
         sys.exit(0 if validate() else 1)
     print_schema()
+    print_actions()
     print_reference()
     if "--origin" in args:
         print_source(args[args.index("--origin") + 1])

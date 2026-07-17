@@ -23,21 +23,9 @@ continuation row makes it look like a new step.
 import csv
 import pathlib
 
-from sheet import header_row, open_sheet
+from sheet import HERO_TAB, TABS, header_row, open_sheet
 
 DATA = pathlib.Path(".claude/scripts/tft-set9-skill-modularity/data")
-
-# Sheet tab name -> csv filename. Every tab the scripts own.
-TABS = {
-    "Hero": "hero.csv",
-    "Column Explain": "column-explain.csv",
-    # `Action Model` retired when Hero migrated to the decomposed axes (Apply/Spawn/Motion/Behavior/Shape).
-    "Effect Types": "effect-types.csv",
-    "Collision Types": "collision-types.csv",
-    "Scaling Types": "scaling-types.csv",
-    "Spread Types": "spread-types.csv",
-    "Design Notes": "design-notes.csv",
-}
 
 
 def main():
@@ -56,7 +44,7 @@ def main():
             vals.pop()
         # Hero carries a display-only merged super-header ('Action'/'Effect') above its column names.
         # The CSV is single-header, so drop everything above the real header row on the way out.
-        if tab == "Hero":
+        if tab == HERO_TAB:
             vals = vals[header_row(vals):]
         width = max(len(r) for r in vals)
         vals = [r + [""] * (width - len(r)) for r in vals]

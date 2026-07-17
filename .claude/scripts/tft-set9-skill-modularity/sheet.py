@@ -10,15 +10,53 @@ Everything here runs from repo-root cwd:
     python .claude/scripts/tft-set9-skill-modularity/sync.py
 """
 
+import csv
+import pathlib
+
 import gspread
 from google.auth.transport.requests import AuthorizedSession
 from google.oauth2.service_account import Credentials
 
 KEY = "1X5glHjVcgv3yYG4Q2SyV9YJS3sv_wH5XAg3RLOHnUa4"
 CRED = "google-service-credential.json"
+DATA = pathlib.Path(".claude/scripts/tft-set9-skill-modularity/data")
 
 D = "—"                        # the sheet's "not applicable" marker
 SAME = "Same to Aim Target"    # recipient shorthand when it equals the Aim Target
+
+# Sheet tab name -> csv filename. THE definition of which tabs the tooling owns; sync.py (writer) and
+# export.py (reader) both derive from it.
+#
+# It lives here because it was two lists, one per script, and they drifted: `Action Model` was added
+# back to sync's map and export simply forgot it, so the tab was written but could never be read back
+# — a hand-edit to it would be silently destroyed by the next sync. Same failure mode the merge layout
+# has (one function, one file, on purpose): two copies of a fact will disagree, given a chance.
+#
+# `Action Model` is the lookup Hero's `Legacy action` keys into. Only `Hero` has a logical column
+# schema; the rest are plain tables synced positionally.
+TABS = {
+    "Hero": "hero.csv",
+    "Column Explain": "column-explain.csv",
+    "Action Model": "action-model.csv",
+    "AOE shape": "aoe-shape.csv",
+    "Trigger Types": "trigger-types.csv",
+    "Effect Recipient Types": "effect-recipient-types.csv",
+    "Effect Types": "effect-types.csv",
+    "Collision Types": "collision-types.csv",
+    "Scaling Types": "scaling-types.csv",
+    "Spread Types": "spread-types.csv",
+    "Design Notes": "design-notes.csv",
+}
+
+HERO_TAB = "Hero"
+REFERENCE = {t: f for t, f in TABS.items() if t != HERO_TAB}
+
+# Reference tab -> the column merged vertically for display (0-based). Same rule as Hero: a merged
+# cell reads back "" on every row but its first, so the CSV carries the blank and the merge is
+# DERIVED from the values. `Effect Types` groups by category (the user: "merge the cell in Effect
+# category until it left with only 4 row") - which needs the rows SORTED by category first, or a
+# scattered category cannot merge into one block.
+MERGED_REFERENCE = {"Effect Types": 0}
 
 # Logical name -> header text to look for. Headers carry parenthetical suffixes the user has
 # edited over time ("Collision (If it have one)"), so matching is exact-first, then prefix.
@@ -36,12 +74,23 @@ HERO_COLUMNS = [
     "Champion", "Cost", "Role", "Origin 1", "Origin 2", "Class 1", "Class 2", "Range",
     "Summary", "Skill Description",
     "Step", "Skill Type", "Trigger", "Condition",
-    # v2 action model: the lumped `Action` was decomposed into these orthogonal axes (Apply/Spawn/
-    # Motion/Behavior/Shape). Collision is KEPT (not fully derivable — Grab & Slam = Flank-Pair).
-    "Action Source", "Apply", "Spawn", "Motion", "Behavior", "Shape", "Aim Target", "Offset", "AOE",
-    "Skill Range", "Count", "Spread", "Collision",
+    # `Legacy action` is a KEY into the `Action Model` tab, which holds the axes (Apply/Spawn/Motion/
+    # Behavior/Shape) that describe it. Those axes lived here per-row for one day (v2, 0db5e27) and
+    # moved out: they are functionally determined by the name — verified on all 135 action rows — so
+    # per-row copies were ~200 rows restating a 23-row lookup, and could only drift out of sync.
+    # Collision/Offset/AOE STAY here: they genuinely vary per row (Burst Projectile is First-Hit on
+    # three rows and Target-Only on one), which is exactly what a lookup cannot express.
+    "Action Source", "Legacy action", "Aim Target", "Offset", "AOE",
+    # `Collision` is GONE from Hero: the action decides it. It was per-row for a real reason until
+    # Urgot — the last action whose Collision varied — turned out to be a Cone AOE, not a Burst
+    # Projectile. The Action Model tab is now its only home.
+    "Skill Range", "Count", "Spread",
+    # `Cast` sits at the END of the action region, not with the effects. It describes the ACTION (the
+    # user: "the cast is one the element in each action"), and it used to be the sheet's LAST column —
+    # marooned past the effect block, which is what made it read as an effect property.
+    "Cast",
     "Effect Recipient", "Effect Category", "Effect Detail",
-    "Amount", "Scaling Type", "Scaling", "Effect Cadence", "Effect Duration", "Cast",
+    "Amount", "Scaling Type", "Scaling", "Effect Cadence", "Effect Duration",
 ]
 
 # The action-instance block: these cells are vertically merged across the rows of one action.
@@ -146,8 +195,8 @@ def merge_request(sheet_id, start, end, col):
 STEP_BLOCK = ACTION_BLOCK
 
 # The columns that merge wherever consecutive rows happen to agree.
-RUN_COLUMNS = ["Trigger", "Condition", "Action Source", "Apply", "Spawn", "Motion", "Behavior",
-               "Shape", "Count", "Spread", "Collision", "Skill Range", "Aim Target"]
+RUN_COLUMNS = ["Trigger", "Condition", "Action Source", "Legacy action", "Count", "Spread",
+               "Skill Range", "Aim Target", "Cast"]
 
 
 def remerge_hero(sh):
@@ -227,6 +276,134 @@ def remerge_hero(sh):
 
 # The round scripts import this name. Kept as an alias so they keep working until they are archived.
 remerge = remerge_hero
+
+
+def unmerge_reference(sh, tab, col):
+    """Drop the merges on one reference column, so a write cannot be swallowed by a stale one.
+
+    A merged cell EATS a write to any row but its first, silently (invariant #8 - the doc-block bug).
+    So the order is always unmerge -> write -> remerge, exactly as sync_hero does it.
+    """
+    ws = sh.worksheet(tab)
+    sh.batch_update({"requests": [{"unmergeCells": {"range": {
+        "sheetId": ws.id, "startRowIndex": 1, "endRowIndex": ws.row_count,
+        "startColumnIndex": col, "endColumnIndex": col + 1}}}]})
+
+
+def remerge_reference(sh, tab, col):
+    """Merge runs of one reference column. Derived from the values, same as Hero's merges.
+
+    A run starts on a non-blank cell and continues through the blanks below it - which is exactly how
+    the CSV encodes it, so a flat CSV still fully describes the tab.
+    """
+    ws = sh.worksheet(tab)
+    vals = ws.get_all_values()
+    while vals and not any(c.strip() for c in vals[-1]):
+        vals.pop()
+    starts = [i for i, r in enumerate(vals) if i > 0 and len(r) > col and r[col].strip()]
+    reqs = []
+    for a, b in zip(starts, starts[1:] + [len(vals)]):
+        if b - a > 1:
+            reqs.append({"mergeCells": {"range": {
+                "sheetId": ws.id, "startRowIndex": a, "endRowIndex": b,
+                "startColumnIndex": col, "endColumnIndex": col + 1}, "mergeType": "MERGE_COLUMNS"}})
+    if reqs:
+        sh.batch_update({"requests": reqs})
+    print(f"{tab}: re-merged — {len(starts)} blocks in column {col}")
+
+
+# Hero column -> the reference CSV whose first column defines its legal values.
+VOCAB = {
+    "Legacy action": "action-model.csv",     # THE lookup: a key with no row here resolves to nothing
+    "AOE": "aoe-shape.csv",                  # sizes are keys too, or the column drifts back to prose
+    "Trigger": "trigger-types.csv",
+    "Effect Recipient": "effect-recipient-types.csv",
+    "Scaling Type": "scaling-types.csv",
+    "Spread": "spread-types.csv",
+}
+
+# Reference tab -> (its csv, the column to check, the csv defining that column's vocabulary).
+# Hero is not the only thing that can rot. `Collision` left Hero (the action decides it), so nothing
+# was left to check it against `collision-types.csv` — the taxonomy could drift with no Hero column
+# to notice. A tab's own vocabulary needs validating too.
+TAB_VOCAB = [("action-model.csv", "Collision", "collision-types.csv")]
+
+
+def read_data(name):
+    with (DATA / name).open(encoding="utf-8", newline="") as f:
+        return [r for r in csv.reader(f)]
+
+
+def fill_down(seq):
+    """Resolve a merged column to its EFFECTIVE values: a blank inherits the row above."""
+    out, prev = [], ""
+    for v in seq:
+        if v.strip():
+            prev = v
+        out.append(prev)
+    return out
+
+
+def validate_data():
+    """No value used in Hero may be undefined in its reference tab. Returns a list of problems.
+
+    THE ONE implementation. sync.py raises on it; context.py prints it for the /add-champion flow.
+    It was written twice - once in each - and they drifted the moment Effect Types gained a merge:
+    sync.py learned to fill_down its category column and context.py did not, so the same CSVs passed
+    one check and failed the other with 36 phantom errors. Exactly the bug the single tab map and the
+    single merge layout exist to prevent. One fact, one function.
+    """
+    hero = read_data("hero.csv")
+    c = cols(hero[0])
+
+    def cell(r, i):
+        return r[i] if len(r) > i else ""
+
+    def used(name):
+        return {cell(r, c[name]).strip() for r in hero[1:]} - {"", D}
+
+    def defined(csv_name, col=0):
+        """First column of a reference tab, header dropped, STOPPING at the first all-blank row -
+        every prose/doc block below that separator is documentation, not vocabulary."""
+        out = set()
+        for r in read_data(csv_name)[1:]:
+            if not any(x.strip() for x in r):
+                break
+            if cell(r, col).strip():
+                out.add(cell(r, col).strip())
+        return out
+
+    problems = [f"{label}: {sorted(miss)} used in Hero but not defined in {src}"
+                for label, src in VOCAB.items()
+                for miss in [used(label) - defined(src)] if miss]
+
+    # Effect Types is MERGED by category, so its Category column is blank on every row but a block's
+    # first. Reading it raw turns every pair below a block top into ('', Detail) - matching nothing.
+    et = read_data("effect-types.csv")[1:]
+    effects = set(zip([v.strip() for v in fill_down([cell(r, 0) for r in et])],
+                      [cell(r, 1).strip() for r in et]))
+    pairs = {(cell(r, c["Effect Category"]).strip(), cell(r, c["Effect Detail"]).strip())
+             for r in hero[1:]} - {("", "")}
+    # (D, D) is not an undefined effect — it is NO effect, and it is a legitimate row: a projectile
+    # exists to hit something, and applies nothing itself (the burst that follows does). Blank would
+    # be wrong there (blank means "same as the row above"), so the em-dash pair says it explicitly.
+    orphan = {p for p in pairs if p not in effects and all(p) and p != (D, D)}
+    if orphan:
+        problems.append(f"Effect: {sorted(orphan)} used in Hero but not defined in effect-types.csv")
+
+    for src, col, vocab in TAB_VOCAB:
+        rows = read_data(src)
+        i = rows[0].index(col)
+        used_t = set()
+        for r in rows[1:]:
+            if not any(x.strip() for x in r):
+                break
+            if cell(r, i).strip():
+                used_t.add(cell(r, i).strip())
+        miss = used_t - defined(vocab) - {D, "per row"}
+        if miss:
+            problems.append(f"{src} {col}: {sorted(miss)} used but not defined in {vocab}")
+    return problems
 
 
 NOTES_TAB = "Design Notes"
