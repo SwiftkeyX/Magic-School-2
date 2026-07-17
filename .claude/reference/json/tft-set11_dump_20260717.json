@@ -2,7 +2,7 @@
   "_meta": {
     "sheet": "tft-set11",
     "key": "1BCFZRFebGd2O41ZvbJcNZ7LdVBWH3ssBliTQGMVN3cI",
-    "dumped_at": "2026-07-17T18:58:24"
+    "dumped_at": "2026-07-17T19:03:47"
   },
   "Champions": [
     [
@@ -835,7 +835,7 @@
       "Soraka",
       "3 Gold",
       "Support",
-      "Passive: Each time your team loses 20% of their total Health, gain 8 Ability Power for the rest of combat. Active: Mana Reave the largest group of enemies within range. Deal 260/390/600% Ability Power magic damage to the center enemy and 120/180/290% Ability Power magic damage to adjacent enemies. Mana Reave: Increase max Mana by 20% until the next cast",
+      "Passive: Each time your team loses 20% of their total Health, gain 8% Ability Power for the rest of combat. Active: Mana Reave the largest group of enemies within range. Deal 260/390/600% Ability Power magic damage to the center enemy and 120/180/290% Ability Power magic damage to adjacent enemies. Mana Reave: Increase max Mana by 20% until the next cast",
       "Heavenly",
       "",
       "Altruist",
