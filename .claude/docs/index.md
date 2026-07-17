@@ -41,3 +41,5 @@
 |---|---|
 | `tft/tft-reference-sheets.md` | External TFT set 9/10/11 hero/trait/skill Google Sheets — auto-chess genre reference |
 | `tft/set9-skill-schema-review.md` | Review: what the simplified set9-skill schema broke vs the intended version |
+| `tft/set9-skill-design-notes.md` | The **why** behind the schema — one section per decision, and what it was decided against. The sheet's `Design Notes` tab holds the one-liners and links here |
+| `tft/set9-skill-review-comments-archive.md` | Verbatim archive of the 79 resolved sheet-review comment threads (the *reasoning* lives in the sheet's `Design Notes`; this is the raw exchange) |

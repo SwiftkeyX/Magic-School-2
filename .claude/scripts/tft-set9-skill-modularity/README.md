@@ -23,15 +23,51 @@ point, and something the old 300-line-patch-script-per-round approach could neve
 |---|---|
 | `data/*.csv` | **The source of truth.** One file per tab. |
 | `sync.py` | **THE one writer.** CSV → sheet, derives every merge, then validates. |
-| `dashboard.py` | **Parked & stale.** Generated a read-only champion-centric Dashboard from `action-model.csv`'s `Columns used` profiles — which were RETIRED when Hero migrated to the decomposed v2 axes (Apply/Spawn/Motion/Behavior/Shape). Needs reworking around the v2 columns before it can be re-wired into `sync.py`. |
+| `dashboard.py` | **Parked & stale.** Generated a read-only champion-centric Dashboard from `action-model.csv`'s `Columns used` profiles. That tab is back and managed again, but it has no `Columns used` column — rework it around the current shape before re-wiring it into `sync.py`. |
 | `export.py` | Sheet → CSV. Use only to re-snapshot if the sheet is edited by hand. |
 | `reply.py` | Replies to the review comments. Holds **the current round's** replies; overwrite it each round. |
-| `sheet.py` | Shared helpers: `cols()`, `remerge_hero()`, `post_replies()`. |
-| `context.py` | One batched read for the `/add-champion` skill: schema + conventions + reference vocab (`--origin X` adds source rows, `--missing` lists un-added champions, `--validate` runs the local check). |
+| `sheet.py` | Shared helpers: `TABS` (**the** tab↔CSV map, which `sync.py` and `export.py` both derive from), `cols()`, `remerge_hero()`, `post_replies()`. |
+| `context.py` | One batched read for the `/add-champion` skill: schema + the action lookup + conventions + reference vocab (`--origin X` adds source rows, `--missing` lists un-added champions, `--validate` runs the local check). |
 | `builder.py` | Reusable `build(identity, steps)` → 31-col rows with the blanking rules baked in. `from builder import build`. |
 | `fix_append.py` | Reconcile the append-merge quirk after adding NEW champions, then sync to 0. |
 | `force_full.py` | Deterministic escape hatch: write every Hero cell to the CSV literal + one re-merge, when sync/fix_append fight (e.g. after a mid-file insert). |
-| `archive/` | 17 retired scripts (~5,000 lines). Kept for history. **Never run them.** |
+| `archive/` | 33 retired scripts (~5,000 lines) — the origin passes, the review rounds, and the schema migrations. Kept for history. **Never run them.** |
+
+## The vocabularies, and what enforces them
+
+`sync.py` VALIDATE fails if a Hero cell uses a value with no row in its tab. That check — not the tab
+— is what stops a vocabulary drifting: `Action Model` spent a day hand-maintained and invisible to the
+tooling, and quietly disagreed with the data.
+
+| Hero column | must match a row in |
+|---|---|
+| `Legacy action` | `Action Model` (`action-model.csv`) |
+| `AOE (hex)` | `AOE shape` (`aoe-shape.csv`) — `Circle N hex` / `Cone N hex` / `Box WxD` |
+| `Trigger (When)` | `Trigger Types` (`trigger-types.csv`) |
+| `Effect Recipient` | `Effect Recipient Types` (`effect-recipient-types.csv`) |
+| `Scaling Type` / `Spread` | their `*-types.csv` |
+| `Effect Category` + `Effect Detail` | `Effect Types` (as a PAIR) |
+| *(tab-vs-tab)* `Action Model`'s `Collision` | `Collision Types` — `TAB_VOCAB`, because no Hero column checks it any more |
+
+## The action model — one name, one lookup
+
+`Hero.Legacy action` holds a **key** (`Pierce Projectile`, `Circle AOE`, `Cast`). How that action
+*works* — `Apply` / `Spawn` / `Motion` / `Behavior` / `Shape` — lives in **one row** of the
+`Action Model` tab (`data/action-model.csv`). `sync.py` VALIDATE fails if a key has no row there.
+
+Those five axes were Hero **columns** for one day (v2, `0db5e27`) and moved out again, because every
+one of them is decided by the action's name — checked across all 135 action rows, 23 names, no
+exceptions once `Auto-Attack` is split into `(melee)` and `(ranged)`. Per-row copies were ~200 rows
+restating a 23-row lookup, with nothing to stop the two drifting apart.
+
+**What stays in Hero:** `Offset`, `AOE (hex)`, `Count`, `Spread`, `Cast (s)` — an action's shape is
+fixed but its **size**, anchor and repetition are not.
+
+**`Collision` left too.** It was per-row for a real reason — `Burst Projectile` was `First-Hit` on
+three rows and `Target-Only` on one — until that last exception (Urgot) turned out to be a `Cone AOE`,
+not a Burst Projectile at all. Every action now has exactly one Collision, so the column was restating
+the tab on every row. **If a future champion breaks that, they get their own action** (which is
+exactly how `Wave` and Nilah's `Cone AOE` happened) — that is the model working, not failing.
 
 ## Renaming a column
 
