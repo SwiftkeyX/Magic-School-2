@@ -189,7 +189,21 @@ Yordle's trait is a blanket miss-chance effect, no per-champion text, so no bonu
 
 THE MODEL: an action = Apply {DirectApply | Hitbox} - Spawn {at-User | at-Target} - Motion {- static | Projectile | Arc | Forward N hex} - Behavior {First-Hit | Homing | Pierce | Returning, Projectile only} - Shape {1-hex | circle | cone | box | custom}. WHAT HAPPENED: v2 (0db5e27) replaced the lumped 'Action' column with those five axes AS HERO COLUMNS (36 cols). One day later they were collapsed back into a single 'Legacy action' key (32 cols) pointing at the 'Action Model' tab. WHY: the axes are FUNCTIONALLY DETERMINED BY THE ACTION'S NAME - verified on all 135 action rows, 23 names, zero exceptions once Auto-Attack is split. Per-row axes were therefore ~200 rows restating a 23-row lookup, with no way to stop the two drifting apart. Normalising it means an action is DEFINED once, in the tab, and Hero references it. The v2 work was not wasted: the axes are the tab's columns. WHAT STAYS PER-ROW, and why the lookup does not swallow them: Collision (Burst Projectile is First-Hit on 3 rows and Target-Only on 1), Offset, AOE (hex) (the SIZE of a Circle AOE is per row; its SHAPE is not), Count, Spread. LOCKED DECISIONS: (1) 'Auto-Attack' is NOT an action when the champion attacks - that is a TRIGGER ('On Attack'), and the action riding on it is 'Bonus on AA' (DirectApply, Collision None). The user's call, and they were right: 'On attack do action Auto-Attack' is circular, and Warwick proves it (On Attack -> Buff/HEAL - he is not attacking). 'Auto-Attack (ranged)' now means only a SUMMON really attacking (Azir's Sand Soldier, Soraka's Child of the Star); QuickAA is its own action (Bel'Veth PERFORMS N attacks). 'Auto-Attack (melee)' is RETIRED - zero rows. This replaced an earlier melee/ranged split, which was a PROXY for the same distinction (every melee AA row was a bonus) and is why that split looked like it held. (2) Shape moves to the tab; SIZE stays in Hero's AOE (hex). (3) Collision stays a Hero column, shown in the tab for reference only - where it varies the tab reads 'per row' and the Hero cell is the truth. (4) The tab's key must match Hero's cell EXACTLY, so champion parentheticals ('Sweep Laser (Gwen)') moved into 'Clarify more'; 'Leap' and 'Leap Behind' stay two rows (same axes, different intent). ENFORCED: sync.py VALIDATE fails if any Hero 'Legacy action' has no row in the tab. The tab is now a managed tab (data/action-model.csv), not hand-edited - it was hand-made and invisible to the tooling for a day, which is precisely how a doc drifts from the data unnoticed. Supersedes 'Note - Delivery vs Shape' and 'Note - Mid-action change (KNOWN GAP)'.
 
-## Note - Charge/Move split (one row, two jobs)
+## Note - Charge moves its carrier (REVERSED: was a Charge/Move split)
+
+**Charge is the reposition AND the hitbox, as of 2026-07-17.** The split below required a paired `Move` action that **only 1 of its 3 users ever had** — Sion. Gangplank's Dreadway and K'Sante's flying body never did, and nobody noticed for as long as the rule existed.
+
+The user: *"I don't think move+charge is neccessary anymore, just lump it to charge."*
+
+**I argued against it and was wrong on the evidence.** My case was that the split protects K'Sante — and it does, which is why the cost below is real. But when I actually counted the rows before defending the rule, it was being followed once in three. A rule honoured 1-in-3 is not carrying its weight; it is decoration that occasionally trips someone.
+
+**The known cost, accepted rather than hidden:** K'Sante's carrier does **not** move under its own power — his `Knock Back` throws it — and `Charge` can no longer tell that apart from Sion charging in himself. If that distinction ever earns its keep it becomes a **second action**, not a column. It is written into the `Charge` row of the Action Model tab so the next person meets it there.
+
+The 1-in-3 count cuts both ways and it is worth being honest about that: it could equally have meant two rows were *missing* a Move. What settled it was **who** the users are — a sailing ship and a thrown body are not repositioning themselves in any sense the sheet was capturing.
+
+---
+
+*The original reasoning, kept because the split was right for a year and the argument still explains what `Charge` is:*
 
 **'Charge Into' and 'Knock Back' each hid a second action. Charge = a hitbox carried on a unit; Move = the reposition. The carrier need not be the caster.**
 
@@ -359,3 +373,104 @@ So a champion with genuinely no `Class 2` has a blank cell, and a whole-column f
 **It hid for the entire life of the sheet**, because for a champion already on the sheet both sides fill down identically and nothing is written. It only fires on an APPEND, where the sheet has no row yet: the two sides disagree and sync writes the filled value. Adding the 11 Set 9.5 champions gave Illaoi Graves' `Gunner`, and six champions Gangplank's `Reaver King` and Naafari's `Shurima`.
 
 **Only the export round-trip catches this.** Sync reports 0 afterwards (the sheet equals what it wrote), and VALIDATE reads the CSV, not the sheet. Fixed: `fill_down(seq, starts)` resets at each champion for the identity block.
+
+## Note - Delayed Blast (Twisted Fate)
+
+**The bomb rides the VICTIM. `Action Source` is the `Delayed Blast` itself — not the caster, and not the victim, who does not explode.**
+
+The user: *"Self doesn't sound right for Step2. It more like he attach bomb on you and that bomb explode 1.25 second later. Step1 attack target + give them explode status. Step2 the souce target explode."*
+
+His step 2 was sourced from `Self`, which put the blast on **Twisted Fate**, four hexes away from where it actually goes off. The question this asks is the **same one Zone AOE vs Circle AOE asks**, and it is testable the same way: *where does it land if the victim moves during the 1.25s?* The cards are stuck to them, so it follows them.
+
+Step 1 now applies `Status / Delayed Blast` — a new Effect Type. It is not `Mark` (a mark does nothing by itself; this one goes off).
+
+**Then the user sharpened it again:** *"This is kinda confusing, use 'Delay blast' instead here."* — against `Step 1 Aim target`, which I had put in the source. They were right, and the reason is worth keeping: `Step 1 Aim target` names the **victim**, so the row read *"the victim explodes"*. The victim does not explode; **the bomb does**, and the victim is merely what it is stuck to. Source now names the thing that **acts**, exactly as Graves and Silco already did with `Step 1 Projectile`.
+
+**The fuse lives in `Amount`, alone** (the user's call). It had briefly been in three cells — the status' `Amount`, its `Effect Duration`, and step 2's `Cast (s)` — all necessarily the same number, so they could only ever disagree by typo. The other two are `—`.
+
+## Note - a summon that holds no hex
+
+**`Summon (untethered)` (Spawn `—`): Naafiri's packmates float and occupy NO hex.**
+
+The user: *"Where it was spawned, maybe is confusing. Because those summon just float around and didn't belong to any hex… Naafiri cast ability on target, summon 3 wolf, each wolf float around, then charge into target and deal damage."*
+
+`Summon`'s Spawn is `at-Target`, so the sheet was saying **the wolves appear on the victim's hex**. But `at-User` is just as wrong: they are not on Naafiri's hex either. **Both values assume the summon takes a hex**, and these take none.
+
+Hence a second action with `Spawn = —`, and `Aim Target = —` for the same reason: there is no hex to name.
+
+**The `at-Target` decision stands** — it was the user's call, twice (`159caa8`), and it is right for summons that *do* occupy a hex (Azir's Sand Soldier). This is not a per-row exception to it: being ungridded is a property of the **action**, so it gets its own action. Same shape as `Wave` and Nilah's `Cone AOE`.
+
+## Note - X [collision=Y] is a NAME, not a syntax
+
+**An override rides in the action's own name and is a REAL Action Model row.**
+
+The user, on Naafiri's wolves: *"The pierce all can be overwrite, but don't add new column, just put it in the same cell, 'Charge [collision=homing]'."* And their reason, which is the important half: *"the only reason I don't like putting collision column in hero tab is it was most of time useless."*
+
+That is not an objection to per-row collision *information* — it is an objection to a **column that is redundant on ~200 rows**. So the exception rides in the action's name instead, and `Charge [collision=Target-Only]` is an actual row in the Action Model tab. Hero's cell stays a plain key; **nothing in the tooling had to learn a mini-language**; VALIDATE keeps working unchanged.
+
+It is really the existing rule — *a champion whose mechanics differ from its action's gets its own action* — wearing the user's syntax. And their name is **better than an invented one**, because it says what it overrides instead of hiding it. (`Wave` and `Burst Projectile` were both retired for hiding things.)
+
+**One correction to the proposal:** `homing` is not a Collision — it is a *Behavior*, and only for `Motion = Projectile`. A Charge is not a projectile. The collision meaning what they described is `Target-Only`: *"ONLY the unit being aimed at — nothing else on the way is touched."* The wolf tracking its target is already said by `Aim Target`.
+
+**The cost, and its guard:** the name states the collision twice — in the name and in the row's own `Collision` cell — which is exactly the two-copies-of-one-fact trap. `validate_data()` therefore checks that a `X [collision=Y]` row's Collision cell **is** Y, and that `X` is a real action. Both were tested against a deliberately drifted row.
+
+**A truly parsed override** (strip the brackets, validate the parts, allow it on any action) is a small step from here — but it would reopen the per-row axis overrides that v2→v3 deliberately closed, so it needs a reason.
+
+## Note - Gilgamesh Projectile (Xayah)
+
+**Her feathers are ranked BEHIND her (`Offset = rank -1`) and fan out through the target. It is its own action.**
+
+The user: *"she create the projectile behind her back that line up in a row (projectile didn't create at herself)… Then each projectile is shoot at target and pierce through him. And potentially… it could hit several enemy behind the target."*
+
+This one went through **both** modelling rules and is worth reading as a pair with them.
+
+**First: an existing axis beats a new action.** I proposed a whole new projectile action. The user said use `Offset` — and they were right. `Offset` is precisely the column for *"the hitbox is not at its derived centre"*, and it already had an unused `detached +N` in its legend for exactly this kind of displacement. No new action needed.
+
+**But the value could not be per-row, and that is the second rule.** `Pierce Projectile` **fixes** its Offset at `centred`. A per-row `rank -1` on Xayah was therefore **not an override — it was a contradiction**: it made the tab lie about Jhin, Sona and Quinn, who really are centred. The user reached the same place from the visual side — *"since how it look visually is so different from the other"* — and named it.
+
+**So the general rule: before putting a value in a Hero cell, check whether the action FIXES that axis.** If it does, the row cannot override it; the champion needs their own action. `Spread` could not carry it either — Spread says where the instances **go** (they all converge on the target), and this is where they **start**.
+
+**Why the rank is data and not decoration:** each feather starts in a different slot and they all converge on ONE target, so they arrive at different angles and carry on through at different angles — a neat rank **fans out** behind the target. That is testable, which is what earns it a place.
+
+## Note - Offset is a KEY, not prose
+
+**The anchor vocabulary is a tab (`Offset Types`), and VALIDATE enforces it.**
+
+Offset was the **last geometry column with no reference tab**. `AOE (hex)`, `Trigger`, `Spread`, `Effect Recipient` and `Scaling Type` all had one; Offset had a legend buried in the Action Model tab's footer and nothing checking it.
+
+It nearly got prose. The user, on Xayah: *"Could we just set Offset = spawn projectile behind her, and line them up in a row."* Half of that was right and better than my proposal (see Gilgamesh Projectile). The half that was not is the sentence itself:
+
+- **Prose in an unchecked column is how `AOE (hex)` once held `Gwen-shaped`** and `4 (1 hex at range 1, 3 at range 2)`. Offset held exactly three clean values across every row that stated one — a sentence would have been the only prose in it, and nothing would ever have caught it.
+- **It welds two facts into one cell**: where one hitbox starts, and how N of them are arranged. That is `On Ally Attack Chilled Enemy` again.
+
+So the value is a **term** — `rank -1` — and the tab exists. Precedent for a single term naming an arrangement: `360° radial` in Spread Types. **When a column takes prose, the real bug is that it has no tab.**
+
+`TAB_VOCAB` also checks the Action Model tab's **own** Offset column, because most anchors live there now and Hero's check cannot see a value no Hero row uses (`rank -1` is used by the action, not by a row).
+
+## Note - who states the geometry ('—' vs 'default' vs 'unknown')
+
+**Three different facts get three different values. While two of them shared the em-dash, no check could exist.**
+
+The user: *"Isn't it better to use 'default' than the '-'?"*
+
+This is the best call of the round and the reasoning generalises. I had adopted a rule — *if the action fixes the anchor, the Hero cell says `—`* — which was the majority convention already (~12 actions followed it; `Cone AOE` and `Charge` were the stragglers). **But it was unenforceable**, because `—` already meant *"this action projects no hitbox at all"*. One symbol, two facts:
+
+| Action Model says | Hero cell must say |
+|---|---|
+| `—` (projects no hitbox) | `—` |
+| a fixed value (Offset) / `1-hex` (Shape) | `default` |
+| `per row` / a shape needing a size / `specify elsewhere` | a real value — or `unknown` |
+
+**A row that had lost its size read identically to a row that never needed one.** Split them and the mapping is exact in both directions, so `validate_data()` can check every hitbox row — which it now does, for `Offset` and `AOE (hex)` alike, tested four ways.
+
+**It found 13 bad rows immediately**, all pre-existing:
+
+- **10 hitboxes with no size at all** — Swain's circle, Irelia's and Senna's and Viego's beams, Ahri's circle and wave, Kayle's wave, Nilah's cone and line. The sheet had been asserting *"these have no hitbox"*, which is **false**, in the one symbol that guaranteed nobody would ask.
+- **2 summon bolts** (Azir, Soraka) → `1-hex`, the documented default projectile.
+- **Sett's Grab & Slam** → `Box 3x1`, centred (the user: *"3x1, center at self"*). Not a gap at all: the tab was right and the row was empty.
+
+**`unknown` is an admission, not a shape.** Those 10 sizes are simply not in the source — Swain *"deal circular AOE damage"*, Senna *"fire a massive beam"*, Nilah *"strikes in a line"* — and inventing numbers is the one thing this sheet has consistently refused (Yasuo's stun, Garen's cadence, Maokai's stat block). Now the gap is **visible on the tab** instead of hiding behind a symbol that means "not applicable", and closing one is editing a cell.
+
+**The lesson, general form: when a rule cannot be checked, suspect the vocabulary before blaming the discipline.** `Cone AOE` and `Charge` did not drift because anyone was careless; they drifted because nothing *could* notice.
+
+Also fixed here: `Custom AOE` had the inverse bug — the tab said `—` (no anchor) while its only Hero row said `centred`. It is `per row`, which is what it always meant.

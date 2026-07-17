@@ -43,6 +43,7 @@ tooling, and quietly disagreed with the data.
 |---|---|
 | `Legacy action` | `Action Model` (`action-model.csv`) |
 | `AOE (hex)` | `AOE shape` (`aoe-shape.csv`) — `Circle N hex` / `Cone N hex` / `Box WxD` |
+| `Offset` | `Offset Types` (`offset-types.csv`) — `centred` / `rear edge` / `rank -N` / `detached +N` |
 | `Trigger (When)` | `Trigger Types` (`trigger-types.csv`) |
 | `Effect Recipient` | `Effect Recipient Types` (`effect-recipient-types.csv`) |
 | `Scaling Type` / `Spread` | their `*-types.csv` |

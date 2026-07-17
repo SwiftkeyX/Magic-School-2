@@ -28,7 +28,7 @@ Note - Empowered Attack (Maokai),Maokai's heal is not a passive. It is what his 
 Note - Void,No per-unit bonus; four novel shapes resolved with the user.
 Note - Yordle,No per-unit bonus; Poppy & Kled already entered under their Origin 1; 4-star modelled per user.
 Note - Action model (v1 lumped -> v2 axes -> Legacy action + lookup),"The action's mechanics live in the 'Action Model' tab, one row per action; Hero holds only the name. The five axes were per-row Hero columns for one day and moved out."
-"Note - Charge/Move split (one row, two jobs)",'Charge Into' and 'Knock Back' each hid a second action. Charge = a hitbox carried on a unit; Move = the reposition. The carrier need not be the caster.
+Note - Charge moves its carrier (REVERSED: was a Charge/Move split),"Charge is the reposition AND the hitbox, as of 2026-07-17. The split required a paired 'Move' that only 1 of its 3 users ever had. Cost: K'Sante's thrown body now reads as self-propelled."
 Note - Trigger Types tab,"The trigger vocabulary is a tab, and sync VALIDATE enforces it - a trigger cannot be invented without adding a row first."
 Note - Cast (s) sits in the Action block,"Cast time is an element of the ACTION, so its column lives at the end of Hero's Action block (after Collision) and merges per action. It is NOT in the Action Model tab."
 "Note - AOE (hex) is a KEY, not prose","Every AOE (hex) cell names a row in the 'AOE shape' tab: Circle N hex / Cone N hex / Box WxD. Cone N = widest 2N+1, depth N+1."
@@ -43,6 +43,13 @@ Note - a projectile and its burst are 2 parts,The projectile has its own shape; 
 Note - a delivery row applies nothing,A projectile's own row reads '—' for its effect. It exists to hit; the burst that follows does the applying.
 Note - Zone AOE: a hitbox that stays,Damage from BEING somewhere (Zone AOE) vs from HAVING BEEN HIT (Circle AOE + a status). The action says which the duration means.
 Note - a blank identity cell inherits the champion above,"sync's fill_down was whole-column, but an identity merge stops at the champion. It gave Illaoi the class of the champion above her."
+Note - Delayed Blast (Twisted Fate),"The bomb rides the VICTIM, so it goes off wherever they walked to. Action Source is the 'Delayed Blast' itself - not the caster, and not the victim, who does not explode. Its Amount is the fuse."
+Note - a summon that holds no hex,"'Summon (untethered)' (Spawn '—'): Naafiri's packmates float and occupy NO hex, so at-User and at-Target are both wrong - each claims one. Plain 'Summon' keeps at-Target."
+"Note - Offset is a KEY, not prose","The anchor vocabulary is a tab ('Offset Types') and VALIDATE enforces it. Offset was the LAST geometry column with no reference tab, so a sentence in it could never have been caught."
+Note - '—' vs 'default' vs 'unknown',"Three different facts, three values: no hitbox exists / the action fixes it / it HAS a size nobody has researched. While two of them shared the em-dash, no check could tell a correct row from one that had lost its value - splitting them exposed 13 bad rows at once."
+Note - who states the geometry,"If the action's Offset/Shape says 'per row', the Hero cell states it; if the action FIXES it, Hero says 'default'. Enforced both ways, on every action-start row, for Offset and AOE (hex) alike."
+"Note - X [collision=Y] is a NAME, not a syntax","An override rides in the action's own name and is a REAL Action Model row, so Hero's cell stays a plain key and no tool parses anything. Collision is not a Hero column because it would be useless on ~200 rows; an exception costs one row instead."
+Note - Gilgamesh Projectile (Xayah),"Her feathers are ranked BEHIND her (Offset 'rank -1') and fan out through the target. Its own action because Pierce Projectile FIXES 'centred' - a per-row override there would make the tab lie about Jhin, Sona and Quinn."
 ,
 How to read this tab,
 "The one-line summary of every schema decision. THE FULL REASONING — what was decided against, and why — lives in the repo at .claude/docs/tft/set9-skill-design-notes.md, which is versioned and diffable.",
