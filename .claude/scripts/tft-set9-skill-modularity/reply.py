@@ -5,58 +5,96 @@ Run from repo-root cwd:  python .claude/scripts/tft-set9-skill-modularity/reply.
 Overwrite REPLIES each round; git keeps the history. Comments are left UNRESOLVED — resolving them is
 the user's call, always. A MATCH KEY IS A SUBSTRING OF THE COMMENT'S ROOT and fails SILENTLY, so keep
 keys long, distinctive, and never a prefix of another.
+
+THIS ROUND IS CORRECTIONS. The three replies below were answered earlier today and then OVERTAKEN by
+later decisions — a thread that describes a state which no longer exists is worse than no reply, since
+the sheet is what gets read. post_replies is idempotent on BODY, so a correction must be a new body.
 """
 
 from sheet import post_replies
 
-# --- Round: Zone AOE (a hitbox that stays) + Silco's missing vial ---
+# --- Round: corrections, after the Charge/geometry decisions landed ---
 
-SILCO = "\n".join([
-    "Done — Silco is a projectile then a zone now:",
+NAAFIRI = "\n".join([
+    "CORRECTION to my reply above — the Move row is gone. You decided that a Charge MOVES its carrier, "
+    "so step 3 is one row now, not two:",
     "",
-    "  step 1  Homing Projectile   AOE 1-hex           -> — (the vial; it applies nothing)",
-    "  step 2  On Projectile Hit   src 'Step 1 Projectile'",
-    "          Zone AOE            AOE Circle 2 hex    -> Damage/Heal, every 1s for 6s",
+    "  step 3  After Step 2   src 'Summon'",
+    "          Charge [collision=Target-Only]   Aim 'Step 1 Aim target'",
+    "             -> Damage 190/195/200% AD (total across all packmates)",
     "",
-    "The vial was missing from the sheet ENTIRELY — he was a bare Circle AOE, so the thing he throws "
-    "was nowhere. He is the same shape as Teemo now: a projectile, then the thing it becomes.",
+    "Ignore the 'Move' line in the reply above; it described a rule that no longer exists. Everything "
+    "else in it still stands — the bracket is a real Action Model row, and Target-Only is the "
+    "collision that means what you described.",
     "",
-    "See your Teemo comment for the Zone AOE half — that one is the more interesting of the two.",
+    "Two of its cells also changed with the geometry rule: Offset and AOE (hex) both read 'default' "
+    "now, because the Charge action already fixes them (centred, 1-hex) and the row no longer repeats "
+    "what the action owns.",
+    "",
+    "STILL OPEN, and I need a number from you: you asked for the 3 wolves to be modelled as 3. Her "
+    "190/195/200% AD is the TOTAL across all packmates, so Count 3 needs either a per-wolf amount "
+    "(~63.3/65/66.7% AD) or a new rule saying 'the Amount is the total, divide by Count'. I did not "
+    "want to invent either.",
 ])
 
-ZONE = "\n".join([
-    "You have found a real gap, and the difference you are describing is testable, which is what makes "
-    "it worth a name: walk OUT of Silco's chemicals and the damage stops; walk away from Teemo's "
-    "poison and it keeps ticking, because that one rides on YOU.",
+DELAY = "\n".join([
+    "CORRECTION to my reply above — that question is settled, and this is what it landed on. You said "
+    "keep the Amount, so the fuse now lives in exactly one cell:",
     "",
-    "  Silco: the damage comes from BEING IN A PLACE. His hitbox persists.",
-    "  Teemo: the damage comes from HAVING BEEN HIT. His hitbox fires once and leaves a status.",
+    "  step 1  Status / Delayed Blast   Amount 1.25   Effect Duration —",
+    "  step 2  Circle AOE               Cast (s) —",
     "",
-    "THE SHEET COULD NOT SAY WHICH. Both read 'Circle AOE + Every Ns + duration' — and that duration "
-    "silently meant two different things: the HITBOX's life for Silco, the VICTIM's status for Teemo. "
-    "Same class of bug as AOE (hex) meaning both the hitbox and the burst it becomes.",
+    "Ignore the 'say the word and I will' at the end of the reply above; it is done.",
     "",
-    "So there is a new action, 'Zone AOE' — a hitbox that STAYS for its duration, re-applying to "
-    "whoever is inside at each tick. Its Effect Recipient is re-evaluated every tick; that is the "
-    "whole point of it. The ACTION now says which kind of duration a row means, so no column has to:",
+    "Effect Types now says the AMOUNT IS THE FUSE, so the meaning travels with the value rather than "
+    "living in this thread.",
+])
+
+SOURCE = "\n".join([
+    "Still correct as replied — 'Delayed Blast' is the Action Source and nothing since has changed it.",
     "",
-    "  Circle AOE (fires once) + over-time  ->  the duration is the VICTIM'S status",
-    "  Zone AOE   (persists)   + over-time  ->  the duration is the ZONE'S life",
+    "One addition worth knowing: the same instinct you had here ('name the thing that ACTS') is now "
+    "written into the Design Notes tab, because it is a rule and not a one-off. Graves and Silco name "
+    "'Step 1 Projectile'; Twisted Fate names 'Delayed Blast'. The victim never names itself — it is "
+    "what the bomb is stuck to, not the thing that goes off.",
+])
+
+XAYAH_RECIPIENT = "\n".join([
+    "Fixed — 'Enemies in path'. You are right, and that cell was contradicting her own action.",
     "",
-    "TEEMO NEEDED NO CHANGE. He was already right — only the ambiguity around him was wrong.",
+    "'Gilgamesh Projectile' is Pierce-All: it touches EVERY unit along the path. 'Same to Aim Target' "
+    "is what a Target-Only action says - it hits the one it aimed at and nothing else. So the row was "
+    "denying the exact thing the action exists for, and the thing you described when you asked for it: "
+    "'it could hit several enemy behind the target'.",
     "",
-    "AND IT WAS NOT JUST THESE TWO. Garen ('spin like a beyblade for 4s') and Swain (his aura while "
-    "transformed) are persistent hitboxes wearing Circle AOE as well. All three are Zones now.",
+    "Her armour shred below it is UNCHANGED and still 'First hit enemy' - that one is right, because "
+    "the source says each feather removes 6 Armor from the FIRST target IT hits. So her one action "
+    "now has two recipients, and they genuinely differ:",
     "",
-    "ONE THING I LEFT ALONE, flagged for you: Garen's cadence reads 'Every spin'. Every other cadence "
-    "in the sheet is a real interval (Once / Every 0.5s / Every 1s), and his source only says 'damage "
-    "over time' — it never gives a number. I would rather flag it than invent one.",
+    "  Damage 80/80/100% AD + 15/25/60% AP  -> Enemies in path   (everyone the feathers pierce)",
+    "  Debuff DEF 6                         -> First hit enemy   (only who each feather hits first)",
+    "",
+    "I CHECKED WHETHER THIS WAS SYSTEMIC. It is not - you found the only one. Five other rows look "
+    "like it and are all correct, which is worth knowing because it is why I am NOT adding a checker "
+    "for this:",
+    "",
+    "  Swain / Shen / Renekton   Circle AOE aimed at SELF, so 'Same to Aim Target' IS the caster -",
+    "                            a self-buff riding on the AOE (your Swain-heal precedent).",
+    "  Lissandra                 the Stun lands on the aimed target, the damage on the area.",
+    "                            Two effects, two recipients, both right.",
+    "  Nilah                     a self attack-speed buff on her laser row.",
+    "",
+    "The rule that separates them is subtle: a recipient may narrow to one unit when the effect RIDES "
+    "ALONG (a buff, a status on the aim target), but not when it is the hitbox's own damage. A checker "
+    "would have to tell those apart, and it would cry wolf five times to catch Xayah once.",
 ])
 
 REPLIES = [
-    ("Silco throw homing projectile first", SILCO),
-    ("Teemo and Silco are really similar", ZONE),
+    ("Summon charge into target for Naafiri", NAAFIRI),
+    ("I think put delay duration here is a good idea", DELAY),
+    ("This is kinda confusing, use", SOURCE),
+    ("Enemies in path For Xayah", XAYAH_RECIPIENT),
 ]
 
 if __name__ == "__main__":
-    post_replies(REPLIES, warn_unmatched=False)
+    post_replies(REPLIES, warn_unmatched=True)
