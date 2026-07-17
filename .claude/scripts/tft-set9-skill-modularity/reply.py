@@ -9,179 +9,54 @@ keys long, distinctive, and never a prefix of another.
 
 from sheet import post_replies
 
-# --- Round: remaining-11 roster review (Nilah / Aatrox / Qiyana / Jinx / Spread naming) ---
+# --- Round: Zone AOE (a hitbox that stays) + Silco's missing vial ---
 
-SPREAD_NAME = (
-    "Good catch — Jinx's 'Each to its own target' isn't a spatial spread at all; it's a per-instance "
-    "TARGET re-pick (each rocket re-rolls a random enemy). The column really covers two ideas: spatial "
-    "layout (Cone, 360° radial, Diagonal) AND target distribution (Split across nearest N, Each to its "
-    "own target). If you want, I'd rename the column to 'Targeting' or 'Distribution', which fits both "
-    "senses. I left the header as 'Spread' for now — say the word and I'll rename it across the sheet.")
+SILCO = "\n".join([
+    "Done — Silco is a projectile then a zone now:",
+    "",
+    "  step 1  Homing Projectile   AOE 1-hex           -> — (the vial; it applies nothing)",
+    "  step 2  On Projectile Hit   src 'Step 1 Projectile'",
+    "          Zone AOE            AOE Circle 2 hex    -> Damage/Heal, every 1s for 6s",
+    "",
+    "The vial was missing from the sheet ENTIRELY — he was a bare Circle AOE, so the thing he throws "
+    "was nowhere. He is the same shape as Teemo now: a projectile, then the thing it becomes.",
+    "",
+    "See your Teemo comment for the Zone AOE half — that one is the more interesting of the two.",
+])
 
-NILAH_AOE = "Done — cleared that AOE cell on Nilah's cone auto (it's back to '—')."
+ZONE = "\n".join([
+    "You have found a real gap, and the difference you are describing is testable, which is what makes "
+    "it worth a name: walk OUT of Silco's chemicals and the damage stops; walk away from Teemo's "
+    "poison and it keeps ticking, because that one rides on YOU.",
+    "",
+    "  Silco: the damage comes from BEING IN A PLACE. His hitbox persists.",
+    "  Teemo: the damage comes from HAVING BEEN HIT. His hitbox fires once and leaves a status.",
+    "",
+    "THE SHEET COULD NOT SAY WHICH. Both read 'Circle AOE + Every Ns + duration' — and that duration "
+    "silently meant two different things: the HITBOX's life for Silco, the VICTIM's status for Teemo. "
+    "Same class of bug as AOE (hex) meaning both the hitbox and the burst it becomes.",
+    "",
+    "So there is a new action, 'Zone AOE' — a hitbox that STAYS for its duration, re-applying to "
+    "whoever is inside at each tick. Its Effect Recipient is re-evaluated every tick; that is the "
+    "whole point of it. The ACTION now says which kind of duration a row means, so no column has to:",
+    "",
+    "  Circle AOE (fires once) + over-time  ->  the duration is the VICTIM'S status",
+    "  Zone AOE   (persists)   + over-time  ->  the duration is the ZONE'S life",
+    "",
+    "TEEMO NEEDED NO CHANGE. He was already right — only the ambiguity around him was wrong.",
+    "",
+    "AND IT WAS NOT JUST THESE TWO. Garen ('spin like a beyblade for 4s') and Swain (his aura while "
+    "transformed) are persistent hitboxes wearing Circle AOE as well. All three are Zones now.",
+    "",
+    "ONE THING I LEFT ALONE, flagged for you: Garen's cadence reads 'Every spin'. Every other cadence "
+    "in the sheet is a real interval (Once / Every 0.5s / Every 1s), and his source only says 'damage "
+    "over time' — it never gives a number. I would rather flag it than invent one.",
+])
 
-NILAH_LASER = (
-    "Done — Nilah's every-3rd-attack line is now the 'Laser Shot' action (Pierce-All), not Pierce "
-    "Projectile.")
-
-NILAH_LUMP = (
-    "Done — the shield (Cast) and the dash (Leap) now share one step, both triggered 'On Cast', so it "
-    "reads 'On Cast => Cast and Leap'.")
-
-AATROX_AS = (
-    "Captured — added a Self 'Debuff / Attack Speed' row ('all bonus AS removed') alongside the AD "
-    "buff, so the sheet shows the bonus AS is consumed by the conversion, not kept.")
-
-AATROX_MELEE = (
-    "Reworked — added a new 'Melee AOE' action (a hitbox centred ON the caster, not the aim target) "
-    "and gave Aatrox's transformed attack three looping instances of it: 1st a 1×2 box, 2nd a "
-    "Gwen-shaped cone, 3rd a 1-hex circle. The AOE (hex) column carries each shape; the Condition "
-    "column carries the 1st/2nd/3rd loop position. Registered Melee AOE in the Action Model tab.")
-
-QIYANA = (
-    "Remodelled — Qiyana now Leaps THROUGH the current target (step 1), then step 2 sends a wave "
-    "modelled as a Pierce Projectile that passes through everyone in the line, dealing the damage and "
-    "knocking up (Stun: 1.5s on the first target hit, 0.5s on the rest). Dropped 'Charge Into'.")
-
-JINX = (
-    "Done — Jinx's 5 rockets are now 'Homing Projectile' (they seek their random targets). I left "
-    "Urgot's leg-blast as 'Burst Projectile' since it fires in a fixed direction rather than homing — "
-    "tell me if you want that changed too.")
-
-QIYANA_LEAPBEHIND = (
-    "Done — Qiyana's step 1 is now 'Leap Behind' (she rips through and ends up behind the target).")
-
-QIYANA_COND = (
-    "Fixed — dropped 'First target hit' / 'Other targets' from the Condition column. The two Stun rows "
-    "now differ only by Effect Recipient (First hit enemy vs Enemies in path) and Duration (1.5s vs "
-    "0.5s), so Condition is free to mean an ACTION gate, as you said.")
-
-AOE_TAXONOMY = (
-    "Implemented (per our walk-through). AOE actions are now shape TEMPLATES — Circle AOE / Cone AOE / "
-    "Box AOE / Custom AOE — reused across heroes; 'Melee AOE' is gone. The caster-vs-target centre is "
-    "DERIVED from Action Source + Aim Target (Aim=Self → on the source, incl. a summon; else on the "
-    "target), so no Melee/Range naming is needed. Added a new 'Offset' column (an anchor label: "
-    "centred / rear edge / front edge / detached +N; '—' for non-AOE) — e.g. Aatrox's box is 'rear "
-    "edge', Kassadin's cone 'front edge'. Shape size stays in AOE (hex); odd shapes (MF's X) use "
-    "Custom AOE. Migrated every instant/spawned AOE user; projectiles + lasers left untouched.")
-
-GROUP_HEADERS = (
-    "Done — added a two-row header: 'Action' merged over Apply..Shape, and 'Effect' merged over the "
-    "effect columns (Effect Recipient..Effect Duration). The real column names are on row 2, and both "
-    "rows are frozen. The tooling now reads the header below the super-header (via a header_row() "
-    "helper), so sync stays at 0; the CSV source stays single-header — the super-header is display-only.")
-
-CLEAN_PROSE = (
-    "Done — stripped hero-name mentions from the What/Clarify prose (17 cells): removed the "
-    "'(Poppy, Cassiopeia, Samira)'-style asides and the hero-example sentences, so the descriptions "
-    "read generically now.")
-
-SUMMON_SPAWN = (
-    "Done — set Spawn = at-Target on the Summon rows (Zed, Azir). Heads-up: the decomposition folded "
-    "Summon into DirectApply, so a summon now reads Apply=DirectApply · Spawn=at-Target + the Summon "
-    "effect. Tell me if you'd rather it carry a distinct Apply value.")
-
-TAB_RENAME = "Done — renamed the tab to 'Action Model' (v1 is retired, so the name is free)."
-
-AA_WHAT = (
-    "Done — set Auto-Attack's 'What it does' to 'Basic attack on the aimed enemy. Apply direct damage "
-    "without relying on hitbox' (that's the melee case = DirectApply).")
-
-AA_CLARIFY_DEL = (
-    "Deleted — removed the old 'Mechanically this IS a homing projectile' clarify from Auto-Attack. "
-    "The axes now say it: melee AA = DirectApply, ranged AA = at-User / Projectile / Homing.")
-
-V2_REFINE = (
-    "Reworked v2, and yes it makes sense. Shape/Size moved OUT to the Hero tab (per row); 'Delivery' → "
-    "'Spawn' (at-User | at-Target); 'Projectile' moved into Motion. You confirmed spawn-at-User can be "
-    "static, so Laser = at-User · Motion — · Box-in-Hero · rear edge. Consequence: Circle/Cone/Box/"
-    "Custom AOE collapse into ONE action (Hitbox · at-Target · static) — the shape distinguishes them "
-    "in Hero; projectiles differ only by Behavior. So the action set shrinks to ~9 mechanic-combos.")
-
-TRIGGER_TAB = (
-    "Noted — and agreed: I won't invent triggers, and a dedicated Trigger tab (a controlled vocabulary "
-    "of the triggers we actually use) is the right way to keep them from proliferating. Holding off per "
-    "'Don't do this yet' — say the word and I'll build it.")
-
-V2_ENRICH = (
-    "Done — folded v1's Collision, What it does, and Clarify more into the v2 tab, matched per action. "
-    "v2 now carries both the decomposed axes AND the v1 prose, so it can stand in for v1. (Collision is "
-    "still derivable from Delivery+Behavior+Shape; kept as a reference column.)")
-
-V2_MOVE = "Done — moved the axes explanation below the table (doc-block style, like the other tabs)."
-
-V2_ASSESS = (
-    "Deleted Burst + Homing Burst Projectile — they're just First-Hit/Homing + Circle now. On "
-    "'finished?': the action PRIMITIVE is complete, and Collision is now DERIVED from "
-    "Delivery+Behavior+Shape, so it stops being a column. What is NOT here (stays per-row in Hero, not "
-    "part of an action's definition): Count, Spread, Aim Target, Action Source, Skill Range. On 'Hero "
-    "v2 — really similar?': yes, mostly — same champion-centric layout; the only real change is the "
-    "single 'Action' column exploding into ~5 (Apply/Delivery/Behavior/Shape/Motion) and Collision "
-    "dropping out. Wider, but more modular. See my note for a side-by-side; migrating Hero is a real "
-    "cost/benefit call, not a must.")
-
-DASHBOARD_DITCH = (
-    "Done — ditched it for now: deleted the Dashboard tab and un-wired it from sync. Kept dashboard.py "
-    "(and the 'Columns used' profiles it reads) parked in the tooling, so we can switch it back on any "
-    "time by calling dashboard.generate(sh) in sync's main().")
-
-COLUMN_PROFILES = (
-    "Built it — both parts. (1) Each Action now declares a 'Columns used' profile in the Action Model "
-    "tab: e.g. Circle AOE → Aim Target, Offset, AOE, Collision, Skill Range; Homing Projectile → "
-    "Count, Spread, Collision (no AOE/Offset); Leap → Aim Target, Offset. (2) A new generated, "
-    "read-only 'Dashboard' tab shows each champion's full kit, and each action's Targeting cell shows "
-    "ONLY the columns its profile declares — so the '—' clutter is gone. The champion-centric Hero "
-    "stays the source you edit; the Dashboard is derived from it and regenerates every sync "
-    "(idempotent). I went with the dashboard-only option you picked; per-type tabs can come later off "
-    "the same profiles.")
-
-ACTION_GROUPING = (
-    "Done — grouped the Action Model rows by delivery family (adjacency only, no header rows; the doc "
-    "block stays at the bottom): Basic attack (Auto-Attack, QuickAA) · Projectile (Homing, First hit, "
-    "Pierce, Burst, Homing Burst, Receive) · AOE (Spawn At Target, Circle, Cone, Box, Custom) · Laser "
-    "(Laser Shot, Sweep, Standard, Current Target) · Movement/body (Charge Into, Knock Back, Grab & "
-    "Slam, Leap, Leap Behind) · Other (Cast, Summon).")
-
-COLUMN_ORDER = (
-    "Done — regrouped the columns for readability. The action region now reads: Action Source | "
-    "Action | Aim Target | Offset | AOE (hex) | Skill Range | Count | Spread | Collision, then the "
-    "effect block, then Cast. Applied on the sheet and in the source CSV + tooling (the merge logic no "
-    "longer assumes AOE/Offset are the rightmost columns). sync converges to 0 cells with VALIDATE ok.")
-
-
-# LONGEST / MOST DISTINCTIVE KEY FIRST. Each is a substring of exactly one open comment root.
 REPLIES = [
-    ("Do we have a better", SPREAD_NAME),   # NB: reviewer's text has a non-breaking space before 'name'
-    ("Get rid of this one", NILAH_AOE),
-    ("For nilah, it is Laser shot", NILAH_LASER),
-    ("Lump this into", NILAH_LUMP),
-    ("AS are converted", AATROX_AS),
-    ("I should name it", AATROX_MELEE),
-    ("leap through her target", QIYANA),
-    ("Homing Projectile.", JINX),
-    ("Use Leap behind", QIYANA_LEAPBEHIND),
-    ("condition for the action", QIYANA_COND),
-    ("should also have Range AOE", AOE_TAXONOMY),
-    ("I want column to have this format", COLUMN_ORDER),
-    ("group those action together", ACTION_GROUPING),
-    ("define which column each Action", COLUMN_PROFILES),
-    ("ditch it for now", DASHBOARD_DITCH),
-    ("Move the explanation below", V2_MOVE),
-    ("Now deleting Burst Projectile", V2_ASSESS),
-    ("make its own tab", TRIGGER_TAB),
-    ("clean up action mess", V2_ENRICH),
-    ("Apply direct damage without relying on hitbox", AA_WHAT),
-    ("Shape for AA", V2_REFINE),
-    ("No need to mention hero", CLEAN_PROSE),
-    ("Spawn at target for Summon", SUMMON_SPAWN),
-    ("Change the tab name", TAB_RENAME),
-    ("group together under", GROUP_HEADERS),
-    ("should be replaced by", GROUP_HEADERS),
-    ("Delete", AA_CLARIFY_DEL),
+    ("Silco throw homing projectile first", SILCO),
+    ("Teemo and Silco are really similar", ZONE),
 ]
 
-
 if __name__ == "__main__":
-    # warn off: comment [5] (the Melee/Range AOE taxonomy discussion) is being handled with the user
-    # directly, not via a scripted reply.
     post_replies(REPLIES, warn_unmatched=False)
