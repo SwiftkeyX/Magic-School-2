@@ -12,6 +12,7 @@ Everything here runs from repo-root cwd:
 
 import csv
 import pathlib
+import re
 
 import gspread
 from google.auth.transport.requests import AuthorizedSession
@@ -39,6 +40,7 @@ TABS = {
     "Column Explain": "column-explain.csv",
     "Action Model": "action-model.csv",
     "AOE shape": "aoe-shape.csv",
+    "Offset Types": "offset-types.csv",
     "Trigger Types": "trigger-types.csv",
     "Effect Recipient Types": "effect-recipient-types.csv",
     "Effect Types": "effect-types.csv",
@@ -316,6 +318,10 @@ def remerge_reference(sh, tab, col):
 VOCAB = {
     "Legacy action": "action-model.csv",     # THE lookup: a key with no row here resolves to nothing
     "AOE": "aoe-shape.csv",                  # sizes are keys too, or the column drifts back to prose
+    # Offset was the LAST geometry column with no tab, so nothing could catch a SENTENCE in it — and
+    # one was proposed ("spawn projectile behind her, and line them up in a row"). Prose in an
+    # unchecked column is how AOE (hex) once held 'Gwen-shaped'. Anchors are keys now, +N/-N included.
+    "Offset": "offset-types.csv",
     "Trigger": "trigger-types.csv",
     "Effect Recipient": "effect-recipient-types.csv",
     "Scaling Type": "scaling-types.csv",
@@ -326,7 +332,13 @@ VOCAB = {
 # Hero is not the only thing that can rot. `Collision` left Hero (the action decides it), so nothing
 # was left to check it against `collision-types.csv` — the taxonomy could drift with no Hero column
 # to notice. A tab's own vocabulary needs validating too.
-TAB_VOCAB = [("action-model.csv", "Collision", "collision-types.csv")]
+TAB_VOCAB = [("action-model.csv", "Collision", "collision-types.csv"),
+             # Offset mostly lives HERE now, not in Hero: an action that fixes its anchor owns it and
+             # the Hero cell reads '—' (the rule ~12 actions already followed; Cone AOE and Charge were
+             # the stragglers). So the tab's own column is the one that can rot unseen — Hero's check
+             # cannot see a value no Hero row uses, e.g. Gilgamesh Projectile's 'rank -1'.
+             # The loop already exempts '—' and 'per row', which is exactly this column's vocabulary.
+             ("action-model.csv", "Offset", "offset-types.csv")]
 
 
 def read_data(name):
@@ -403,6 +415,63 @@ def validate_data():
         miss = used_t - defined(vocab) - {D, "per row"}
         if miss:
             problems.append(f"{src} {col}: {sorted(miss)} used but not defined in {vocab}")
+
+    # An action named `X [collision=Y]` states Y TWICE — in its own name and in its Collision cell —
+    # and two copies of one fact disagree given a chance. The bracket is a NAMING CONVENTION, not a
+    # parsed syntax (Hero's cell stays a plain key into this tab, so no reader learns a mini-language),
+    # and this is the price of that: a name that can lie. It is the user's way of keeping Collision out
+    # of Hero, where it would be "most of the time useless" — so the override rides in the action name,
+    # and the check makes the name honest. `X` must be a real action too, or the variant is orphaned.
+    # GEOMETRY: the Hero cell follows from the action's own axis, exactly, in BOTH directions.
+    #   tab '—'        -> Hero '—'        the action projects no hitbox; there is nothing to place
+    #   tab fixed      -> Hero 'default'  the action owns it; the row points at it
+    #   tab 'per row'  -> Hero a value    only the row can say it (a circle's SIZE, a bolt's shape)
+    # This check is ONLY possible because 'default' exists. While action-fixed also wrote an em-dash,
+    # a row that had LOST its value read identically to a correct one, so the rule could not be
+    # enforced at all — it just rotted, which is how Cone AOE and Charge drifted apart. The user's
+    # call, and it turned a convention into an invariant.
+    am_rows = []
+    for r in read_data("action-model.csv")[1:]:
+        if not any(x.strip() for x in r):
+            break                       # the doc block below the blank row is not vocabulary
+        if cell(r, 0).strip():
+            am_rows.append(r)
+    t_off = {cell(r, 0).strip(): cell(r, 6).strip() for r in am_rows}
+    t_shape = {cell(r, 0).strip(): cell(r, 5).strip() for r in am_rows}
+    # Offset/AOE are MERGED columns: a blank inherits the row above, exactly as sync compares them.
+    eff_off = fill_down([cell(r, c["Offset"]) for r in hero[1:]])
+    eff_aoe = fill_down([cell(r, c["AOE"]) for r in hero[1:]])
+    for k, r in enumerate(hero[1:]):
+        act = cell(r, c["Legacy action"]).strip()
+        if not act or act not in t_off:
+            continue                    # continuation rows inherit; unknown keys are VOCAB's problem
+        for axis, tabv, got in (("Offset", t_off[act], eff_off[k].strip()),
+                                ("AOE (hex)", t_shape[act], eff_aoe[k].strip())):
+            fixed = tabv not in (D, "per row", "specify elsewhere",
+                                 "circle", "cone", "box", "custom")
+            if axis == "AOE (hex)":
+                fixed = tabv == "1-hex"     # only a fixed 1-hex leaves the row nothing to choose
+            want = (D if tabv == D else "default" if fixed else "a real value")
+            ok = (got == D) if tabv == D else (got == "default") if fixed else (
+                got not in (D, "default", ""))
+            if not ok:
+                problems.append(f"{axis}: row {k + 2} ('{act}') says {got!r} but the action's "
+                                f"{axis.split()[0]} is {tabv!r} — expected {want}")
+
+    am = read_data("action-model.csv")
+    names = {cell(r, 0).strip() for r in am[1:] if cell(r, 0).strip()}
+    ci = am[0].index("Collision")
+    for r in am[1:]:
+        m = re.fullmatch(r"(.+?)\s*\[collision=(.+?)\]", cell(r, 0).strip())
+        if not m:
+            continue
+        base, declared = m.group(1).strip(), m.group(2).strip()
+        if base not in names:
+            problems.append(f"action-model.csv: '{cell(r, 0).strip()}' overrides '{base}', "
+                            f"which is not an action")
+        if cell(r, ci).strip() != declared:
+            problems.append(f"action-model.csv: '{cell(r, 0).strip()}' says collision={declared} "
+                            f"but its Collision cell says '{cell(r, ci).strip()}'")
     return problems
 
 

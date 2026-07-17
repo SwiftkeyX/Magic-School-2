@@ -92,6 +92,9 @@ def print_reference():
     print("  Collisions   :", col0("collision-types.csv"))
     print("  Spreads      :", col0("spread-types.csv"))
     print("  Scaling Types:", col0("scaling-types.csv"))
+    # Offset is checked like the rest now, so a champion-adder has to be able to SEE the legal
+    # anchors. An enforced vocabulary that the adding tool never prints is a trap, not a guard.
+    print("  Offsets      :", col0("offset-types.csv"))
     # Effect Types is MERGED by category, so its Category cell is blank on every row but a block's
     # first. Filtering on `r[0].strip()` here would silently print 6 pairs instead of 44 - the blank
     # is data ("same as above"), not an empty row.
