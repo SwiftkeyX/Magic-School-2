@@ -1,4 +1,7 @@
 AOE (hex),Shape,Meaning,Picture (o = the origin hex)
+unknown,—,"IT HAS A SIZE AND WE DO NOT KNOW IT — an admission, not a shape. The action projects a real hitbox that the row must size, and the champion's own skill text never says how big: Swain 'deal circular AOE damage', Senna 'fire a massive beam', Nilah 'strikes in a line'. USED BY 10 ROWS: Kayle (wave), Swain (circle x2), Irelia (beam), Ahri (circle + wave), Viego (beam), Senna (beam), Nilah (cone + line). Replace one with a real size the moment it is known; that is the only reason this value exists, and it must never spread beyond a genuinely unresearched size. WHY IT BEATS THE EM-DASH these rows held until 2026-07-17: an em-dash means 'there is NO hitbox', so the sheet was stating something false about ten hitboxes — in the one symbol that guaranteed no check would ever ask. They only fell out, all ten at once, when '—' was split from 'default' and every hitbox row became checkable. A gap you can SEE is a gap you can close.","(none — the size
+is what is missing)"
+default,—,"THE ACTION'S OWN SHAPE APPLIES - look it up in the 'Action Model' tab's Shape column for this row's action. Only actions whose Shape is a FIXED '1-hex' use this (Charge, Spawn At Target, Current Target Laser): there is no size left for the row to choose. A circle/cone/box has to state its SIZE here, and a projectile's Shape is 'specify elsewhere', which means this cell IS the truth - neither can say 'default'.",(the action says)
 1-hex,1-hex,"One hex — a bolt, not an area. The default projectile.","x
 o"
 Circle 1 hex,circle,Every hex within 1 of the centre.,"o = centre
@@ -34,4 +37,4 @@ How to read this tab,,,
 "CONE N HEX: widest row = 2N+1, depth = N+1 rows. So the number is the SPREAD to each side at the far edge, not the total hexes and not the reach.",,,
 "BOX WxD: width × depth in hexes, facing the aim. Fractions are real — a wave is 1.5 wide and a blade is 0.1.",,,
 "THIS IS THE HITBOX, not the area a moving hitbox covers. Gwen's blade is Box 0.1x2 even though her sweep traces a cone: the sweep is Motion=Arc on the action, not a shape.",,,
-"An action with no area at all (a Cast, a Move, a 1-hex bolt) reads '—' here, not a size.",,,
+"AN ACTION WITH NO HITBOX AT ALL (a Cast, a Move, a Summon) reads '—' here. An action that HAS a hitbox whose shape it already fixes reads 'default' - not '—', and not a copy of the size. The two were one symbol until 2026-07-17, which meant a row that had LOST its size looked exactly like a row that never needed one; validate_data() can tell them apart now and checks every row. See the 'Offset Types' tab, whose column follows the identical rule.",,,
