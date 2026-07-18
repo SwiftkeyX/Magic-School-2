@@ -57,3 +57,6 @@ __pycache__/
 
 # Transient sheet dump written at repo root by sheet_sync.py (dated copies live in .claude/reference/json/)
 /sheet_dump.json
+
+# Transient review state: which cells the tft-skill writers changed, for highlight_changes.py to colour
+/.claude/scripts/tft-set9-skill-modularity/changes-state.json

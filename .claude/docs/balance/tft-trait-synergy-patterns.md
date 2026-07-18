@@ -16,7 +16,7 @@ Before the pattern analysis below could be trusted, two problems were found and 
    - Set 9's Maokai was also missing from the Champions tab entirely (a plain Set 9.0 gap, unrelated to the 9.5 split) — added (Shadow Isles / Bastion, 1-cost). Numeric combat stats for Maokai weren't found via public research in this pass and are marked `N/A` rather than invented.
 3. **Set 11 comp 3 ("Level 8/9 Duelists") was internally broken**, not just missing data: its roster referenced Camille and Fiora, neither of which exist in Set 11 at all, and the real Set 11 Duelist roster (Darius, Yasuo, Qiyana, Tristana, Volibear, Lee Sin, Irelia — 7 champions total) means "8/9 Duelists" was never achievable in the first place. Every other comp in Set 11 checked out against the real roster, so this was an isolated bad row, not a systemic split — it was rebuilt as `Darius, Yasuo, Qiyana, Tristana, Volibear, Lee Sin, Irelia, Ornn` (7 Duelist, the natural cap without an emblem), renamed "Duelist Vertical (corrected)".
 
-Local offline mirrors of all three sheets were refreshed after these fixes: `.claude/reference/json/tft-set9_dump_20260707.json`, `tft-set10_dump_20260707.json`, `tft-set11_dump_20260707.json`.
+Local offline mirrors of all three sheets were refreshed after these fixes: `.claude/reference/json/tft-set9_dump_20260717.json`, `tft-set10_dump_20260707.json`, `tft-set11_dump_20260707.json`.
 
 ---
 

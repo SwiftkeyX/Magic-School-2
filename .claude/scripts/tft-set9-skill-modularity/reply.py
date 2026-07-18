@@ -3,49 +3,40 @@
 Run from repo-root cwd:  python .claude/scripts/tft-set9-skill-modularity/reply.py
 
 Overwrite REPLIES each round; git keeps the history. Comments are left UNRESOLVED — resolving them is
-the user's call, always.
+the user's call, always. A MATCH KEY IS A SUBSTRING OF THE COMMENT'S ROOT and fails SILENTLY, so keep
+keys long, distinctive, and never a prefix of another.
 
-⚠ A MATCH KEY IS A SUBSTRING OF THE COMMENT'S ROOT TEXT, AND A MISMATCH FAILS SILENTLY.
-
-A short key grabs any longer comment that happens to contain it. This is not hypothetical: the key
-"same step" once matched a comment reading "This are the same heal, so it should be combine into same
-step" — a comment answered rounds earlier — and landed a reply on it that had nothing to do with it.
-The reply had to be deleted by hand.
-
-So: keys are LONG and DISTINCTIVE, the longest is listed first, and a key is never a prefix of
-another comment's text. Beware curly quotes and non-breaking spaces (\xa0) — quote nothing you do not
-have to.
-
-This round answers the ONE re-opened thread: the user rejected my earlier "leaving it as Pierce
-Projectile" and gave explicit instructions for BOTH champions in the same thread (anchored to Ahri's
-cell). post_replies matches on the ROOT comment, so the key is the root's distinctive typo, not the
-follow-up replies. A new body means post_replies will add a fresh reply under my earlier one rather
-than skip the thread as already-answered.
+THIS ROUND (round 7b): summon taxonomy + passive 0.x normalization, both BUILT. warn_unmatched=False.
 """
 
 from sheet import post_replies
 
-BURST = (
-    "Done — you were right on both, and my earlier 'leaving it as Pierce Projectile' was wrong.\n\n"
-    "KARMA — Burst Projectile on every cast now, exactly as you said:\n"
-    "  1st / 2nd cast  ->  Burst Projectile  x1\n"
-    "  3rd cast        ->  Burst Projectile  x3  (Current + Left + Right)\n"
-    "The old rows read Circle AOE / Pierce Projectile, which fought her own description: 'fire a "
-    "burst that explodes on impact ... every third cast launches 3 bursts'.\n\n"
-    "AHRI — a clean 3-cast cycle, the wave now REPLACES the AOE on the 3rd cast:\n"
-    "  1st / 2nd cast  ->  Circle AOE   (essence steal + Mana Reave)\n"
-    "  3rd cast        ->  Pierce wave  (360 radial, +33% on essence-stolen enemies)\n"
-    "Its condition moved 2nd -> 3rd, and the description dropped 'Every 2/2/0 casts' for 'Every third "
-    "cast instead'.\n\n"
-    "And Jayce, the only other Burst Projectile, had Collision 'Area' — corrected to 'First-Hit' to "
-    "match the Action Model tab: a Burst Projectile IS First-Hit + Circle AOE, so it detonates on the "
-    "FIRST body it meets and the circle is centred on that impact hex.")
+SUMMON = "\n".join([
+    "Built it — three summon actions, split by behaviour:",
+    "",
+    "  Static Summon  (spawns, stands, attacks):            Set 9 Zed, Azir",
+    "  Charge Summon  (spawns unit[s] that charge in):      Naafiri, Gangplank  (absorbs 'untethered')",
+    "  Hero Summon    (walks the grid + auto-attacks):      Set 10 Zed",
+    "",
+    "'Summon' and 'Summon (untethered)' are retired. Each spawned unit still becomes a SECOND action "
+    "source for the steps that follow, so its charge/attack rides on it (Naafiri's packmates keep their "
+    "'Charge [collision=Target-Only]' step; the Charge Summon just declares their nature).",
+])
 
-# LONGEST / MOST DISTINCTIVE KEY FIRST. Unique to exactly one comment (the user's own typo).
+PASSIVE = "\n".join([
+    "Done — every passive is in the 0.x family now. Single passives moved from '0' to '0.1', and the "
+    "three that were mis-numbered as ACTIVE steps (Zeri's chain, Riven's splash, Urgot's cone, all at "
+    "'2') became 0.1 / 0.2. 30 steps across Set 9 plus the Set 10 passives.",
+    "",
+    "One note: I renumbered in place, so a passive that currently sits BELOW its active in the sheet "
+    "keeps that file position but reads 0.x. If you want them physically reordered to the TOP of each "
+    "champion's block, say so — that is a bigger row-move and I kept it out for now.",
+])
+
 REPLIES = [
-    ("Karma use Burse Projectile", BURST),
+    ("made each one a action", SUMMON),        # #2
+    ("should also be step 0.1", PASSIVE),      # #3
 ]
-
 
 if __name__ == "__main__":
     post_replies(REPLIES, warn_unmatched=False)

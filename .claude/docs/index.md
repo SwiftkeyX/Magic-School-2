@@ -41,3 +41,6 @@
 |---|---|
 | `tft/tft-reference-sheets.md` | External TFT set 9/10/11 hero/trait/skill Google Sheets — auto-chess genre reference |
 | `tft/set9-skill-schema-review.md` | Review: what the simplified set9-skill schema broke vs the intended version |
+| `tft/set9-skill-design-notes.md` | The **why** behind the schema — one section per decision, and what it was decided against. The sheet's `Design Notes` tab holds the one-liners and links here |
+| `tft/set10-skill-tab.md` | The `Hero set 10` tab — Set 10's 8-Bit/Country champions on the reused 31-col schema: the 9 champions, the 2nd-schema-tab tooling change (and the `Hero`→`Hero set 9` rename), the 3 new vocab rows, and the modelling calls to review |
+| `tft/set9-skill-review-comments-archive.md` | Verbatim archive of the 79 resolved sheet-review comment threads (the *reasoning* lives in the sheet's `Design Notes`; this is the raw exchange) |

@@ -1,0 +1,8 @@
+Fire Timing,What it means,Used by
+At Once,"All Count instances are produced SIMULTANEOUSLY — one volley.","Ashe (8 arrows loosed together), Ahri (360 wave), Karma (3 bursts on 3rd cast), Vel'Koz (2 split bolts), Azir (Soldiers strike together), Xayah (7/7/15 feathers), Naafiri (3 packmates charge)"
+Consecutive,"The Count instances are produced ONE AFTER ANOTHER, over time.","Akshan (6 shots), Bel'Veth / Fiora (QuickAA), Kai'Sa (missile barrage), Caitlyn (4 shots at the furthest), Twisted Fate (21 cards), Jinx (5, each re-picking), Gwen (3 snips), a bounce chain (Katarina / Zeri / Zac)"
+,,
+How to read this tab,,
+"Fire Timing answers WHEN a multi-instance action fires: all at once, or one after another. It is ORTHOGONAL to Spread (which says WHERE the instances go) — the two were conflated until 2026-07-18, when the user split them: 'Same target' covers Akshan (6 shots, consecutive) AND Xayah (feathers, at once), so the arrangement alone could not tell them apart.",,
+"Set it ONLY when Count > 1. A single instance has nothing to time, so its cell is '—' (never blank — blank means 'same as the row above'). Like Count and Spread it is per-ROW, so a branch may change it: Karma's 1st/2nd cast fire ONE burst ('—') and her 3rd fires THREE at once.",,
+"A bounce (Bounce Homing Projectile) is Consecutive even though its Spread is '—': the hops land one after another. That is why Fire Timing keys off Count, not Spread.",,

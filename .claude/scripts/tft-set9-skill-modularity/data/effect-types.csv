@@ -1,38 +1,53 @@
 Effect Category,Effect Detail,Meaning
 Attack,Damage,Deal damage to the recipient.
+,True Damage,Damage that ignores both Armor and Magic Resist.
 Status,Stun,Recipient cannot act for the duration.
-Status,Wound,Reduce the healing the recipient receives.
-Status,Slow,Reduce the recipient's speed. (taxonomy — not used by a Set 9 unit here)
-Status,Silence,Prevent the recipient from casting. (taxonomy — not used by a Set 9 unit here)
+,Wound,Reduce the healing the recipient receives.
+,Slow,Reduce the recipient's speed. (taxonomy — not used by a Set 9 unit here)
+,Silence,Prevent the recipient from casting. (taxonomy — not used by a Set 9 unit here)
+,Knock Off,"Recipient is knocked clean off the battlefield - removed from combat entirely. An execute, not a Stun (K'Sante, when the target has no room left to be pushed)."
+,Chill,Reduce the recipient's Attack Speed by 30%.
+,Impale,"A spear left standing in the target. It does nothing until removed - and the ONLY thing that removes it is lethality: the spears stack until their combined true damage would kill the target, and Kalista rips them all out at that moment. There is no other way for a spear to come out."
+,Disarm,"Recipient cannot move or attack, but CAN still cast spells. Distinct from Stun (cannot act at all) and Chill (attack-speed only). Kassadin."
+,Mark,A mark left on the target that later effects check for; it does nothing by itself. Rek'Sai's conditions read it — she deals bonus true damage to a marked target.
+,Delayed Blast,"A charge attached to the recipient that detonates after the Amount, in seconds - the AMOUNT IS THE FUSE (the user's call: the delay is the one number this status is about, so it reads in the Amount column rather than only in Duration, which necessarily repeats it). The blast is a SEPARATE step sourced from the recipient (Action Source 'Step 1 Aim target', Aim 'Self'), so it lands wherever the recipient has moved to, not where the charge was applied. Twisted Fate's cards: he encircles the target and the cards ride it. Same distinction as Zone AOE vs Circle AOE - it matters because it is testable: walk away and the blast walks with you."
+,Child of the Star,The recipient hosts a Child of the Star for the duration - a summon (Action Source 'Child of the Star') that auto-attacks the nearest enemy to its owner every second. Soraka; replaced her old 5-stars / 'Each to its own target' model at the user's request.
+,Execute,"Instantly kills the recipient when its Health is below a threshold (a percentage of max HP, increased by Ability Power). Not damage — a kill. Zeri executes enemies below 8% max Health."
+,Knock Up,"Recipient is thrown into the air, unable to act until it lands. The sheet already had 'On Enemy Knocked Up' as a TRIGGER and 'Knocked-up enemy' as an Aim Target - this is the effect that causes what those two referenced."
+,Soul Link,"Recipient is linked to the caster for the duration. While linked, a share of the damage the RECIPIENT takes is healed back to the caster (Illaoi)."
+,Empowered,"A self-applied state the caster enters for a duration; later steps of the SAME champion gate on it with Condition 'If Empowered'. Does nothing by itself — like Mark, but on the caster and time-boxed. The user's call (2026-07-18): 'If Empowered' was used in several places as a bare window, so the status it checks now exists explicitly. Riven and Urgot enter it on cast and their on-attack steps fire only while it holds; Zeri's chain-lightning window is the same idea (recipient Self)."
 Buff,Attack Speed,Increase the recipient's attack speed.
-Buff,Bonus HP,Grant bonus / max health.
-Buff,Shield,Grant a temporary damage-absorbing shield.
-Buff,Heal,Restore health.
-Buff,Damage Reduction,Reduce incoming damage taken.
+,Bonus HP,Grant bonus / max health.
+,Shield,Grant a temporary damage-absorbing shield.
+,Heal,Restore health.
+,Damage Reduction,Reduce incoming damage taken.
+,Armor,Increase the recipient's Armor (Defense).
+,MR,Increase the recipient's Magic Resist.
+,AD,Increase the recipient's Attack Damage.
+,AP,Increase the recipient's Ability Power.
+,Crit Chance,Increase the recipient's Critical Strike Chance.
+,Crit Damage,Increase the recipient's Critical Strike Damage.
+,Omnivamp,Recipient heals for a percentage of the damage it deals.
+,Mana Regen,Recipient gains Mana per second.
+,Empowered Attack,"The recipient's NEXT attack deals bonus damage - ONE attack, then the buff is spent. If every attack is buffed for a duration, that is On-Hit Damage, not this (Orianna, Maokai)."
+,Mana,"Instantly grants the recipient flat Mana. Distinct from Mana Regen, which grants it per second."
+,Damage Redirect,"A share of the damage the recipient takes is dealt to the CASTER instead. It is not a shield on the recipient and not damage prevention - the damage still happens, it just happens to someone else. Taric takes it himself; his own Shield is incidental, merely what it lands on."
+,Chakram,A stack resource held by the caster. It is not a stat and does nothing on its own - other effects scale off how many are equipped (Aphelios).
+,On-Hit Damage,"EVERY attack by the recipient deals bonus damage, for as long as the buff lasts. Distinct from Empowered Attack, which is spent on the NEXT attack and then gone. Viego's stacks and never expires (Duration = Permanent); Aphelios' lasts 7s."
+,Empowered Attack (Maokai),"The recipient's NEXT auto-attack also HEALS the recipient for the Amount. One attack, then spent - the same lifetime as Empowered Attack, but it heals instead of dealing bonus damage. Maokai only. Distinct from On-Hit Damage (Viego), which stacks and never falls off."
+,Untargetable,Recipient cannot be targeted or hit for the duration. Not the same as Damage Reduction: nothing can select them at all.
+,Range,"Increase the recipient's attack range, in hexes."
+,CC Immunity,"Recipient ignores crowd control (Stun, Chill, Disarm, Knock Up...) for the duration."
+,Style,"A stack resource held by the caster (Samira). Each stack grants Attack Speed (20% AP per stack), and the active scales off how many are equipped — both read via 'Per Stack' scaling. Gained on a critical strike, capped (max 6), and reset to 0 when the active fires. A counter, not a stat: analogous to Aphelios' Chakram, which other effects read rather than a stat the unit carries."
 Debuff,DEF,Shred the recipient's Defense (armor). TFT calls this 'Sunder' (Vi) or 'Shred' when it is Magic Resist - see Debuff -> MR.
-Debuff,MR,Shred the recipient's Magic Resist.
+,MR,Shred the recipient's Magic Resist.
+,Mana Reave,Increase the recipient's max Mana until its next cast - delays its next ability.
+,Max HP,Reduce the recipient's maximum Health.
+,AD,Reduce the recipient's Attack Damage.
+,Damage Amplification,Recipient takes more damage from ALL sources for the duration (Lissandra).
+,Shield Destroy,"Removes a percentage of the recipient's active Shield value outright, before damage is applied. Malzahar destroys 50%."
+,Shield Reduction,"Reduces the effectiveness of Shields the recipient GAINS for the duration — incoming shields are worth less. Distinct from Shield Destroy, which removes a share of an EXISTING shield instantly. Miss Fortune reduces incoming Shields by 35% for 5s."
+,Attack Speed,"Reduces or removes the recipient's (bonus) Attack Speed. Aatrox's transform converts his bonus AS to AD, consuming it — the bonus AS becomes 0 for the duration."
 Movement,(reposition),A movement / setup step with no direct combat effect.
-Buff,Armor,Increase the recipient's Armor (Defense).
-Buff,MR,Increase the recipient's Magic Resist.
-Buff,AD,Increase the recipient's Attack Damage.
-Buff,AP,Increase the recipient's Ability Power.
-Buff,Crit Chance,Increase the recipient's Critical Strike Chance.
-Buff,Crit Damage,Increase the recipient's Critical Strike Damage.
-Buff,Omnivamp,Recipient heals for a percentage of the damage it deals.
-Buff,Mana Regen,Recipient gains Mana per second.
-Debuff,Mana Reave,Increase the recipient's max Mana until its next cast - delays its next ability.
+,(setup),"A step with no payload of its own — it only sets up the step that follows. Katarina throwing her daggers before she blinks; a projectile that flies so its burst can land. Was '(setup / daggers)', which put one champion's ability in the vocabulary."
 Summon,(summon),"Spawns a clone/summon that acts as a SECOND action source for the following step - its own action is centred on the clone, not on Self."
-Movement,(setup / daggers),A setup step (Katarina throwing her daggers) with no direct combat effect of its own; the damage comes from the step that follows.
-Debuff,Max HP,Reduce the recipient's maximum Health.
-Debuff,AD,Reduce the recipient's Attack Damage.
-Status,Knock Off,"Recipient is knocked clean off the battlefield - removed from combat entirely. An execute, not a Stun (K'Sante, when the target has no room left to be pushed)."
-Status,Chill,Reduce the recipient's Attack Speed by 30%.
-Attack,True Damage,Damage that ignores both Armor and Magic Resist.
-Debuff,Damage Amplification,Recipient takes more damage from ALL sources for the duration (Lissandra).
-Buff,Empowered Attack,"The recipient's NEXT attack deals bonus damage - ONE attack, then the buff is spent. If every attack is buffed for a duration, that is On-Hit Damage, not this (Orianna, Maokai)."
-Buff,Mana,"Instantly grants the recipient flat Mana. Distinct from Mana Regen, which grants it per second."
-Status,Impale,"A spear left standing in the target. It does nothing until removed - and the ONLY thing that removes it is lethality: the spears stack until their combined true damage would kill the target, and Kalista rips them all out at that moment. There is no other way for a spear to come out."
-Buff,Damage Redirect,"A share of the damage the recipient takes is dealt to the CASTER instead. It is not a shield on the recipient and not damage prevention - the damage still happens, it just happens to someone else. Taric takes it himself; his own Shield is incidental, merely what it lands on."
-Buff,Chakram,A stack resource held by the caster. It is not a stat and does nothing on its own - other effects scale off how many are equipped (Aphelios).
-Buff,On-Hit Damage,"EVERY attack by the recipient deals bonus damage, for as long as the buff lasts. Distinct from Empowered Attack, which is spent on the NEXT attack and then gone. Viego's stacks and never expires (Duration = Permanent); Aphelios' lasts 7s."
-Buff,Empowered Attack (Maokai),"The recipient's NEXT auto-attack also HEALS the recipient for the Amount. One attack, then spent - the same lifetime as Empowered Attack, but it heals instead of dealing bonus damage. Maokai only. Distinct from On-Hit Damage (Viego), which stacks and never falls off."

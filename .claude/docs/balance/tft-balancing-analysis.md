@@ -120,7 +120,7 @@ Below is a summary table comparing the Normal auto-attack DPS and Spell-Cycle DP
 | **Jhin** (2 Targets Avg) | Physical Line Caster | 36.7 / 37.6 | 55.0 / 56.5 | 82.6 / 84.7 | **74.3 / 111.5 / 167.3** |
 | **Malzahar** (2 Targets Avg) | AP AoE Portal Caster | 27.2 / 49.8 | 40.8 / 74.7 | 61.2 / 113.2 | **77.0 / 115.5 / 174.4** |
 | **Samira** | AD Shred Caster | 27.4 / 19.0 | 41.0 / 28.5 | 61.5 / 42.7 | **46.4 / 69.5 / 104.2** |
-| **Tristana** (1 Splash Target) | AD AS-Steroid | 20.4 / 38.8 | 30.6 / 58.2 | 45.9 / 87.3 | **59.2 / 88.8 / 133.2** |
+| **Tristana** (2 Splash Targets) | AD AS-Steroid | 20.4 / 53.4 | 30.6 / 80.1 | 45.9 / 120.2 | **73.8 / 110.7 / 166.1** |
 | **Viego (2 Stacks)** | AP Stacking Melee | 32.0 / 21.3 | 48.0 / 32.0 | 72.0 / 48.4 | **53.3 / 80.0 / 120.4** |
 
 > These rows mirror [tier-1-carry-dps.md](file:///c:/Organized%20Files/Working/Unity/Unity%20Project/Magic%20School%202/.claude/docs/balance/set9/tier-1-carry-dps.md) (unified convention: AS-scaled cast lockouts, 1.10x baseline crit applied to autos and spells, target counts as labeled).

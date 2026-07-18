@@ -53,7 +53,7 @@ python .claude/scripts/sheet_sync.py --sheet tft-set11 dump
 
 `dump` writes `<name>_dump_<date>.json` to the **current working directory**, not directly to `.claude/reference/json/` — move it there after dumping (e.g. `mv tft-set9_dump_<date>.json .claude/reference/json/`) so it matches the snapshots below. Each file has an embedded `_meta` block (`sheet`, `key`, `dumped_at`) so provenance is never a guess — unlike the old anonymous dumps this replaced. Current snapshots:
 
-- `.claude/reference/json/tft-set9_dump_20260707.json`
+- `.claude/reference/json/tft-set9_dump_20260717.json`
 - `.claude/reference/json/tft-set9-analysis_dump_20260706.json`
 - `.claude/reference/json/tft-set10_dump_20260711.json`
 - `.claude/reference/json/tft-set11_dump_20260707.json`
