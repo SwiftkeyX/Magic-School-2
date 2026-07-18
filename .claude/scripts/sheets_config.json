@@ -1,0 +1,38 @@
+{
+  "auto-battler": {
+    "key": "1lz_WS8Vw0YjfmNZLI3JmRArfFBU2sPAk2qAG8AKN3jg",
+    "role": "canonical",
+    "writable": true,
+    "description": "Custom Auto-Battler design database - our own Heroes/Origin/Class/Dashboard tabs."
+  },
+  "tft-set9": {
+    "key": "1xj6em5XlvIN1gWHTKOPDsssmkgnS3jIsaLnAMjYyPUA",
+    "role": "reference",
+    "writable": true,
+    "description": "TFT Set 9 Champions reference sheet (external)."
+  },
+  "tft-set9-analysis": {
+    "key": "1pnbDKR55HxXFUExIXKyksJqaUSrNuw53IfnvBEt9zNY",
+    "role": "reference-analysis",
+    "writable": true,
+    "description": "TFT Set 9 Carry and Combat Efficiency Analysis sheet (separated)."
+  },
+  "tft-set9-skill-research": {
+    "key": "1X5glHjVcgv3yYG4Q2SyV9YJS3sv_wH5XAg3RLOHnUa4",
+    "role": "reference-analysis",
+    "writable": true,
+    "description": "TFT Set 9 skill-pattern research: modularizes each hero's skill into Skill/Effect pieces. Tabs: Hero, Skill Analysis Column Explain."
+  },
+  "tft-set10": {
+    "key": "1Eutkil9U8RJ4Lqo3l6wk9pbUeVVH80M4JmcRyMEqa2E",
+    "role": "reference",
+    "writable": true,
+    "description": "TFT Set 10 Champions reference sheet (external)."
+  },
+  "tft-set11": {
+    "key": "1BCFZRFebGd2O41ZvbJcNZ7LdVBWH3ssBliTQGMVN3cI",
+    "role": "reference",
+    "writable": true,
+    "description": "TFT Set 11 Champions reference sheet (external)."
+  }
+}

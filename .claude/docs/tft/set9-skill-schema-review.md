@@ -241,7 +241,7 @@ The user reviewed the trial and signed off: *"I am satisfied with the Hero (temp
 
 **Renamed, not copied back.** Copying the template's values into the old tab would have preserved its gid, but it would also have meant rebuilding by hand the ~570 vertical merges (champion identity blocks, per-action blocks) that make the tab readable — and a merge rebuilt by hand is exactly the kind of thing that goes wrong quietly. The rename keeps the sheet the user actually reviewed, merges and all. The cost is the dead gid, noted at the top of this doc.
 
-`Count`/`Spread` are now first-class `Hero` columns in `HERO_COLUMNS` and `ACTION_BLOCK` (`tft_sheet.py`), so every script resolves them like any other column. Because `append_champions()` fills rows **by column name** and knows nothing about them, a newly-added region would otherwise land with both cells blank — and blank reads as *"unknown"*, not *"fires once"*. `backfill_hero()` closes that: it fills only the blanks with `COUNT_DEFAULT` / `SPREAD_DEFAULT`, so a region script that sets them itself is never overwritten, and one that forgets cannot leave a hole.
+`Count`/`Spread` are now first-class `Hero` columns in `HERO_COLUMNS` and `ACTION_BLOCK` (`tft/sheet.py`), so every script resolves them like any other column. Because `append_champions()` fills rows **by column name** and knows nothing about them, a newly-added region would otherwise land with both cells blank — and blank reads as *"unknown"*, not *"fires once"*. `backfill_hero()` closes that: it fills only the blanks with `COUNT_DEFAULT` / `SPREAD_DEFAULT`, so a region script that sets them itself is never overwritten, and one that forgets cannot leave a hole.
 
 ### I.2 `Spread` earned its own tab
 
@@ -296,7 +296,7 @@ The first ruling here was that Gwen's cone is a real collider. **That was wrong*
 
 The `Column Explain` value lists were split across two scripts — `tft-add-freljord-piltover.py` held Trigger/Aim/Recipient, `tft-add-shurima.py` held Condition. They did not yet fight (different keys), but this pass adds values to **all four**, and a third writer would have restarted the exact overwrite-each-other bug that bit twice. All four now have a single owner: the latest origin pass.
 
-All share `.claude/scripts/tft_sheet.py`, which resolves **columns by header name, never by index**. That is not cosmetic: every script addressed cells as `r[14]`, and inserting `Action Source` mid-table would have silently redirected every one of those writes into the wrong column. The header lookup kills the whole class of bug.
+All share the tooling's shared helper (now `.claude/scripts/tft-set9-skill-modularity/sheet.py`), which resolves **columns by header name, never by index**. That is not cosmetic: every script addressed cells as `r[14]`, and inserting `Action Source` mid-table would have silently redirected every one of those writes into the wrong column. The header lookup kills the whole class of bug.
 
 **Idempotence is the acceptance test.** Run all three scripts twice; the second pass must report **zero changes**. That is what caught both cell-fighting bugs.
 
@@ -394,7 +394,7 @@ Recorded as `Note - Count vs Amount`.
 
 **`Condition` is now PER-EFFECT, not per-action.** *"This are the same heal, so it should be combined into same step."* Soraka's base heal and her below-50%-HP bonus heal are one cast on one ally — but `Condition` sat in the **merged action block**, so it could only gate a *whole* action. That is the only reason the bonus heal had been faked as a separate step: a workaround for a missing capability, not a modelling decision.
 
-`Condition` is removed from `ACTION_BLOCK` (`tft_sheet.py`) and is no longer merged. A condition gating a whole action simply repeats down its rows; one gating a single effect sits on that row alone. Recorded as `Note - Condition is PER-EFFECT`.
+`Condition` is removed from `ACTION_BLOCK` (`tft/sheet.py`) and is no longer merged. A condition gating a whole action simply repeats down its rows; one gating a single effect sits on that row alone. Recorded as `Note - Condition is PER-EFFECT`.
 
 ### L.7 `Action Model` promoted; the two old tabs deleted
 
@@ -402,6 +402,195 @@ Recorded as `Note - Count vs Amount`.
 
 The delete is guarded: `promote()` refuses to drop the old tabs unless `Action Model` is present and fully populated.
 
+### L.8 Round 6 — `Scaling` was the last free-text field, and it leaked
+
+**35 rows carry a `Scaling` value and 27 are distinct.** That ratio is the tell: it was prose, not a vocabulary. Sorting the values showed the column fusing **four** different things:
+
+| What it actually was | Example | Where it belongs |
+|---|---|---|
+| a real **modifier** | `stacking`, `decaying 20/13/0%/s`, `per Chakram equipped` | this is Scaling |
+| a **duration** | `rest of combat` (Sona), `until next cast` (Ahri) | `Duration` |
+| **multiplicity** | `×8 arrows in a cone` (Ashe) | `Count` / `Spread` |
+| prose that isn't scaling | `redirected onto Taric himself` | nowhere — `Effect Types` already defines it |
+
+Fixed the way this sheet always fixes it: **split the column.** `Scaling Type` is a 10-value vocabulary (new `Scaling Types` tab) and `Scaling` keeps the specifics — the same `Effect Category` / `Effect Detail` idiom sitting two columns to its left.
+
+⚠ **The Ashe row is the finding.** `×8 arrows in a cone` is exactly the multiplicity `Count`/`Spread` was built to eliminate — and it **survived that cleanup**, because the fix only rewrote each action's *first* row and never its continuation rows. It was the last leak in the sheet, and it sat there undetected for three rounds.
+
+### L.9 `Re-picked per instance` was a bad spread value
+
+*"The rest is spread but this one isn't."* Correct. The other four spreads answer **where** the instances go (a geometry). That one answered **when** the aim is decided — which is why no name for it was ever going to sit right in that column.
+
+Renamed to **`Each to its own target`**: a where-answer, so it belongs in the family. The re-picking is now the point of its Clarify text, not of its name. The underlying mid-action gap (§L.1) is unchanged.
+
+### L.10 `Column Explain` had become half decision-log
+
+20 of its 41 rows were Notes. A **column legend** ("what does this cell mean") and a **decision log** ("why is the schema this shape, what did we rule out") are different documents, and mixing them buries the legend.
+
+All 20 moved to a new **`Design Notes`** tab. `Column Explain` is back to one row per column.
+
+**This broke idempotence, which is the point of running twice.** Seven scripts appended notes to `Column Explain`; once the notes were gone, their "already present?" check could never be satisfied, so they re-added them on every run. Fixed by routing every script through one `sync_notes()` helper (`tft/sheet.py`) pointed at the new tab — one writer, one place.
+
 ### L.5 Kalista's condition was redundant
 
 Lethal is the *only* thing that pulls a spear, so `Trigger = On Spears Lethal` says it and `Condition = If Lethal` said it twice. Condition collapsed to an em-dash; `If Lethal` removed from the value list.
+
+---
+
+## M. Rounds 7–9 — what a *Step* actually is
+
+Three rounds that all answer one question, because the user kept asking it from different angles: **what is a Step?** The answer the sheet now gives:
+
+> **A Step is a MOMENT in the cast. Each ROW is one branch of it: condition → action → effect.**
+
+Everything in §M falls out of that sentence.
+
+### M.1 Round 7 — a passive is not part of the cast
+
+*"Isn't it weird to have Passive as Step 1? Passive should be Step 0."* If `Step` is the order of events **within one cast**, then a passive is not in that sequence at all. **15 champions opened with a passive at Step 1; 19 renumbered in total.**
+
+`Count`/`Spread` also became **per-effect** here. Karma's 1st cast fires ONE burst and her 3rd fires THREE — from the same action. A merged `Count` cannot say that, and *that limitation was the only reason those had ever been two steps.* A schema limit had been mistaken for a design fact.
+
+⚠ **Renumbering is the most dangerous edit in this sheet.** Steps are *referenced* by other cells (`Step 2 Aim target`), so renumbering one means rewriting whatever points at it. Round 7 broke three things at once by not doing so — a stale `("Azir","1")` key overwrote his Summon, Irelia's *"insert if no step 4"* guard fired twice and duplicated a row, and Yasuo's three re-aims pointed at the wrong step. **A step number is a POSITION, not an IDENTITY. Never key on one, never guard on one.**
+
+### M.2 Round 8 — the action block dissolves
+
+*"Same step, but with if-else condition"*, on five champions. They were right, and it costs more than Karma did. Karma's two branches fired the **same** action; these five fire **different** ones:
+
+| Champion | branch A | branch B |
+|---|---|---|
+| Swain | not transformed → `Cast` (gain HP) | already transformed → `Circle AOE` burst |
+| Azir | fewer than 3 Soldiers → `Summon` | already 3 → they all `Auto-Attack` |
+| K'Sante | target at edge → knock off | not at edge → `Leap` after it |
+| Kayle | Lvl 1–5 → `Auto-Attack` | Lvl 6+ → `Pierce Projectile` |
+| Ahri | every cast → `Circle AOE` | 2nd cast → **also** a `Pierce Projectile` |
+
+So `Action`, `Collision`, `Aim Target` and `Trigger` cannot be properties of the **step** any more. The merged action block is gone: only `Step` and `Skill Type` span a step, and **everything else merges by VALUE RUN** — wherever consecutive rows happen to agree.
+
+**A merge is now a *display of* the data, not a *claim about* it.** That is the only form of merging that survives a schema where any column may differ per row.
+
+**Not all branches are exclusive.** Ahri's wave is *additional* to her Circle AOE, not instead of it, so her first branch keeps an em-dash rather than a false `If not 2nd Cast`. Encoding an either/or where the game has an *and* would be a lie that reads as rigour.
+
+### M.3 Round 9 — the test that falls out of it
+
+If a Step is a moment, then **two steps triggered by the same event are one step.** Applying that test found four more champions whose Step 2 fired on `On Cast` — the same instant as Step 1:
+
+| Champion | Step 1 | Step 2 (collapsed up) |
+|---|---|---|
+| Shen | shields himself | shields the lowest-HP allies |
+| Orianna | shields an ally | empowers her own next attack |
+| Jayce | buffs his attack speed | buffs adjacent allies' AP |
+| Viego | fires his beam | stacks his on-hit damage |
+
+A *consequence* still earns its own step — Jayce's burst is `After Cast`, so it survives as Step 2.
+
+### M.4 Karma's actions were wrong, and the source text is what misled me
+
+*"1st, 2nd cast: do circle AOE. 3rd cast: do Pierce Projectile. The description is misleading, but believe me on this one."*
+
+Round 7 had collapsed Karma on the explicit claim that her branches were *"the same action, same amount, same AOE — they only ever differed by Count and Spread."* **The first half of that was false.** The collapse still stands, but for a better reason than the one given: round 8 later established that the rows of one step may run *different actions*, which is exactly what her correction describes.
+
+Collision and shape came from `Action Model`, not from guesswork: `Pierce Projectile` is Pierce-All / Line, so her 3rd cast hits `Enemies in path` and its AOE is an em-dash — **a line has no circle radius.**
+
+### M.5 Maokai's heal was never a passive
+
+He had it as a separate always-on step (`0.2`) gated by `If Empowered`. That step **claimed he heals on attack whether or not he ever cast** — which is false — and the condition existed only to take the claim back. *A condition that exists to undo its own Step number is a workaround for a missing word, not a design.*
+
+The word now exists: a new Effect Detail, **`Empowered Attack (Maokai)`** — the next auto-attack also heals. This preserves the split settled in round 2: Orianna and Maokai get ONE empowered attack, spent on the next hit; Viego's stacks forever (`On-Hit Damage`). Maokai's now differs in **what it does**, not in how long it lasts.
+
+### M.6 Swain's burn was never a step either
+
+Same shape as Maokai. It ticks for as long as he is transformed, whether or not he casts again — so it is `Step 0`, `Passive`. Its `Condition` stays an em-dash because the Trigger `When Transformed` already says it (the §L.5 Kalista rule: the sheet does not say a thing twice). **Flagged to the user in case they want the Condition column filled literally — which would mean bringing Kalista's back too.**
+
+---
+
+## N. The tooling bugs — three cell-fights, all the same shape
+
+Every one of these was caught by the same test, and by nothing else:
+
+> **Run every script TWICE. The second run must report ZERO changes.**
+
+### N.1 `tft-add-ionia.py` was crashing on every single run
+
+It wrote to the `Action Types` tab that **round 6 deleted**, so it raised `WorksheetNotFound` every time. **The crash was load-bearing** — it aborted the function before two further staleness bugs could fire, which is why nobody had seen them:
+
+- It rewrote the `Column Explain` value lists that `tft-add-shadowisles-targon.py` owns. Two scripts, one cell, overwriting each other for ever.
+- Its `Effect Types` row was keyed `("Movement","(summon)")`, but `tft-apply-comments.py` had renamed that category to `Summon` (a summon is not a repositioning). **The key never matched, so the row was re-appended on every run** and then renamed — the tab grew 37 → 38 → 39 before it was caught.
+
+**Lesson: a declared block must state CURRENT truth.** A declaration written under one version of the schema silently rots when another script changes what it declares.
+
+### N.2 The filled-value trick is fatal on `Step`
+
+Round 8 established a rule for converging rewrites: *write the FILLED value into a continuation row, and let the re-merge absorb the duplicate.* That is right for every column **except `Step`** — because `Step` is what `remerge()` reads to find the step **boundaries**.
+
+Writing `"1"` into a continuation row instead of a blank made that row look like a **new step start**. The re-merge then refused to merge it away, round 7's renumber saw *two steps both numbered 1*, and renumbered everything below them — which round 9 undid on its next run. **A stable, infinite fight**, invisible to any check except running twice.
+
+`Step` and `Skill Type` are now compared **raw** and written **literally**. A blank continuation row must genuinely *be* blank.
+
+### N.3 A reply key is a SUBSTRING, and a short one grabs the wrong comment
+
+Round 9's match key `"same step"` also matched Soraka's *"This are the same heal, so it should be combine into same step"* — a comment answered back in round 5. It collected a reply about Shen and Jayce that had nothing to do with it. The reply was deleted by hand and a guard added.
+
+**Match keys are substrings of the comment's own text, and a mismatch fails SILENTLY.** Longer keys must be listed first, and any already-answered comment whose text contains a shorter key must be listed *ahead* of it with its existing reply body, so it matches there and is skipped.
+
+---
+
+## O. The consolidation — 17 scripts became 1
+
+The user asked the question that ended §N: **"is checking those scripts necessary? I thought it was one-time use?"**
+
+They were right, and the answer was uncomfortable. Look again at the three bugs in §N:
+
+| Bug | Real, or self-inflicted? |
+|---|---|
+| `tft-add-ionia` crashing on a deleted tab | **Real** — Ionia's reference rows were never written. |
+| The round 7 ↔ round 9 renumber fight (§N.2) | **Self-inflicted** — no fight if round 7 were retired. |
+| The `add-ionia` ↔ `apply-comments` duplicate row (§N.1) | **Self-inflicted** — same. |
+
+**Two of the three bugs existed only because the scripts were re-run.** Each `tft-review-roundN.py` is a *migration*: it patches the sheet from state N-1 to state N. Once applied, it has no further work — but the acceptance discipline re-ran it anyway, on every pass, for ever. **A one-shot migration cannot fight anything if it is never run again.**
+
+The suite had reached **17 scripts, 5,257 lines, and ~13 minutes** per acceptance run — to describe one 132-row table.
+
+### The new shape
+
+The sheet's state was verified correct at round 9, so **the sheet became the source of truth, and then the truth moved into the repo:**
+
+```
+.claude/scripts/tft-set9-skill-modularity/
+  README.md    the entry point: "edit a CSV, run sync.py"
+  sheet.py     helpers: cols(), remerge_hero(), post_replies()
+  export.py    sheet -> data/*.csv        (snapshot)
+  sync.py      data/*.csv -> sheet        (THE one writer) + validate
+  data/*.csv   the source of truth, one file per tab
+  archive/     the 17 retired scripts — kept for history, never run
+```
+
+It is a self-contained folder on purpose. `data/` and `archive/` are generic names, and
+`.claude/scripts/` is shared with other work — namespacing them is what stops a future collision.
+
+**The folder is named for its job, not for the game.** Other scripts in this repo also touch TFT data
+(`sheet_sync.py`, `balance_report.py`, `push_stats_to_sheet.py`), but they are a different task. A
+bare `tft/` would have claimed a namespace it does not own; `tft-set9-skill-modularity/` claims only
+the sheet it actually writes.
+
+**5,007 lines retired. 523 lines live. ~13 minutes → 68 seconds.**
+
+### Why a CSV is enough
+
+**Merges are DERIVED from the values, never stored.** `remerge_hero()` reconstructs all three layers — the champion identity block, the `Step`/`Skill Type` span, and the value-run merges on `Trigger`…`Aim Target` — from the cell values alone. So a flat table fully describes the sheet.
+
+**A blank cell is data.** A merged cell reads back `""` on every row but its first, so a continuation row exports as a genuine empty string and is written back as one. They round-trip exactly.
+
+### The gate that made it safe
+
+The whole refactor rested on one cheap, decisive check:
+
+> **Export the sheet, then run the sync. It must report ZERO cells changed on its FIRST run.**
+
+A zero-diff first run proves the CSV reproduces the sheet *exactly* — the export is lossless and the writer is faithful. Any non-zero diff would have meant the round-trip lost something. **It passed, and nothing was archived until it did.** The sheet was never at risk: a zero-diff sync writes nothing.
+
+### What this buys
+
+A review round used to mean **a new 300-line patch script** that would then be re-run for ever. It now means: **edit the CSV, run one script.** The git diff shows exactly which cells moved — which is the thing a patch script could never show.
+
+And the "two scripts fight over one cell" bug is no longer something the tests catch. **It is something the architecture forbids.**
