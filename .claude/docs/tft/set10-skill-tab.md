@@ -146,4 +146,16 @@ states its shape (Sona `Box 1.5x2`, Jhin `Box 1x2`). `validate_data`'s geometry 
 - **Zac** — new **`Bounce Charge`** action ("Bounce Homing Projectile + Charge": the caster bounces its
   own body), Count = bounces, Collision Target-Only.
 
+**Round 7 refactors (BUILT):**
+
+- **`Summon` split into three by behaviour:** `Static Summon` (spawns, stands, attacks — Set 9 Zed,
+  Azir), `Charge Summon` (spawns unit[s] that charge in; absorbs the old `Summon (untethered)` —
+  Naafiri, Gangplank), `Hero Summon` (walks the grid + auto-attacks — Set 10 Zed, Soraka's Child of the
+  Star). `Summon` and `Summon (untethered)` retired.
+- **Passive steps are numbered `0.1, 0.2, …`** per champion (never the active's `1/2/3` sequence).
+  Single passives moved `0`→`0.1`; three mis-numbered as active steps (Zeri chain, Riven, Urgot at
+  `2`) → `0.x`. Renumbered in place.
+- **Jinx** — aim `Random (2 hex of Current)` (fixed a Spread/Aim-refactor slip that had overwritten it
+  with `Each to own target`, now retired).
+
 The deeper reasoning for the shared schema lives in [`set9-skill-design-notes.md`](set9-skill-design-notes.md).
