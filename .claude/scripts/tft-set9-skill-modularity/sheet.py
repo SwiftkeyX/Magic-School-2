@@ -22,18 +22,24 @@ SAME = "Same to Aim Target"    # recipient shorthand when it equals the Aim Targ
 
 # Logical name -> header text to look for. Headers carry parenthetical suffixes the user has
 # edited over time ("Collision (If it have one)"), so matching is exact-first, then prefix.
+# Order here MIRRORS the sheet's physical column order (CSV, sheet and builder all read left-to-right
+# the same way). cols() still resolves BY NAME, so order is not load-bearing for lookups — only
+# IDENTITY_BLOCK = HERO_COLUMNS[:10] depends on the first ten being the identity block. The action
+# region was regrouped for readability (the user's call): who/what/where first — Action Source,
+# Action, Aim Target, Offset, AOE — then the delivery detail (Skill Range, Count, Spread, Collision),
+# then the effect block. `Offset` is the AOE anchor label; it and `AOE` are per-ACTION merged columns.
+# `Effect Cadence` / `Effect Duration` were plain `Cadence` / `Duration (s)` — the user renamed them
+# for clarity (both describe the EFFECT). The names here MUST track the sheet's header text: cols()
+# matches exact-then-prefix, and "Effect Duration (s)".startswith("Duration") is False, so a stale
+# name does not fall back gracefully — it raises, which is the behaviour we want.
 HERO_COLUMNS = [
     "Champion", "Cost", "Role", "Origin 1", "Origin 2", "Class 1", "Class 2", "Range",
     "Summary", "Skill Description",
-    "Step", "Skill Type", "Trigger", "Condition", "Action Source", "Action",
-    "Count", "Spread", "Collision",
-    "Aim Target", "Effect Recipient", "Effect Category", "Effect Detail",
-    # `Effect Cadence` / `Effect Duration` were plain `Cadence` / `Duration (s)`. The user renamed
-    # them for clarity: both describe the EFFECT, not the action, which puts them in the same family
-    # as Effect Recipient / Category / Detail. The names here MUST track the sheet's header text —
-    # cols() matches exact-then-prefix, and "Effect Duration (s)".startswith("Duration") is False, so
-    # a stale name here does not fall back gracefully. It raises, which is the behaviour we want.
-    "Amount", "Scaling Type", "Scaling", "Effect Cadence", "Effect Duration", "AOE", "Cast",
+    "Step", "Skill Type", "Trigger", "Condition",
+    "Action Source", "Action", "Aim Target", "Offset", "AOE",
+    "Skill Range", "Count", "Spread", "Collision",
+    "Effect Recipient", "Effect Category", "Effect Detail",
+    "Amount", "Scaling Type", "Scaling", "Effect Cadence", "Effect Duration", "Cast",
 ]
 
 # The action-instance block: these cells are vertically merged across the rows of one action.
@@ -128,7 +134,7 @@ STEP_BLOCK = ACTION_BLOCK
 
 # The columns that merge wherever consecutive rows happen to agree.
 RUN_COLUMNS = ["Trigger", "Condition", "Action Source", "Action", "Count", "Spread", "Collision",
-               "Aim Target"]
+               "Skill Range", "Aim Target"]
 
 
 def remerge_hero(sh):
@@ -152,7 +158,11 @@ def remerge_hero(sh):
     ws = sh.worksheet("Hero")
     vals = ws.get_all_values()
     c = cols(vals[0])
-    last_col = c["Aim Target"]
+    # The unmerge must cover EVERY merged column, wherever it physically sits. AOE + Offset merge like
+    # the run block; since the action region was regrouped they may now sit LEFT of Skill Range / Count
+    # / Spread / Collision, so take the max over all of them rather than assuming AOE/Offset are last.
+    # (Effect columns between merged ones are never merged, so unmerging across them is a no-op.)
+    last_col = max(c[n] for n in RUN_COLUMNS + ["AOE", "Offset"])
 
     def merge(a, b, col):
         return {"mergeCells": {"range": {
@@ -179,7 +189,7 @@ def remerge_hero(sh):
     for a, b in steps:
         if b - a > 1:
             reqs += [merge(a, b, c[n]) for n in STEP_BLOCK]
-        for n in RUN_COLUMNS:
+        for n in RUN_COLUMNS + ["AOE", "Offset"]:
             # Compare EFFECTIVE values: a blank continuation row means "same as the row above" and
             # must merge WITH it. Comparing the raw cells would see "" != "Knock Back" and split
             # them - silently destroying the merge on every multi-effect action in the sheet.
@@ -274,7 +284,10 @@ def post_replies(replies, warn_unmatched=True):
         if c.get("resolved"):
             skipped += 1
             continue
-        body = next((t for k, t in replies if k in c["content"]), None)
+        # The user's comments routinely contain non-breaking spaces (\xa0) where a normal space is
+        # expected ("better\xa0name"), which silently breaks substring keys. Normalise before matching.
+        content = c["content"].replace(" ", " ")
+        body = next((t for k, t in replies if k in content), None)
         if body is None:
             if warn_unmatched:
                 print(f"  !! no reply drafted for: {c['content'][:60]!r}")

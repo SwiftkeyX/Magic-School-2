@@ -1,137 +1,202 @@
-Champion,Cost,Role,Origin 1,Origin 2,Class 1,Class 2,Range,Summary,Skill Description,Step,Skill Type,Trigger (When),Condition (Only if),Action Source,Action,Count,Spread,Collision (If it have one),Aim Target,Effect Recipient,Effect Category,Effect Detail,Amount,Scaling Type,Scaling,Effect Cadence,Effect Duration (s),AOE (hex),Cast (s)
-Kayle,1 Gold,Carry,Demacia,,Slayer,,4,Scaling Auto Attacker,Passive scales with Tactician level. Lvl 1: attacks deal bonus damage. Lvl 6: every 3rd attack launches a wave dealing damage and 20% Shred MR for 3s. Lvl 9: every attack launches a farther wave.,0,Passive,On Attack,Lvl 1-5,Self,Auto-Attack,1,—,Target-Only,Current,Same to Aim Target,Attack,Damage,30/45/70% AP,—,—,Once,—,—,—
-,,,,,,,,,,,,On 3rd Attack,Lvl 6-8,,Pierce Projectile,,,Pierce-All,,Enemies in path,Attack,Damage,30/45/70% AP,—,—,Once,—,—,—
-,,,,,,,,,,,,,,,,,,,,Enemies in path,Debuff,MR,20%,—,—,Over Time,3,—,—
-,,,,,,,,,,,,On Attack,Lvl 9+,,,,,,,Enemies in path (farther),Attack,Damage,30/45/70% AP,—,—,Once,—,—,—
-Poppy,1 Gold,Tank,Demacia,Yordle,Bastion,,1,Shield Tank,"Throw a projectile at an enemy for damage, then shield self when it returns.",1,Active,On Cast,—,Self,Homing Projectile,1,—,Target-Only,Current,Same to Aim Target,Attack,Damage,160/240/360% AP,—,—,Once,—,—,—
-,,,,,,,,,,2,Active,After Cast (return),—,Self,Receive Projectile,1,—,Self,Self,Same to Aim Target,Buff,Shield,250/325/400% AP,—,—,Once,4,—,—
-Galio,2 Gold,Tank,Demacia,,Invoker,,1,AOE Damage Tank,"Channel for 2s reducing incoming damage and healing self; on finish, deal circular AOE damage.",1,Active,While Channeling,—,Self,Cast,—,—,None,Self,Same to Aim Target,Buff,Heal,300/350/400% AP,—,—,Over Time,2,—,2
-,,,,,,,,,,,,,,,,,,,,Same to Aim Target,Buff,Damage Reduction,25/25/35%,—,—,Once,,—,—
-,,,,,,,,,,2,Active,After Cast,—,Self,Circle AOE,1,—,Area,Self,Enemies in area,Attack,Damage,200/300/450% AP,—,—,Once,—,2,—
-Garen,3 Gold,Carry,Demacia,,Juggernaut,,1,Beyblade Juggernaut,"Spin like a beyblade for 4s, dealing circular AOE damage over time.",1,Active,On Cast,—,Self,Circle AOE,1,—,Area,Self,Enemies in area,Attack,Damage,80/82/85% AD,Per Tick,per spin,Over Time,4,1,4
-Sona,3 Gold,Support,Demacia,,Multicaster,,4,AOE Spell Spammer,Send a wave at the clustered enemy; damage falls off per enemy hit. Allies hit are buffed instead.,1,Active,On Cast,—,Self,Pierce Projectile,1,—,Pierce-All,Clustered,Enemies in path,Attack,Damage,170/255/420% AP,Falloff per hit,−33% per hit,Once,—,2,—
-,,,,,,,,,,,,,,,,,,,,Allies in path,Buff,Attack Speed,20/25/35%,—,—,Once,Permanent,2,—
-Jarvan IV,4 Gold,Tank,Demacia,,Strategist,,1,AOE Stun Tank,Leap into the clustered enemy; on landing deal circular AOE damage and Stun.,1,Active,On Cast,—,Self,Leap,—,—,None,Clustered,Self,Movement,(reposition),—,—,—,—,—,—,—
-,,,,,,,,,,2,Active,After Leap,—,Self,Circle AOE,1,—,Area,Self,Enemies in area,Attack,Damage,140/210/800% AP,—,—,Once,—,2,—
-,,,,,,,,,,,,,,,,,,,,Enemies in area,Status,Stun,—,—,—,Once,1.5/2/8,2,—
-Lux,4 Gold,Carry,Demacia,,Sorcerer,,4,Laser Spell Spammer,"Laser the current target for 3s, dealing damage over time and shredding MR over time.",1,Active,On Cast,—,Self,Current Target Laser,1,—,Target-Only,Current,Same to Aim Target,Attack,Damage,735/1100/2750% AP,—,—,Over Time,3,—,3
-,,,,,,,,,,,,,,,,,,,,Same to Aim Target,Debuff,MR,15/15/40 /s,—,—,Over Time,3,—,—
-Cassiopeia,1 Gold,Carry,Noxus,Shurima,Invoker,,4,Single-Target Spell Spammer,Damage the current target and Wound it; the damage is amplified if the target is already Wounded.,1,Active,On Cast,If Target Wounded,Self,Homing Projectile,1,—,Target-Only,Current,Same to Aim Target,Attack,Damage,160/240/360% AP,Conditional Bonus,+30% if Wounded,Once,—,—,—
-,,,,,,,,,,,,,,,,,,,,Same to Aim Target,Status,Wound,—,—,—,Once,5,—,—
-Samira,1 Gold,Carry,Noxus,,Challenger,,4,Single-Target Shred Spammer,Shoot the current target for damage and permanently shred a flat amount of DEF.,1,Active,On Cast,—,Self,First hit Projectile,1,—,First-Hit,Current,Same to Aim Target,Attack,Damage,190/190/200% AD,—,—,Once,—,—,—
-,,,,,,,,,,,,,,,,,,,,Same to Aim Target,Debuff,DEF,10/15/20,Derived,+AP,Once,Permanent,—,—
-Kled,2 Gold,Tank,Noxus,Yordle,Slayer,,1,AA Juggernaut,"Passive: start with +30% bonus HP; when it expires, gain a permanent stacking Attack Speed boost. Active: gain new bonus HP.",0.1,Passive,Game Start,—,Self,Cast,—,—,None,Self,Same to Aim Target,Buff,Bonus HP,30% max HP,—,—,Once,—,—,—
-,,,,,,,,,,0.2,Passive,On Bonus-HP Expire,—,Self,Cast,—,—,None,Self,Same to Aim Target,Buff,Attack Speed,65/70/75% AP,Stacking,stacking,Once,Permanent,—,—
-,,,,,,,,,,1,Active,On Cast,—,Self,Cast,—,—,None,Self,Same to Aim Target,Buff,Bonus HP,30% max HP,—,—,Once,—,—,—
-Swain,2 Gold,Tank,Noxus,,Strategist,Sorcerer,2,Transforming AOE Tank,"Transform to gain bonus max HP, then deal circular AOE magic damage over time. If already transformed, gain more HP and deal a burst.",1,Active,On Cast,If not Transformed,Self,Cast,—,—,None,Self,Same to Aim Target,Buff,Bonus HP,325/375/550% AP,—,—,Once,—,—,—
-,,,,,,,,,,,,,If Already Transformed,,Circle AOE,1,,Area,,Same to Aim Target,Buff,Bonus HP,225/260/385% AP,—,—,Once,—,—,—
-,,,,,,,,,,,,,,,,,,,,Enemies in area,Attack,Damage,100/160/300% AP,Burst,burst,Once,—,—,—
-,,,,,,,,,,0,Passive,When Transformed,—,Self,Circle AOE,1,—,Area,Self,Enemies in area,Attack,Damage,25/40/60% AP,Per Tick,per second,Over Time,—,—,—
-Darius,3 Gold,Carry,Noxus,,Juggernaut,,1,Executing Melee Carry,"Strike the current target for heavy physical damage; if it kills the target, immediately recast on a new target.",1,Active,On Cast,—,Self,Cast,—,—,None,Current,Same to Aim Target,Attack,Damage,350% AD + 55/80/110% AP,—,—,Once,—,—,—
-,,,,,,,,,,2,Active,On Kill,—,Self,Cast,—,—,None,Current (new),Same to Aim Target,Attack,Damage,90/95/100% of cast,—,—,Once,—,—,—
-Katarina,3 Gold,Carry,Noxus,,Rogue,,1,AOE Wound Assassin,"Throw three daggers at nearby enemies, blink to each, and deal circular AOE magic damage plus Wound to adjacent enemies.",1,Active,On Cast,—,Self,Cast,—,—,None,Clustered,Self,Movement,(setup / daggers),—,—,—,—,—,—,—
-,,,,,,,,,,2,Active,After Cast,—,Self,Leap,—,—,None,Clustered,Self,Movement,(reposition),—,—,—,—,—,—,—
-,,,,,,,,,,3,Active,After Leap,—,Self,Circle AOE,1,—,Area,Self,Enemies in area,Attack,Damage,145/220/350% AP,—,—,Once,—,1,—
-,,,,,,,,,,,,,,,,,,,,Enemies in area,Status,Wound,—,—,—,Once,6,1,—
-Sion,5 Gold,Tank,Noxus,,Bruiser,,1,Charging Stun Tank,"Charge into the largest enemy cluster, dealing physical damage and Stunning enemies in the path. Passive: revive once on death with decaying HP, immune to CC and gaining Attack Speed.",1,Active,On Cast,—,Self,Charge Into,—,—,Pierce-All,Clustered,Enemies in path,Attack,Damage,225/235/500% AD,—,—,Once,—,—,—
-,,,,,,,,,,,,,,,,,,,,Enemies in path,Status,Stun,—,—,—,Once,1.25/1.5/15,—,—
-,,,,,,,,,,0,Passive,On Death,—,Self,Cast,—,—,None,Self,Same to Aim Target,Buff,Bonus HP,100% HP,Decay,20/13/0% per second,Once,—,—,—
-,,,,,,,,,,,,,,,,,,,,Same to Aim Target,Buff,Attack Speed,1.5/1.5/10% AP,—,—,Once,—,—,—
-Irelia,1 Gold,Tank,Ionia,,Bastion,,1,Decaying Shield Tank,"Ionia Bonus: +25 Armor and Magic Resist. Active: enter a defensive stance and gain a Shield that rapidly decays over 3s. When it expires, deal circular AOE magic damage plus 30% of the damage absorbed to enemies around and in front of her.",0,Passive,Game Start,If Ionia Active,Self,Cast,—,—,None,Self,Same to Aim Target,Buff,Armor,25,—,—,Once,Permanent,—,—
-,,,,,,,,,,,,,,,,,,,,Same to Aim Target,Buff,MR,25,—,—,Once,Permanent,—,—
-,,,,,,,,,,1,Active,On Cast,—,Self,Cast,—,—,None,Self,Same to Aim Target,Buff,Shield,350/400/450% AP,Decay,decays over its duration,Once,3,—,—
-,,,,,,,,,,2,Active,On Shield Expire,—,Self,Circle AOE,1,—,Area,Self,Enemies in area,Attack,Damage,70/100/150% AP,Derived,+30% of damage absorbed,Once,—,1,—
-,,,,,,,,,,,,,,,Laser Shot,,,Pierce-All,Current,Enemies in path,Attack,Damage,70/100/150% AP,Derived,+30% of damage absorbed,Once,—,—,—
-Jhin,1 Gold,Carry,Ionia,,Deadeye,,5,Falloff Line Carry,Ionia Bonus: +25% Attack Damage. Active: take aim at the current target and fire a shot through enemies in a line; each enemy hit reduces the damage by 56%.,0,Passive,Game Start,If Ionia Active,Self,Cast,—,—,None,Self,Same to Aim Target,Buff,AD,25%,—,—,Once,Permanent,—,—
-,,,,,,,,,,1,Active,On Cast,—,Self,Pierce Projectile,1,—,Pierce-All,Current,Enemies in path,Attack,Damage,744% AD & AP,Falloff per hit,−56% per hit,Once,—,—,—
-Sett,2 Gold,Tank,Ionia,,Juggernaut,,1,Grab-and-Slam Stun Tank,"Ionia Bonus: +180 max Health. Active: grab an enemy from either side and slam them together, dealing magic damage and Stunning them. If only one enemy is grabbed, the damage and Stun duration are increased by 50%.",0,Passive,Game Start,If Ionia Active,Self,Cast,—,—,None,Self,Same to Aim Target,Buff,Bonus HP,180,—,—,Once,Permanent,—,—
-,,,,,,,,,,1,Active,On Cast,—,Self,Grab & Slam,1,—,Flank-Pair,Adjacent (both sides),Grabbed enemies,Attack,Damage,180/270/420% AP,Conditional Bonus,+50% if only 1 grabbed,Once,—,—,—
-,,,,,,,,,,,,,,,,,,,,Grabbed enemies,Status,Stun,—,Conditional Bonus,+50% if only 1 grabbed,Once,1.25/1.5/2,—,—
-Zed,2 Gold,Carry,Ionia,,Rogue,Slayer,1,Shadow Twin Assassin,Ionia Bonus: +15% Critical Strike Chance and Critical Strike Damage. Active: create a shadow at the furthest enemy within 2 hexes; Zed and his shadow each slash adjacent enemies for physical damage.,0,Passive,Game Start,If Ionia Active,Self,Cast,—,—,None,Self,Same to Aim Target,Buff,Crit Chance,15%,—,—,Once,Permanent,—,—
-,,,,,,,,,,,,,,,,,,,,Same to Aim Target,Buff,Crit Damage,15%,—,—,Once,Permanent,—,—
-,,,,,,,,,,1,Active,On Cast,—,Self,Summon,1,—,None,Farthest (within 2 hex),—,Summon,(summon),—,—,—,—,—,—,—
-,,,,,,,,,,2,Active,After Summon,—,Self,Circle AOE,1,—,Area,Self,Enemies in area,Attack,Damage,140/140/150% AD + 25/40/50% AP,—,—,Once,—,1,—
-,,,,,,,,,,,,,,Summon,,,,,Summon,Enemies in area,Attack,Damage,140/140/150% AD + 25/40/50% AP,—,—,Once,—,1,—
-Karma,3 Gold,Carry,Ionia,,Invoker,,4,Burst Spell Spammer,"Ionia Bonus: +25 Ability Power. Active: fire a burst of energy that explodes on impact, dealing magic damage to enemies adjacent to the target. Every third cast launches 3 bursts.",0,Passive,Game Start,If Ionia Active,Self,Cast,—,—,None,Self,Same to Aim Target,Buff,AP,25,—,—,Once,Permanent,—,—
-,,,,,,,,,,1,Active,On Cast,If 1st or 2nd Cast,Self,Burst Projectile,1,—,First-Hit,Current,Enemies in area,Attack,Damage,200/300/470% AP,—,—,Once,—,1,—
-,,,,,,,,,,,,,If 3rd Cast,,Burst Projectile,3,Current + Left + Right,First-Hit,,Enemies in area,Attack,Damage,200/300/470% AP,—,—,Once,—,1,—
-Shen,4 Gold,Tank,Ionia,,Bastion,Invoker,1,Ally-Shielding Burst Tank,"Ionia Bonus: +8% Damage Reduction. Active: shield self and the 2 lowest-Health allies for 4s. After ally's shield duration expire, Shen's Shield refreshes and burst, dealing magic damage to adjacent enemies.",0,Passive,Game Start,If Ionia Active,Self,Cast,—,—,None,Self,Same to Aim Target,Buff,Damage Reduction,8%,—,—,Once,Permanent,—,—
-,,,,,,,,,,1,Active,On Cast,—,Self,Cast,—,—,None,Self,Same to Aim Target,Buff,Shield,350/450/2000% AP,—,—,Once,4,—,—
-,,,,,,,,,,,,,,,,,,,Lowest-HP Allies,Same to Aim Target,Buff,Shield,225/275/1500% AP,—,—,Once,4,—,—
-,,,,,,,,,,2,Active,After Shielding Allies,—,Self,Circle AOE,1,—,Area,Self,Same to Aim Target,Buff,Shield,(refresh),—,—,Once,4,1,—
-,,,,,,,,,,,,,,,,,,,,Enemies in area,Attack,Damage,240/360/2500% AP,Burst,burst,Once,—,1,—
-Yasuo,4 Gold,Carry,Ionia,,Challenger,,1,Whirlwind Dash Carry,"Ionia Bonus: +15% Omnivamp. Active: send a whirlwind at the furthest enemy within 3 hexes, knocking up and Stunning all enemies hit. Dash to and slash the original target for heavy physical damage, then slam it into the ground, damaging enemies within 1 hex.",0,Passive,Game Start,If Ionia Active,Self,Cast,—,—,None,Self,Same to Aim Target,Buff,Omnivamp,15%,—,—,Once,Permanent,—,—
-,,,,,,,,,,1,Active,On Cast,—,Self,Pierce Projectile,1,—,Pierce-All,Farthest (within 3 hex),Enemies in path,Status,Stun,—,—,—,Once,—,—,—
-,,,,,,,,,,2,Active,After Whirlwind,—,Self,Leap,—,—,None,Step 1 Aim target,Self,Movement,(reposition),—,—,—,—,—,—,—
-,,,,,,,,,,3,Active,After Leap,—,Self,Cast,—,—,None,Step 1 Aim target,Same to Aim Target,Attack,Damage,500/500/1500% AD + 55/85/300% AP,—,—,Once,—,—,—
-,,,,,,,,,,4,Active,After Slash,—,Self,Circle AOE,1,—,Area,Step 1 Aim target,Enemies in area,Attack,Damage,300/300/750% AD,—,—,Once,—,1,—
-Ahri,5 Gold,Carry,Ionia,,Sorcerer,,4,Essence-Steal Spell Carry,"Ionia Bonus: +3 Mana per second. Active: steal essence from enemies around the current target, dealing magic damage and Mana Reaving them. Every third cast instead unleashes a wave that damages all enemies hit, dealing 33% more to enemies whose essence has been stolen.",0,Passive,Game Start,If Ionia Active,Self,Cast,—,—,None,Self,Same to Aim Target,Buff,Mana Regen,3 /s,—,—,Once,Permanent,—,—
-,,,,,,,,,,1,Active,On Cast,If 1st or 2nd Cast,Self,Circle AOE,1,—,Area,Current,Enemies in area,Attack,Damage,105/150/1000% AP,—,—,Once,—,—,—
-,,,,,,,,,,,,,,,,,,,,Enemies in area,Debuff,Mana Reave,20%,—,—,Once,Until next cast,—,—
-,,,,,,,,,,,,,If 3rd Cast,,Pierce Projectile,,360° radial,Pierce-All,Self,All enemies,Attack,Damage,260/390/1999% AP,Conditional Bonus,+33% if essence stolen,Once,—,—,—
-Renekton,1 Gold,Tank,Shurima,,Bruiser,,1,Healing AOE Bruiser,"Deal magic damage to adjacent enemies. Heal for the first enemy hit, and a further 30% Ability Power for every additional enemy caught in the same swing.",1,Active,On Cast,—,Self,Circle AOE,1,—,Area,Self,Enemies in area,Attack,Damage,180/270/400% AP,—,—,Once,—,1,—
-,,,,,,,,,,,,,,,,,,,,Same to Aim Target,Buff,Heal,220/270/320% AP,Per Target Hit,+30% AP per additional enemy hit,Once,—,1,—
-Taliyah,2 Gold,Carry,Shurima,,Multicaster,,4,Knock-up Punisher Mage,"Passive: whenever ANY enemy is knocked up or back - by anything, not just her - throw a boulder towards them; it damages the first enemy it hits. Active: damage the current target and knock them up, Stunning them for 2s.",0,Passive,On Enemy Knocked Up,—,Self,First hit Projectile,1,—,First-Hit,Knocked-up enemy,First hit enemy,Attack,Damage,120/180/270% AP,—,—,Once,—,—,—
-,,,,,,,,,,1,Active,On Cast,—,Self,Spawn At Target,1,—,Target-Only,Current,Same to Aim Target,Attack,Damage,220/330/495% AP,—,—,Once,—,—,—
-,,,,,,,,,,,,,,,,,,,,Same to Aim Target,Status,Stun,—,—,—,Once,2,—,—
-Akshan,3 Gold,Carry,Shurima,,Deadeye,,4,Multi-shot Deadeye,Lock on to the farthest enemy and unleash a hail of 6 shots toward them. Each shot damages the first enemy it hits - which need not be the enemy locked on to.,1,Active,On Cast,—,Self,First hit Projectile,6,Same target,First-Hit,Farthest,First hit enemy,Attack,Damage,125% AD + 20/35/60% AP,—,—,Once,—,—,—
-Azir,4 Gold,Carry,Shurima,,Strategist,,4,Sand Soldier Summoner,"Passive: every third attack, a Sand Soldier damages Azir's target. Active: summon a Sand Soldier to attack the current target; if Azir already has 3 Soldiers, they all strike at once instead.",0,Passive,On 3rd Attack,—,Summon,Auto-Attack,1,—,Target-Only,Current,Same to Aim Target,Attack,Damage,110/160/500% AP,—,—,Once,—,—,—
-,,,,,,,,,,1,Active,On Cast,If fewer than 3 Soldiers,Self,Summon,3,—,None,—,Same to Aim Target,Summon,(summon),—,Cap,max 3 Soldiers on the board,—,—,—,—
-,,,,,,,,,,,,,If Already 3 Soldiers,Summon,Auto-Attack,,Same target,Target-Only,Current,Same to Aim Target,Attack,Damage,70% AP,—,—,Once,—,—,—
-Nasus,4 Gold,Tank,Shurima,,Juggernaut,,1,Stat-Stealing Juggernaut,"Steal max Health, Attack Damage, Armor and Magic Resist from the nearest 4/5/7 enemies for 8s - each stat is deducted from them and added to him. While empowered, every third attack deals heavy physical damage.",1,Active,On Cast,—,Self,Cast,—,—,None,Nearest 4/5/7 enemies,Same to Aim Target,Debuff,Max HP,4/4/15%,—,—,Once,8,—,—
-,,,,,,,,,,,,,,,,,,,,Same to Aim Target,Debuff,AD,8%,—,—,Once,8,—,—
-,,,,,,,,,,,,,,,,,,,,Same to Aim Target,Debuff,DEF,4/4/20,—,—,Once,8,—,—
-,,,,,,,,,,,,,,,,,,,,Same to Aim Target,Debuff,MR,4/4/20,—,—,Once,8,—,—
-,,,,,,,,,,,,,,,,,,,,Self,Buff,Bonus HP,4/4/15%,Per Target Hit,from each enemy hit,Once,8,—,—
-,,,,,,,,,,,,,,,,,,,,Self,Buff,AD,8%,Per Target Hit,from each enemy hit,Once,8,—,—
-,,,,,,,,,,,,,,,,,,,,Self,Buff,Armor,4/4/20,Per Target Hit,from each enemy hit,Once,8,—,—
-,,,,,,,,,,,,,,,,,,,,Self,Buff,MR,4/4/20,Per Target Hit,from each enemy hit,Once,8,—,—
-,,,,,,,,,,0,Passive,On 3rd Attack,If Empowered,Self,Auto-Attack,1,—,Target-Only,Current,Same to Aim Target,Attack,Damage,380/380/700% AD,—,—,Once,—,—,—
-K'Sante,5 Gold,Tank,Shurima,,Bastion,,1,Knockback Slam Tank,"Heal, then knock up the current target and smash them to the edge of the battlefield, damaging and Stunning them. Enemies the flying target collides with are also damaged and Stunned. If the target cannot be pushed further it is knocked off the battlefield; otherwise K'Sante chases it.",1,Active,On Cast,—,Self,Cast,—,—,None,Self,Same to Aim Target,Buff,Heal,10% max HP,—,—,Once,—,—,—
-,,,,,,,,,,2,Active,After Cast,—,Self,Knock Back,1,—,Pierce-All,Current,Same to Aim Target,Attack,Damage,250/400/1000% AP,—,—,Once,—,—,—
-,,,,,,,,,,,,,,,,,,,,Same to Aim Target,Status,Stun,—,—,—,Once,2/2.5/10,—,—
-,,,,,,,,,,,,,,,,,,,,Enemies in path,Attack,Damage,250/400/1000% AP,—,—,Once,—,—,—
-,,,,,,,,,,,,,,,,,,,,Enemies in path,Status,Stun,—,—,—,Once,1/1.25/5,—,—
-,,,,,,,,,,3,Active,After Knock Back,If Target at Edge,Self,Cast,—,—,None,Step 2 Aim target,Same to Aim Target,Status,Knock Off,—,—,—,Once,—,—,—
-,,,,,,,,,,,,,If Target Not at Edge,,Leap,,,,,Self,Movement,(reposition),—,—,—,—,—,—,—
-Ashe,2 Gold,Support,Freljord,,Deadeye,,6,Cone Chill Archer,Fire 8 arrows in a cone. Each arrow damages the first enemy it hits and Chills it (-30% Attack Speed) for 2s.,1,Active,On Cast,—,Self,First hit Projectile,8,Cone,First-Hit,Current,First hit enemy,Attack,Damage,160/165/175% AD,—,—,Once,—,—,—
-,,,,,,,,,,,,,,,,,,,,First hit enemy,Status,Chill,—,—,—,Once,2,—,—
-Lissandra,3 Gold,Support,Freljord,,Invoker,,2,Stun & Amplify Mage,"Stun the current target, damage everything within 2 hexes of it, and leave those enemies taking 10% more damage for 4s.",1,Active,On Cast,—,Self,Circle AOE,1,—,Area,Current,Same to Aim Target,Status,Stun,—,—,—,Once,2,2,—
-,,,,,,,,,,,,,,,,,,,,Enemies in area,Attack,Damage,160/240/400% AP,—,—,Once,—,2,—
-,,,,,,,,,,,,,,,,,,,,Enemies in area,Debuff,Damage Amplification,10%,—,—,Once,4,2,—
-Sejuani,4 Gold,Tank,Freljord,,Bruiser,,1,Chill Enabler Tank,"Passive: whenever an ALLY attacks a Chilled enemy, that ally's attack deals bonus true damage. Active: shield self, then damage and Chill nearby enemies.",0,Passive,On Ally Attack Chilled Enemy,—,Ally,Auto-Attack,1,—,Target-Only,Current,Same to Aim Target,Attack,True Damage,160/240/1200,Derived,increased by max Health,Once,—,—,—
-,,,,,,,,,,1,Active,On Cast,—,Self,Cast,—,—,None,Self,Same to Aim Target,Buff,Shield,600/700/2000% AP,—,—,Once,4,—,—
-,,,,,,,,,,2,Active,After Cast,—,Self,Circle AOE,1,—,Area,Self,Enemies in area,Attack,Damage,160/240/1200% AP,—,—,Once,—,2,—
-,,,,,,,,,,,,,,,,,,,,Enemies in area,Status,Chill,—,—,—,Once,4,2,—
-Orianna,1 Gold,Support,Piltover,,Sorcerer,,4,Shield & Empower Support,"Shield the lowest-Health ally for 4s, and empower Orianna's NEXT attack to deal bonus magic damage.",1,Active,On Cast,—,Self,Cast,—,—,None,Lowest-HP Ally,Same to Aim Target,Buff,Shield,200/225/275% AP,—,—,Once,4,—,—
-,,,,,,,,,,,,,,,,,,,Self,Same to Aim Target,Buff,Empowered Attack,290/435/650% AP,—,—,Once,—,—,—
-Vi,2 Gold,Tank,Piltover,,Bruiser,,1,Shield & Sunder Bruiser,"Shield self for 4s, then damage enemies within 1 hex of the current target and Sunder them (-20% Armor) for 4s.",1,Active,On Cast,—,Self,Cast,—,—,None,Self,Same to Aim Target,Buff,Shield,350/400/450% AP,—,—,Once,4,—,—
-,,,,,,,,,,2,Active,After Cast,—,Self,Circle AOE,1,—,Area,Current,Enemies in area,Attack,Damage,300% AD,—,—,Once,—,1,—
-,,,,,,,,,,,,,,,,,,,,Enemies in area,Debuff,DEF,20%,—,—,Once,4,1,—
-Ekko,3 Gold,Carry,Zaun,Piltover,Rogue,,1,Retroactive-Heal Assassin,"Heal for 20% of the damage he took in the last 4s, then strike the current target for magic damage.",1,Active,On Cast,—,Self,Cast,—,—,None,Self,Same to Aim Target,Buff,Heal,20% of damage taken in last 4s,—,—,Once,—,—,—
-,,,,,,,,,,2,Active,After Cast,—,Self,Cast,—,—,None,Current,Same to Aim Target,Attack,Damage,255/380/570% AP,—,—,Once,—,—,—
-Jayce,3 Gold,Support,Piltover,,Gunner,,4,Flank-Buff Gunner,"Grant himself Attack Speed and his left and right neighbours Ability Power for 3s, then fire a blast that detonates on the first enemy hit, damaging everyone near the blast.",1,Active,On Cast,—,Self,Cast,—,—,None,Self,Same to Aim Target,Buff,Attack Speed,30/40/50% AP,—,—,Once,3,—,—
-,,,,,,,,,,,,,,,,,,,,Adjacent allies (left & right),Buff,AP,15%,—,—,Once,3,—,—
-,,,,,,,,,,2,Active,After Cast,—,Self,Burst Projectile,1,—,First-Hit,Current,Enemies in area,Attack,Damage,275/275/295% AD,—,—,Once,—,1,—
-Viego,1 Gold,Carry,Shadow Isles,,Rogue,,1,Stacking Melee Assassin,"Deal 110/165/250% Ability Power magic damage to the current target. For the rest of combat, Viego's attacks deal 20/30/45% Ability Power bonus stacking magic damage.",1,Active,On Cast,—,Self,Laser Shot,1,—,Pierce-All,Current,Enemies in path,Attack,Damage,110/165/250% AP,—,—,Once,—,—,—
-,,,,,,,,,,,,,,,,—,,,Self,Enemies in path,Buff,On-Hit Damage,20/30/45% AP,Stacking,stacking,Once,Permanent,—,—
-Maokai,1 Gold,Tank,Shadow Isles,,Bastion,,1,Mana-Leeching Healing Tank,"Sap Magic: Passive: Whenever an enemy casts an Ability, gain 5 Mana. Active: On his next attack, heal for 220/260/300% Ability Power.",0,Passive,On Enemy Cast,—,Self,Cast,—,—,None,Self,Same to Aim Target,Buff,Mana,5,—,—,Once,—,—,—
-,,,,,,,,,,1,Active,On Cast,—,Self,Cast,—,—,None,Self,Same to Aim Target,Buff,Empowered Attack (Maokai),220/260/300% AP,—,—,Once,—,—,—
-Kalista,3 Gold,Carry,Shadow Isles,,Challenger,,4,Spear-Stacking Executioner,"Passive: Attacks impale a spear in the target, which deals 18/27/45% Ability Power true damage when removed. Kalista rips the spears out if it would kill the target. Active: Impale 6 spears in the current target.",0.1,Passive,On Attack,—,Self,Auto-Attack,1,—,Target-Only,Current,Same to Aim Target,Status,Impale,—,Stacking,stacking,Once,Permanent,—,—
-,,,,,,,,,,0.2,Passive,On Spears Lethal,—,Self,Cast,—,—,None,Current,Same to Aim Target,Attack,True Damage,18/27/45% AP,Per Stack,per spear removed,Once,—,—,—
-,,,,,,,,,,1,Active,On Cast,—,Self,Homing Projectile,1,—,Target-Only,Current,Same to Aim Target,Status,Impale,6 spears,—,—,Once,—,—,—
-Gwen,4 Gold,Carry,Shadow Isles,,Slayer,,2,Dashing Cone Slayer,"Dash around the current target and snip 3 times in a cone, each dealing 100/150/400% Ability Power magic damage to enemies hit. Every 3 casts, gain 120/120/300 Armor and Magic Resist for 3/3/5 seconds.",1,Active,On Cast,—,Self,Leap,—,—,None,Current,Self,Movement,(reposition),—,—,—,Once,—,—,—
-,,,,,,,,,,2,Active,After Leap,—,Self,Sweep Laser,3,Same target,Pierce-All,Current,Enemies in area,Attack,Damage,100/150/400% AP,—,—,Once,—,"4 (1 hex at range 1, 3 at range 2)",—
-,,,,,,,,,,0,Passive,On 3rd Cast,—,Self,Cast,—,—,None,Self,Same to Aim Target,Buff,Armor,120/120/300,—,—,Once,3/3/5,—,—
-,,,,,,,,,,,,,,,,,,,,Same to Aim Target,Buff,MR,120/120/300,—,—,Once,3/3/5,—,—
-Senna,5 Gold,Support,Redeemer,Shadow Isles,Gunner,,4,Board-Wide Beam Support,"Fire a massive beam at the furthest enemy, dealing 235/250/2000% Attack Damage physical damage to all enemies hit. Any allies hit gain 200/275/4000% Ability Power Shield for 4/4/15 seconds.",1,Active,On Cast,—,Self,Laser Shot,1,—,Pierce-All,Farthest,Enemies in path,Attack,Damage,235/250/2000% AD,—,—,Once,—,—,—
-,,,,,,,,,,,,,,,,,,,,Allies in path,Buff,Shield,200/275/4000% AP,—,—,Once,4/4/15,—,—
-Soraka,2 Gold,Support,Targon,,Invoker,,4,Star-Fall Healer,"Heal the lowest health ally for 140/160/180% Ability Power. If the ally is below 50% Health, heal them for an additional 140/160/180% Ability Power. Over the next 5 seconds, 5 stars hit the enemy closest to them. Each deals 120/180/280% Ability Power magic damage.",1,Active,On Cast,—,Self,Cast,—,—,None,Lowest-HP Ally,Same to Aim Target,Buff,Heal,140/160/180% AP,—,—,Once,—,—,—
-,,,,,,,,,,,,,If Ally Below 50% HP,,,,,,,Same to Aim Target,Buff,Heal,140/160/180% AP,—,—,Once,—,—,—
-,,,,,,,,,,2,Active,After Cast,—,Self,Spawn At Target,5,Each to its own target,Target-Only,Nearest enemy to the healed ally,Same to Aim Target,Attack,Damage,120/180/280% AP,—,—,Over Time,5,—,—
-Taric,3 Gold,Tank,Targon,,Bastion,Sorcerer,1,Damage-Redirecting Shield Tank,Gain 500/580/680% Ability Power Shield for 4 seconds. It redirects 50% of the damage received by adjacent allies.,1,Active,On Cast,—,Self,Cast,—,—,None,Self,Same to Aim Target,Buff,Shield,500/580/680% AP,—,—,Once,4,—,—
-,,,,,,,,,,,,,,,,,,,,Adjacent allies (left & right),Buff,Damage Redirect,50%,—,—,Once,4,—,—
-Aphelios,4 Gold,Carry,Targon,,Deadeye,,4,Chakram-Stacking Moon Carry,"Fire a moon blast at the largest group of enemies that deals 240/240/750% Attack Damage physical damage to enemies within 2 hexes. For 7 seconds, equip 3 Chakram, plus 1 more for each enemy hit by the blast. Attacks deal 7/7/15% Attack Damage bonus physical damage for each Chakram equipped. Aphelios heals for 75% of damage dealt by Chakrams (increased by Ability Power).",1,Active,On Cast,—,Self,Homing Burst,1,—,Area,Clustered,Enemies in area,Attack,Damage,240/240/750% AD,—,—,Once,—,2,—
-,,,,,,,,,,2,Active,After Cast,—,Self,Cast,—,—,None,Self,Same to Aim Target,Buff,Chakram,3,Per Target Hit,+1 per enemy hit by the blast,Once,7,—,—
-,,,,,,,,,,0,Passive,On Attack,If Empowered,Self,Auto-Attack,1,—,Target-Only,Current,Same to Aim Target,Attack,Damage,7/7/15% AD,Per Stack,per Chakram equipped,Once,—,—,—
-,,,,,,,,,,,,,,,,,,,,Self,Buff,Omnivamp,75%,Derived,of Chakram damage only; increased by AP,Once,—,—,—
+Champion,Cost,Role,Origin 1,Origin 2,Class 1,Class 2,Range,Summary,Skill Description,Step,Skill Type,Trigger (When),Condition (Only if),Action Source,Action,Aim Target,Offset,AOE (hex),Skill Range,Count,Spread,Collision (If it have one),Effect Recipient,Effect Category,Effect Detail,Amount,Scaling Type,Scaling,Effect Cadence,Effect Duration (s),Cast (s)
+Kayle,1 Gold,Carry,Demacia,,Slayer,,4,Scaling Auto Attacker,Passive scales with Tactician level. Lvl 1: attacks deal bonus damage. Lvl 6: every 3rd attack launches a wave dealing damage and 20% Shred MR for 3s. Lvl 9: every attack launches a farther wave.,0,Passive,On Attack,Lvl 1-5,Self,Auto-Attack,Current,—,—,4,1,—,Target-Only,Same to Aim Target,Attack,Damage,30/45/70% AP,—,—,Once,—,—
+,,,,,,,,,,,,On 3rd Attack,Lvl 6-8,,Pierce Projectile,,—,—,4,,,Pierce-All,Enemies in path,Attack,Damage,30/45/70% AP,—,—,Once,—,—
+,,,,,,,,,,,,,,,,,,,,,,,Enemies in path,Debuff,MR,20%,—,—,Once,3,—
+,,,,,,,,,,,,On Attack,Lvl 9+,,,,,,,,,,Enemies in path (farther),Attack,Damage,30/45/70% AP,—,—,Once,—,—
+Poppy,1 Gold,Tank,Demacia,Yordle,Bastion,,1,Shield Tank,"Throw a projectile at an enemy for damage, then shield self when it returns.",1,Active,On Cast,—,Self,Homing Projectile,Current,—,—,1,1,—,Target-Only,Same to Aim Target,Attack,Damage,160/240/360% AP,—,—,Once,—,—
+,,,,,,,,,,2,Active,After Cast (return),—,Self,Receive Projectile,Self,—,—,1,1,—,Self,Same to Aim Target,Buff,Shield,250/325/400% AP,—,—,Once,4,—
+Galio,2 Gold,Tank,Demacia,,Invoker,,1,AOE Damage Tank,"Channel for 2s reducing incoming damage and healing self; on finish, deal circular AOE damage.",1,Active,While Channeling,—,Self,Cast,Self,—,—,1,—,—,None,Same to Aim Target,Buff,Heal,300/350/400% AP,—,—,Every 0.5s,2,2
+,,,,,,,,,,,,,,,,,,,,,,,Same to Aim Target,Buff,Damage Reduction,25/25/35%,—,—,Once,,—
+,,,,,,,,,,2,Active,After Cast,—,Self,Circle AOE,Self,centred,2,1,1,—,Area,Enemies in area,Attack,Damage,200/300/450% AP,—,—,Once,—,—
+Garen,3 Gold,Carry,Demacia,,Juggernaut,,1,Beyblade Juggernaut,"Spin like a beyblade for 4s, dealing circular AOE damage over time.",1,Active,On Cast,—,Self,Circle AOE,Self,centred,1,1,1,—,Area,Enemies in area,Attack,Damage,80/82/85% AD,Per Tick,per spin,Every spin,4,4
+Sona,3 Gold,Support,Demacia,,Multicaster,,4,AOE Spell Spammer,Send a wave at the clustered enemy; damage falls off per enemy hit. Allies hit are buffed instead.,1,Active,On Cast,—,Self,Pierce Projectile,Clustered,—,2,4,1,—,Pierce-All,Enemies in path,Attack,Damage,170/255/420% AP,Falloff per hit,−33% per hit,Once,—,—
+,,,,,,,,,,,,,,,,,,,,,,,Allies in path,Buff,Attack Speed,20/25/35%,—,—,Once,Permanent,—
+Jarvan IV,4 Gold,Tank,Demacia,,Strategist,,1,AOE Stun Tank,Leap into the clustered enemy; on landing deal circular AOE damage and Stun.,1,Active,On Cast,—,Self,Leap,Clustered,—,—,1,—,—,None,Self,Movement,(reposition),—,—,—,—,—,—
+,,,,,,,,,,2,Active,After Leap,—,Self,Circle AOE,Self,centred,2,1,1,—,Area,Enemies in area,Attack,Damage,140/210/800% AP,—,—,Once,—,—
+,,,,,,,,,,,,,,,,,,,,,,,Enemies in area,Status,Stun,—,—,—,Once,1.5/2/8,—
+Lux,4 Gold,Carry,Demacia,,Sorcerer,,4,Laser Spell Spammer,"Laser the current target for 3s, dealing damage over time and shredding MR over time.",1,Active,On Cast,—,Self,Current Target Laser,Current,—,—,4,1,—,Target-Only,Same to Aim Target,Attack,Damage,735/1100/2750% AP,—,—,Every 0.5s,3,3
+,,,,,,,,,,,,,,,,,,,,,,,Same to Aim Target,Debuff,MR,15/15/40 /s,—,—,Every 0.5s,3,—
+Cassiopeia,1 Gold,Carry,Noxus,Shurima,Invoker,,4,Single-Target Spell Spammer,Damage the current target and Wound it; the damage is amplified if the target is already Wounded.,1,Active,On Cast,If Target Wounded,Self,Homing Projectile,Current,—,—,4,1,—,Target-Only,Same to Aim Target,Attack,Damage,160/240/360% AP,Conditional Bonus,+30% if Wounded,Once,—,—
+,,,,,,,,,,,,,,,,,,,,,,,Same to Aim Target,Status,Wound,—,—,—,Once,5,—
+Samira,1 Gold,Carry,Noxus,,Challenger,,4,Single-Target Shred Spammer,Shoot the current target for damage and permanently shred a flat amount of DEF.,1,Active,On Cast,—,Self,First hit Projectile,Current,—,—,4,1,—,First-Hit,Same to Aim Target,Attack,Damage,190/190/200% AD,—,—,Once,—,—
+,,,,,,,,,,,,,,,,,,,,,,,Same to Aim Target,Debuff,DEF,10/15/20,Derived,+AP,Once,Permanent,—
+Kled,2 Gold,Tank,Noxus,Yordle,Slayer,,1,AA Juggernaut,"Passive: start with +30% bonus HP; when it expires, gain a permanent stacking Attack Speed boost. Active: gain new bonus HP.",0.1,Passive,Game Start,—,Self,Cast,Self,—,—,1,—,—,None,Same to Aim Target,Buff,Bonus HP,30% max HP,—,—,Once,—,—
+,,,,,,,,,,0.2,Passive,On Bonus-HP Expire,—,Self,Cast,Self,—,—,1,—,—,None,Same to Aim Target,Buff,Attack Speed,65/70/75% AP,Stacking,stacking,Once,Permanent,—
+,,,,,,,,,,1,Active,On Cast,—,Self,Cast,Self,—,—,1,—,—,None,Same to Aim Target,Buff,Bonus HP,30% max HP,—,—,Once,—,—
+Swain,2 Gold,Tank,Noxus,,Strategist,Sorcerer,2,Transforming AOE Tank,"Transform to gain bonus max HP, then deal circular AOE magic damage over time. If already transformed, gain more HP and deal a burst.",1,Active,On Cast,If not Transformed,Self,Cast,Self,—,—,2,—,—,None,Same to Aim Target,Buff,Bonus HP,325/375/550% AP,—,—,Once,—,—
+,,,,,,,,,,,,,If Already Transformed,,Circle AOE,,centred,—,2,1,,Area,Same to Aim Target,Buff,Bonus HP,225/260/385% AP,—,—,Once,—,—
+,,,,,,,,,,,,,,,,,,,,,,,Enemies in area,Attack,Damage,100/160/300% AP,Burst,burst,Once,—,—
+,,,,,,,,,,0,Passive,When Transformed,—,Self,Circle AOE,Self,centred,—,2,1,—,Area,Enemies in area,Attack,Damage,25/40/60% AP,Per Tick,per second,Every 0.5s,—,—
+Darius,3 Gold,Carry,Noxus,,Juggernaut,,1,Executing Melee Carry,"Strike the current target for heavy physical damage; if it kills the target, immediately recast on a new target.",1,Active,On Cast,—,Self,Cast,Current,—,—,1,—,—,None,Same to Aim Target,Attack,Damage,350% AD + 55/80/110% AP,—,—,Once,—,—
+,,,,,,,,,,2,Active,On Kill,—,Self,Cast,Current (new),—,—,1,—,—,None,Same to Aim Target,Attack,Damage,90/95/100% of cast,—,—,Once,—,—
+Katarina,3 Gold,Carry,Noxus,,Rogue,,1,AOE Wound Assassin,"Throw three daggers at nearby enemies, blink to each, and deal circular AOE magic damage plus Wound to adjacent enemies.",1,Active,On Cast,—,Self,Cast,Clustered,—,—,1,—,—,None,Self,Movement,(setup / daggers),—,—,—,—,—,—
+,,,,,,,,,,2,Active,After Cast,—,Self,Leap,Clustered,—,—,1,—,—,None,Self,Movement,(reposition),—,—,—,—,—,—
+,,,,,,,,,,3,Active,After Leap,—,Self,Circle AOE,Self,centred,1,1,1,—,Area,Enemies in area,Attack,Damage,145/220/350% AP,—,—,Once,—,—
+,,,,,,,,,,,,,,,,,,,,,,,Enemies in area,Status,Wound,—,—,—,Once,6,—
+Sion,5 Gold,Tank,Noxus,,Bruiser,,1,Charging Stun Tank,"Charge into the largest enemy cluster, dealing physical damage and Stunning enemies in the path. Passive: revive once on death with decaying HP, immune to CC and gaining Attack Speed.",1,Active,On Cast,—,Self,Charge Into,Clustered,—,—,1,—,—,Pierce-All,Enemies in path,Attack,Damage,225/235/500% AD,—,—,Once,—,—
+,,,,,,,,,,,,,,,,,,,,,,,Enemies in path,Status,Stun,—,—,—,Once,1.25/1.5/15,—
+,,,,,,,,,,0,Passive,On Death,—,Self,Cast,Self,—,—,1,—,—,None,Same to Aim Target,Buff,Bonus HP,100% HP,Decay,20/13/0% per second,Once,—,—
+,,,,,,,,,,,,,,,,,,,,,,,Same to Aim Target,Buff,Attack Speed,1.5/1.5/10% AP,—,—,Once,—,—
+Irelia,1 Gold,Tank,Ionia,,Bastion,,1,Decaying Shield Tank,"Ionia Bonus: +25 Armor and Magic Resist. Active: enter a defensive stance and gain a Shield that rapidly decays over 3s. When it expires, deal circular AOE magic damage plus 30% of the damage absorbed to enemies around and in front of her.",0,Passive,Game Start,If Ionia Active,Self,Cast,Self,—,—,1,—,—,None,Same to Aim Target,Buff,Armor,25,—,—,Once,Permanent,—
+,,,,,,,,,,,,,,,,,,,,,,,Same to Aim Target,Buff,MR,25,—,—,Once,Permanent,—
+,,,,,,,,,,1,Active,On Cast,—,Self,Cast,Self,—,—,1,—,—,None,Same to Aim Target,Buff,Shield,350/400/450% AP,Decay,decays over its duration,Once,3,—
+,,,,,,,,,,2,Active,On Shield Expire,—,Self,Circle AOE,Self,centred,1,1,1,—,Area,Enemies in area,Attack,Damage,70/100/150% AP,Derived,+30% of damage absorbed,Once,—,—
+,,,,,,,,,,,,,,,Laser Shot,Current,—,—,1,,,Pierce-All,Enemies in path,Attack,Damage,70/100/150% AP,Derived,+30% of damage absorbed,Once,—,—
+Jhin,1 Gold,Carry,Ionia,,Deadeye,,5,Falloff Line Carry,Ionia Bonus: +25% Attack Damage. Active: take aim at the current target and fire a shot through enemies in a line; each enemy hit reduces the damage by 56%.,0,Passive,Game Start,If Ionia Active,Self,Cast,Self,—,—,5,—,—,None,Same to Aim Target,Buff,AD,25%,—,—,Once,Permanent,—
+,,,,,,,,,,1,Active,On Cast,—,Self,Pierce Projectile,Current,—,—,5,1,—,Pierce-All,Enemies in path,Attack,Damage,744% AD & AP,Falloff per hit,−56% per hit,Once,—,—
+Sett,2 Gold,Tank,Ionia,,Juggernaut,,1,Grab-and-Slam Stun Tank,"Ionia Bonus: +180 max Health. Active: grab an enemy from either side and slam them together, dealing magic damage and Stunning them. If only one enemy is grabbed, the damage and Stun duration are increased by 50%.",0,Passive,Game Start,If Ionia Active,Self,Cast,Self,—,—,1,—,—,None,Same to Aim Target,Buff,Bonus HP,180,—,—,Once,Permanent,—
+,,,,,,,,,,1,Active,On Cast,—,Self,Grab & Slam,Adjacent (both sides),—,—,1,1,—,Flank-Pair,Grabbed enemies,Attack,Damage,180/270/420% AP,Conditional Bonus,+50% if only 1 grabbed,Once,—,—
+,,,,,,,,,,,,,,,,,,,,,,,Grabbed enemies,Status,Stun,—,Conditional Bonus,+50% if only 1 grabbed,Once,1.25/1.5/2,—
+Zed,2 Gold,Carry,Ionia,,Rogue,Slayer,1,Shadow Twin Assassin,Ionia Bonus: +15% Critical Strike Chance and Critical Strike Damage. Active: create a shadow at the furthest enemy within 2 hexes; Zed and his shadow each slash adjacent enemies for physical damage.,0,Passive,Game Start,If Ionia Active,Self,Cast,Self,—,—,1,—,—,None,Same to Aim Target,Buff,Crit Chance,15%,—,—,Once,Permanent,—
+,,,,,,,,,,,,,,,,,,,,,,,Same to Aim Target,Buff,Crit Damage,15%,—,—,Once,Permanent,—
+,,,,,,,,,,1,Active,On Cast,—,Self,Summon,Farthest (within 2 hex),—,—,1,1,—,None,—,Summon,(summon),—,—,—,—,—,—
+,,,,,,,,,,2,Active,After Summon,—,Self,Circle AOE,Self,centred,1,1,1,—,Area,Enemies in area,Attack,Damage,140/140/150% AD + 25/40/50% AP,—,—,Once,—,—
+,,,,,,,,,,,,,,Summon,,Summon,,,,,,,Enemies in area,Attack,Damage,140/140/150% AD + 25/40/50% AP,—,—,Once,—,—
+Karma,3 Gold,Carry,Ionia,,Invoker,,4,Burst Spell Spammer,"Ionia Bonus: +25 Ability Power. Active: fire a burst of energy that explodes on impact, dealing magic damage to enemies adjacent to the target. Every third cast launches 3 bursts.",0,Passive,Game Start,If Ionia Active,Self,Cast,Self,—,—,4,—,—,None,Same to Aim Target,Buff,AP,25,—,—,Once,Permanent,—
+,,,,,,,,,,1,Active,On Cast,If 1st or 2nd Cast,Self,Burst Projectile,Current,—,1,4,1,—,First-Hit,Enemies in area,Attack,Damage,200/300/470% AP,—,—,Once,—,—
+,,,,,,,,,,,,,If 3rd Cast,,Burst Projectile,,—,1,4,3,Current + Left + Right,First-Hit,Enemies in area,Attack,Damage,200/300/470% AP,—,—,Once,—,—
+Shen,4 Gold,Tank,Ionia,,Bastion,Invoker,1,Ally-Shielding Burst Tank,"Ionia Bonus: +8% Damage Reduction. Active: shield self and the 2 lowest-Health allies for 4s. After ally's shield duration expire, Shen's Shield refreshes and burst, dealing magic damage to adjacent enemies.",0,Passive,Game Start,If Ionia Active,Self,Cast,Self,—,—,1,—,—,None,Same to Aim Target,Buff,Damage Reduction,8%,—,—,Once,Permanent,—
+,,,,,,,,,,1,Active,On Cast,—,Self,Cast,Self,—,—,1,—,—,None,Same to Aim Target,Buff,Shield,350/450/2000% AP,—,—,Once,4,—
+,,,,,,,,,,,,,,,,Lowest-HP Allies,,,,,,,Same to Aim Target,Buff,Shield,225/275/1500% AP,—,—,Once,4,—
+,,,,,,,,,,2,Active,After Shielding Allies,—,Self,Circle AOE,Self,centred,1,1,1,—,Area,Same to Aim Target,Buff,Shield,(refresh),—,—,Once,4,—
+,,,,,,,,,,,,,,,,,,,,,,,Enemies in area,Attack,Damage,240/360/2500% AP,Burst,burst,Once,—,—
+Yasuo,4 Gold,Carry,Ionia,,Challenger,,1,Whirlwind Dash Carry,"Ionia Bonus: +15% Omnivamp. Active: send a whirlwind at the furthest enemy within 3 hexes, knocking up and Stunning all enemies hit. Dash to and slash the original target for heavy physical damage, then slam it into the ground, damaging enemies within 1 hex.",0,Passive,Game Start,If Ionia Active,Self,Cast,Self,—,—,1,—,—,None,Same to Aim Target,Buff,Omnivamp,15%,—,—,Once,Permanent,—
+,,,,,,,,,,1,Active,On Cast,—,Self,Pierce Projectile,Farthest (within 3 hex),—,—,1,1,—,Pierce-All,Enemies in path,Status,Stun,—,—,—,Once,—,—
+,,,,,,,,,,2,Active,After Whirlwind,—,Self,Leap,Step 1 Aim target,—,—,1,—,—,None,Self,Movement,(reposition),—,—,—,—,—,—
+,,,,,,,,,,3,Active,After Leap,—,Self,Cast,Step 1 Aim target,—,—,1,—,—,None,Same to Aim Target,Attack,Damage,500/500/1500% AD + 55/85/300% AP,—,—,Once,—,—
+,,,,,,,,,,4,Active,After Slash,—,Self,Circle AOE,Step 1 Aim target,centred,1,1,1,—,Area,Enemies in area,Attack,Damage,300/300/750% AD,—,—,Once,—,—
+Ahri,5 Gold,Carry,Ionia,,Sorcerer,,4,Essence-Steal Spell Carry,"Ionia Bonus: +3 Mana per second. Active: steal essence from enemies around the current target, dealing magic damage and Mana Reaving them. Every third cast instead unleashes a wave that damages all enemies hit, dealing 33% more to enemies whose essence has been stolen.",0,Passive,Game Start,If Ionia Active,Self,Cast,Self,—,—,4,—,—,None,Same to Aim Target,Buff,Mana Regen,3 /s,—,—,Once,Permanent,—
+,,,,,,,,,,1,Active,On Cast,If 1st or 2nd Cast,Self,Circle AOE,Current,centred,—,4,1,—,Area,Enemies in area,Attack,Damage,105/150/1000% AP,—,—,Once,—,—
+,,,,,,,,,,,,,,,,,,,,,,,Enemies in area,Debuff,Mana Reave,20%,—,—,Once,Until next cast,—
+,,,,,,,,,,,,,If 3rd Cast,,Pierce Projectile,Self,—,—,4,,360° radial,Pierce-All,All enemies,Attack,Damage,260/390/1999% AP,Conditional Bonus,+33% if essence stolen,Once,—,—
+Renekton,1 Gold,Tank,Shurima,,Bruiser,,1,Healing AOE Bruiser,"Deal magic damage to adjacent enemies. Heal for the first enemy hit, and a further 30% Ability Power for every additional enemy caught in the same swing.",1,Active,On Cast,—,Self,Circle AOE,Self,centred,1,1,1,—,Area,Enemies in area,Attack,Damage,180/270/400% AP,—,—,Once,—,—
+,,,,,,,,,,,,,,,,,,,,,,,Same to Aim Target,Buff,Heal,220/270/320% AP,Per Target Hit,+30% AP per additional enemy hit,Once,—,—
+Taliyah,2 Gold,Carry,Shurima,,Multicaster,,4,Knock-up Punisher Mage,"Passive: whenever ANY enemy is knocked up or back - by anything, not just her - throw a boulder towards them; it damages the first enemy it hits. Active: damage the current target and knock them up, Stunning them for 2s.",0,Passive,On Enemy Knocked Up,—,Self,First hit Projectile,Knocked-up enemy,—,—,4,1,—,First-Hit,First hit enemy,Attack,Damage,120/180/270% AP,—,—,Once,—,—
+,,,,,,,,,,1,Active,On Cast,—,Self,Spawn At Target,Current,—,—,4,1,—,Target-Only,Same to Aim Target,Attack,Damage,220/330/495% AP,—,—,Once,—,—
+,,,,,,,,,,,,,,,,,,,,,,,Same to Aim Target,Status,Stun,—,—,—,Once,2,—
+Akshan,3 Gold,Carry,Shurima,,Deadeye,,4,Multi-shot Deadeye,Lock on to the farthest enemy and unleash a hail of 6 shots toward them. Each shot damages the first enemy it hits - which need not be the enemy locked on to.,1,Active,On Cast,—,Self,First hit Projectile,Farthest,—,—,4,6,Same target,First-Hit,First hit enemy,Attack,Damage,125% AD + 20/35/60% AP,—,—,Once,—,—
+Azir,4 Gold,Carry,Shurima,,Strategist,,4,Sand Soldier Summoner,"Passive: every third attack, a Sand Soldier damages Azir's target. Active: summon a Sand Soldier to attack the current target; if Azir already has 3 Soldiers, they all strike at once instead.",0,Passive,On 3rd Attack,—,Summon,Auto-Attack,Current,—,—,4,1,—,Target-Only,Same to Aim Target,Attack,Damage,110/160/500% AP,—,—,Once,—,—
+,,,,,,,,,,1,Active,On Cast,If fewer than 3 Soldiers,Self,Summon,—,—,—,4,3,—,None,Same to Aim Target,Summon,(summon),—,Cap,max 3 Soldiers on the board,—,—,—
+,,,,,,,,,,,,,If Already 3 Soldiers,Summon,Auto-Attack,Current,—,—,4,,Same target,Target-Only,Same to Aim Target,Attack,Damage,70% AP,—,—,Once,—,—
+Nasus,4 Gold,Tank,Shurima,,Juggernaut,,1,Stat-Stealing Juggernaut,"Steal max Health, Attack Damage, Armor and Magic Resist from the nearest 4/5/7 enemies for 8s - each stat is deducted from them and added to him. While empowered, every third attack deals heavy physical damage.",1,Active,On Cast,—,Self,Cast,Nearest 4/5/7 enemies,—,—,1,—,—,None,Same to Aim Target,Debuff,Max HP,4/4/15%,—,—,Once,8,—
+,,,,,,,,,,,,,,,,,,,,,,,Same to Aim Target,Debuff,AD,8%,—,—,Once,8,—
+,,,,,,,,,,,,,,,,,,,,,,,Same to Aim Target,Debuff,DEF,4/4/20,—,—,Once,8,—
+,,,,,,,,,,,,,,,,,,,,,,,Same to Aim Target,Debuff,MR,4/4/20,—,—,Once,8,—
+,,,,,,,,,,,,,,,,,,,,,,,Self,Buff,Bonus HP,4/4/15%,Per Target Hit,from each enemy hit,Once,8,—
+,,,,,,,,,,,,,,,,,,,,,,,Self,Buff,AD,8%,Per Target Hit,from each enemy hit,Once,8,—
+,,,,,,,,,,,,,,,,,,,,,,,Self,Buff,Armor,4/4/20,Per Target Hit,from each enemy hit,Once,8,—
+,,,,,,,,,,,,,,,,,,,,,,,Self,Buff,MR,4/4/20,Per Target Hit,from each enemy hit,Once,8,—
+,,,,,,,,,,0,Passive,On 3rd Attack,If Empowered,Self,Auto-Attack,Current,—,—,1,1,—,Target-Only,Same to Aim Target,Attack,Damage,380/380/700% AD,—,—,Once,—,—
+K'Sante,5 Gold,Tank,Shurima,,Bastion,,1,Knockback Slam Tank,"Heal, then knock up the current target and smash them to the edge of the battlefield, damaging and Stunning them. Enemies the flying target collides with are also damaged and Stunned. If the target cannot be pushed further it is knocked off the battlefield; otherwise K'Sante chases it.",1,Active,On Cast,—,Self,Cast,Self,—,—,1,—,—,None,Same to Aim Target,Buff,Heal,10% max HP,—,—,Once,—,—
+,,,,,,,,,,2,Active,After Cast,—,Self,Knock Back,Current,—,—,1,1,—,Pierce-All,Same to Aim Target,Attack,Damage,250/400/1000% AP,—,—,Once,—,—
+,,,,,,,,,,,,,,,,,,,,,,,Same to Aim Target,Status,Stun,—,—,—,Once,2/2.5/10,—
+,,,,,,,,,,,,,,,,,,,,,,,Enemies in path,Attack,Damage,250/400/1000% AP,—,—,Once,—,—
+,,,,,,,,,,,,,,,,,,,,,,,Enemies in path,Status,Stun,—,—,—,Once,1/1.25/5,—
+,,,,,,,,,,3,Active,After Knock Back,If Target at Edge,Self,Cast,Step 2 Aim target,—,—,1,—,—,None,Same to Aim Target,Status,Knock Off,—,—,—,Once,—,—
+,,,,,,,,,,,,,If Target Not at Edge,,Leap,,—,—,1,,,,Self,Movement,(reposition),—,—,—,—,—,—
+Ashe,2 Gold,Support,Freljord,,Deadeye,,6,Cone Chill Archer,Fire 8 arrows in a cone. Each arrow damages the first enemy it hits and Chills it (-30% Attack Speed) for 2s.,1,Active,On Cast,—,Self,First hit Projectile,Current,—,—,6,8,Cone,First-Hit,First hit enemy,Attack,Damage,160/165/175% AD,—,—,Once,—,—
+,,,,,,,,,,,,,,,,,,,,,,,First hit enemy,Status,Chill,—,—,—,Once,2,—
+Lissandra,3 Gold,Support,Freljord,,Invoker,,2,Stun & Amplify Mage,"Stun the current target, damage everything within 2 hexes of it, and leave those enemies taking 10% more damage for 4s.",1,Active,On Cast,—,Self,Circle AOE,Current,centred,2,2,1,—,Area,Same to Aim Target,Status,Stun,—,—,—,Once,2,—
+,,,,,,,,,,,,,,,,,,,,,,,Enemies in area,Attack,Damage,160/240/400% AP,—,—,Once,—,—
+,,,,,,,,,,,,,,,,,,,,,,,Enemies in area,Debuff,Damage Amplification,10%,—,—,Once,4,—
+Sejuani,4 Gold,Tank,Freljord,,Bruiser,,1,Chill Enabler Tank,"Passive: whenever an ALLY attacks a Chilled enemy, that ally's attack deals bonus true damage. Active: shield self, then damage and Chill nearby enemies.",0,Passive,On Ally Attack Chilled Enemy,—,Ally,Auto-Attack,Current,—,—,1,1,—,Target-Only,Same to Aim Target,Attack,True Damage,160/240/1200,Derived,increased by max Health,Once,—,—
+,,,,,,,,,,1,Active,On Cast,—,Self,Cast,Self,—,—,1,—,—,None,Same to Aim Target,Buff,Shield,600/700/2000% AP,—,—,Once,4,—
+,,,,,,,,,,2,Active,After Cast,—,Self,Circle AOE,Self,centred,2,1,1,—,Area,Enemies in area,Attack,Damage,160/240/1200% AP,—,—,Once,—,—
+,,,,,,,,,,,,,,,,,,,,,,,Enemies in area,Status,Chill,—,—,—,Once,4,—
+Orianna,1 Gold,Support,Piltover,,Sorcerer,,4,Shield & Empower Support,"Shield the lowest-Health ally for 4s, and empower Orianna's NEXT attack to deal bonus magic damage.",1,Active,On Cast,—,Self,Cast,Lowest-HP Ally,—,—,4,—,—,None,Same to Aim Target,Buff,Shield,200/225/275% AP,—,—,Once,4,—
+,,,,,,,,,,,,,,,,Self,,,,,,,Same to Aim Target,Buff,Empowered Attack,290/435/650% AP,—,—,Once,—,—
+Vi,2 Gold,Tank,Piltover,,Bruiser,,1,Shield & Sunder Bruiser,"Shield self for 4s, then damage enemies within 1 hex of the current target and Sunder them (-20% Armor) for 4s.",1,Active,On Cast,—,Self,Cast,Self,—,—,1,—,—,None,Same to Aim Target,Buff,Shield,350/400/450% AP,—,—,Once,4,—
+,,,,,,,,,,2,Active,After Cast,—,Self,Circle AOE,Current,centred,1,1,1,—,Area,Enemies in area,Attack,Damage,300% AD,—,—,Once,—,—
+,,,,,,,,,,,,,,,,,,,,,,,Enemies in area,Debuff,DEF,20%,—,—,Once,4,—
+Ekko,3 Gold,Carry,Zaun,Piltover,Rogue,,1,Retroactive-Heal Assassin,"Heal for 20% of the damage he took in the last 4s, then strike the current target for magic damage.",1,Active,On Cast,—,Self,Cast,Self,—,—,1,—,—,None,Same to Aim Target,Buff,Heal,20% of damage taken in last 4s,—,—,Once,—,—
+,,,,,,,,,,2,Active,After Cast,—,Self,Cast,Current,—,—,1,—,—,None,Same to Aim Target,Attack,Damage,255/380/570% AP,—,—,Once,—,—
+Jayce,3 Gold,Support,Piltover,,Gunner,,4,Flank-Buff Gunner,"Grant himself Attack Speed and his left and right neighbours Ability Power for 3s, then fire a blast that detonates on the first enemy hit, damaging everyone near the blast.",1,Active,On Cast,—,Self,Cast,Self,—,—,4,—,—,None,Same to Aim Target,Buff,Attack Speed,30/40/50% AP,—,—,Once,3,—
+,,,,,,,,,,,,,,,,,,,,,,,Adjacent allies (left & right),Buff,AP,15%,—,—,Once,3,—
+,,,,,,,,,,2,Active,After Cast,—,Self,Burst Projectile,Current,—,1,4,1,—,First-Hit,Enemies in area,Attack,Damage,275/275/295% AD,—,—,Once,—,—
+Viego,1 Gold,Carry,Shadow Isles,,Rogue,,1,Stacking Melee Assassin,"Deal 110/165/250% Ability Power magic damage to the current target. For the rest of combat, Viego's attacks deal 20/30/45% Ability Power bonus stacking magic damage.",1,Active,On Cast,—,Self,Laser Shot,Current,—,—,1,1,—,Pierce-All,Enemies in path,Attack,Damage,110/165/250% AP,—,—,Once,—,—
+,,,,,,,,,,,,,,,,Self,,,,—,,,Enemies in path,Buff,On-Hit Damage,20/30/45% AP,Stacking,stacking,Once,Permanent,—
+Maokai,1 Gold,Tank,Shadow Isles,,Bastion,,1,Mana-Leeching Healing Tank,"Sap Magic: Passive: Whenever an enemy casts an Ability, gain 5 Mana. Active: On his next attack, heal for 220/260/300% Ability Power.",0,Passive,On Enemy Cast,—,Self,Cast,Self,—,—,1,—,—,None,Same to Aim Target,Buff,Mana,5,—,—,Once,—,—
+,,,,,,,,,,1,Active,On Cast,—,Self,Cast,Self,—,—,1,—,—,None,Same to Aim Target,Buff,Empowered Attack (Maokai),220/260/300% AP,—,—,Once,—,—
+Kalista,3 Gold,Carry,Shadow Isles,,Challenger,,4,Spear-Stacking Executioner,"Passive: Attacks impale a spear in the target, which deals 18/27/45% Ability Power true damage when removed. Kalista rips the spears out if it would kill the target. Active: Impale 6 spears in the current target.",0.1,Passive,On Attack,—,Self,Auto-Attack,Current,—,—,4,1,—,Target-Only,Same to Aim Target,Status,Impale,—,Stacking,stacking,Once,Permanent,—
+,,,,,,,,,,0.2,Passive,On Spears Lethal,—,Self,Cast,Current,—,—,4,—,—,None,Same to Aim Target,Attack,True Damage,18/27/45% AP,Per Stack,per spear removed,Once,—,—
+,,,,,,,,,,1,Active,On Cast,—,Self,Homing Projectile,Current,—,—,4,1,—,Target-Only,Same to Aim Target,Status,Impale,6 spears,—,—,Once,—,—
+Gwen,4 Gold,Carry,Shadow Isles,,Slayer,,2,Dashing Cone Slayer,"Dash around the current target and snip 3 times in a cone, each dealing 100/150/400% Ability Power magic damage to enemies hit. Every 3 casts, gain 120/120/300 Armor and Magic Resist for 3/3/5 seconds.",1,Active,On Cast,—,Self,Leap,Current,—,—,2,—,—,None,Self,Movement,(reposition),—,—,—,Once,—,—
+,,,,,,,,,,2,Active,After Leap,—,Self,Sweep Laser,Current,—,"4 (1 hex at range 1, 3 at range 2)",2,3,Same target,Pierce-All,Enemies in area,Attack,Damage,100/150/400% AP,—,—,Once,—,—
+,,,,,,,,,,0,Passive,On 3rd Cast,—,Self,Cast,Self,—,—,2,—,—,None,Same to Aim Target,Buff,Armor,120/120/300,—,—,Once,3/3/5,—
+,,,,,,,,,,,,,,,,,,,,,,,Same to Aim Target,Buff,MR,120/120/300,—,—,Once,3/3/5,—
+Senna,5 Gold,Support,Redeemer,Shadow Isles,Gunner,,4,Board-Wide Beam Support,"Fire a massive beam at the furthest enemy, dealing 235/250/2000% Attack Damage physical damage to all enemies hit. Any allies hit gain 200/275/4000% Ability Power Shield for 4/4/15 seconds.",1,Active,On Cast,—,Self,Laser Shot,Farthest,—,—,4,1,—,Pierce-All,Enemies in path,Attack,Damage,235/250/2000% AD,—,—,Once,—,—
+,,,,,,,,,,,,,,,,,,,,,,,Allies in path,Buff,Shield,200/275/4000% AP,—,—,Once,4/4/15,—
+Soraka,2 Gold,Support,Targon,,Invoker,,4,Star-Fall Healer,"Heal the lowest health ally for 140/160/180% Ability Power. If the ally is below 50% Health, heal them for an additional 140/160/180% Ability Power. Over the next 5 seconds, 5 stars hit the enemy closest to them. Each deals 120/180/280% Ability Power magic damage.",1,Active,On Cast,—,Self,Cast,Lowest-HP Ally,—,—,4,—,—,None,Same to Aim Target,Buff,Heal,140/160/180% AP,—,—,Once,—,—
+,,,,,,,,,,,,,If Ally Below 50% HP,,,,,,,,,,Same to Aim Target,Buff,Heal,140/160/180% AP,—,—,Once,—,—
+,,,,,,,,,,,,,,,,,,,,,,,Same to Aim Target,Status,Child of the Star,—,—,—,Once,5,—
+,,,,,,,,,,,,On Cast,—,Child of the Star,Auto-Attack,Nearest enemy to owner,—,—,4,1,—,Target-Only,Aimed enemy,Attack,Damage,120/180/280% AP,—,—,Every 0.5s,5,—
+Taric,3 Gold,Tank,Targon,,Bastion,Sorcerer,1,Damage-Redirecting Shield Tank,Gain 500/580/680% Ability Power Shield for 4 seconds. It redirects 50% of the damage received by adjacent allies.,1,Active,On Cast,—,Self,Cast,Self,—,—,1,—,—,None,Same to Aim Target,Buff,Shield,500/580/680% AP,—,—,Once,4,—
+,,,,,,,,,,,,,,,,,,,,,,,Adjacent allies (left & right),Buff,Damage Redirect,50%,—,—,Once,4,—
+Aphelios,4 Gold,Carry,Targon,,Deadeye,,4,Chakram-Stacking Moon Carry,"Fire a moon blast at the largest group of enemies that deals 240/240/750% Attack Damage physical damage to enemies within 2 hexes. For 7 seconds, equip 3 Chakram, plus 1 more for each enemy hit by the blast. Attacks deal 7/7/15% Attack Damage bonus physical damage for each Chakram equipped. Aphelios heals for 75% of damage dealt by Chakrams (increased by Ability Power).",1,Active,On Cast,—,Self,Homing Burst Projectile,Clustered,—,2,4,1,—,Area,Enemies in area,Attack,Damage,240/240/750% AD,—,—,Once,—,—
+,,,,,,,,,,2,Active,After Cast,—,Self,Cast,Self,—,—,4,—,—,None,Same to Aim Target,Buff,Chakram,3,Per Target Hit,+1 per enemy hit by the blast,Once,7,—
+,,,,,,,,,,0,Passive,On Attack,If Empowered,Self,Auto-Attack,Current,—,—,4,1,—,Target-Only,Same to Aim Target,Attack,Damage,7/7/15% AD,Per Stack,per Chakram equipped,Once,—,—
+,,,,,,,,,,,,,,,,,,,,,,,Self,Buff,Omnivamp,75%,Derived,of Chakram damage only; increased by AP,Once,—,—
+Cho'Gath,1 Gold,Tank,Void,,Bruiser,,1,Devouring Execute Tank,"Deal magic damage equal to 12% of the target's max Health (increased by Ability Power) to the lowest Health enemy in range. If this kills them, devour them and permanently gain 35 maximum Health. (Current Bonus: scales with each enemy devoured)",1,Active,On Cast,—,Self,Cast,Lowest-HP enemy,—,—,1,—,—,None,Same to Aim Target,Attack,Damage,12% target Max HP,Derived,increased by AP,Once,—,—
+,,,,,,,,,,2,Active,On Kill,If Killed By Skill,Self,Cast,Self,—,—,1,—,—,None,Same to Aim Target,Buff,Bonus HP,35,Stacking,+35 per enemy devoured,Once,Permanent,—
+Malzahar,1 Gold,Carry,Void,,Sorcerer,,4,Portal-Zone Mage,Open two portals near the current target. Destroy 50% of Shields and deal 220/330/500% Ability Power magic damage to all enemies caught between the portals.,1,Active,On Cast,—,Self,Laser Shot,Current,—,1×3 (horizontal),4,1,—,Pierce-All,Enemies in path,Debuff,Shield Destroy,50%,—,—,Once,—,—
+,,,,,,,,,,,,,,,,,,,,,,,Enemies in path,Attack,Damage,220/330/500% AP,—,—,Once,—,—
+Kassadin,2 Gold,Tank,Void,,Bastion,,1,Disarming Shield Tank,"Gain 250/300/400% Ability Power Shield for 4 seconds. Deal 160/240/360% Ability Power magic damage to enemies in a cone and Disarm them for 1.5/1.75/2 seconds. Disarm: Cannot move or attack, but CAN cast spells.",1,Active,On Cast,—,Self,Cast,Self,—,—,1,—,—,None,Same to Aim Target,Buff,Shield,250/300/400% AP,—,—,Once,4,—
+,,,,,,,,,,,,On Cast,—,Self,Cone AOE,Current,front edge,"4 (1 hex at range 1, 3 at range 2)",1,1,—,Area,Enemies in area,Attack,Damage,160/240/360% AP,—,—,Once,—,—
+,,,,,,,,,,,,,,,,,,,,,,,Enemies in area,Status,Disarm,—,—,—,Once,1.5/1.75/2,—
+Rek'Sai,3 Gold,Carry,Void,,Bruiser,,1,Marking Execute Bruiser,"Deal 250/250/255% Attack Damage physical damage to the current target and mark them. If they are below 66% max Health, deal true damage instead. If the target is marked, deal 240/240/250% Attack Damage bonus true damage. If this kills the target, rip through them 1 hex and heal for 10% Max Health (increased by Ability Power).",1,Active,On Cast,If Target NOT Below 66% HP,Self,Cast,Current,—,—,1,—,—,None,Same to Aim Target,Attack,Damage,250/250/255% AD,—,—,Once,—,—
+,,,,,,,,,,,,,—,,,,,,,,,,Same to Aim Target,Status,Mark,—,—,—,Once,—,—
+,,,,,,,,,,,,,If Target Below 66% HP,,,,,,,,,,Same to Aim Target,Attack,True Damage,250/250/255% AD,—,—,Once,—,—
+,,,,,,,,,,,,,If Target Marked,,,,,,,,,,Same to Aim Target,Attack,True Damage,240/240/250% AD,Conditional Bonus,bonus true damage if marked,Once,—,—
+,,,,,,,,,,2,Active,On Kill,—,Self,Leap Behind,Current,—,—,1,—,—,None,Self,Movement,(reposition),—,—,—,—,—,—
+,,,,,,,,,,,,,,,,,,,,,,,Self,Buff,Heal,10% Max HP,Derived,increased by AP,Once,—,—
+Vel'Koz,3 Gold,Carry,Void,,Sorcerer,Multicaster,4,Splitting Plasma Mage,"Fire a plasma bolt towards the current target that deals 220/330/550% Ability Power magic damage to the first enemy hit. It then splits in two, dealing 50% less damage whenever it passes through an enemy.",1,Active,On Cast,—,Self,First hit Projectile,Current,—,—,4,1,—,First-Hit,First hit enemy,Attack,Damage,220/330/550% AP,—,—,Once,—,—
+,,,,,,,,,,2,Active,On Projectile Hit,—,Step 1 Projectile,Pierce Projectile,Step 1 Aim target,—,—,4,2,Diagonal to Action Source,Pierce-All,Enemies in path,Attack,Damage,220/330/550% AP,Falloff per hit,−50% per enemy passed through,Once,—,—
+Kai'Sa,4 Gold,Carry,Void,,Challenger,,4,Missile-Barrage Carry,"Dash away from all enemies, then fire 15/15/25 missiles split across the 4 nearest enemies. Each missile deals 80/120/240% Ability Power magic damage.",1,Active,On Cast,—,Self,Leap,Away from enemies,—,—,4,—,—,None,Self,Movement,(reposition),—,—,—,—,—,—
+,,,,,,,,,,2,Active,After Leap,—,Self,Homing Projectile,Nearest 4 enemies,—,—,4,15/15/25,Split across nearest N,Target-Only,Aimed enemy,Attack,Damage,80/120/240% AP,—,—,Once,—,—
+Bel'Veth,5 Gold,Carry,Empress,Void,,,2,Multi-Lash Empress Carry,Lash out at the lowest Health enemy in range 6/6/25 times. Each lash deals 85% Attack Damage + 18/30/100% Ability Power physical damage and 2% of the target's max Health as true damage.,1,Active,On Cast,—,Self,QuickAA,Lowest-HP enemy,—,—,2,6/6/25,Same target,Target-Only,Same to Aim Target,Attack,Damage,85% AD + 18/30/100% AP,—,—,Once,—,—
+,,,,,,,,,,,,,,,,,,,,,,,Same to Aim Target,Attack,True Damage,2% target Max HP,—,—,Once,—,—
+Tristana,1 Gold,Carry,Yordle,,Gunner,,4,Explode-on-Hit Gunner,"Gain 70% Ability Power Attack Speed for 4 seconds. For the duration, attacks explode on impact and deal 60% Attack Damage physical damage to enemies within 1 hex. 4-Star Upgrade: Every 10th attack deals 100% Attack Damage bonus physical damage and ricochets to the largest clump of enemies, dealing 50% of that damage to enemies within 1 hex.",1,Active,On Cast,—,Self,Cast,Self,—,—,4,—,—,None,Same to Aim Target,Buff,Attack Speed,70% AP,—,—,Once,4,—
+,,,,,,,,,,2,Active,On Attack,If Empowered,Self,Circle AOE,Current,centred,1,4,1,—,Area,Enemies in area,Attack,Damage,60% AD,—,—,Once,—,—
+,,,,,,,,,,3,Active,On 10th Attack,If 4-Star,Self,Auto-Attack,Current,—,—,4,1,—,Target-Only,Same to Aim Target,Attack,Damage,100% AD,—,—,Once,—,—
+,,,,,,,,,,,,On 10th Attack,If 4-Star,Self,Circle AOE,Clustered,centred,1,4,1,—,Area,Enemies in area,Attack,Damage,50%,Derived,of the 10th attack's damage,Once,—,—
+Teemo,2 Gold,Carry,Yordle,,Strategist,Multicaster,4,Wounding Mushroom Mage,"Hurl an explosive heat-seeking mushroom at the current target. When it detonates, enemies within 1 hex are Wounded and dealt 260/390/585% Ability Power magic damage over 3 seconds. 4-Star Upgrade: Increase the explosion radius by 1 hex. Wound: Reduce healing received by 33%",1,Active,On Cast,—,Self,Homing Burst Projectile,Current,—,1 (2 at 4-Star),4,1,—,Area,Enemies in area,Attack,Damage,260/390/585% AP,—,—,Every 0.5s,3,—
+,,,,,,,,,,,,,,,,,,,,,,,Enemies in area,Status,Wound,—,—,—,Once,3,—
+Heimerdinger,5 Gold,Support,Technogen,Yordle,,,4,Grenade Stun Artillery,"Hurl a grenade towards the largest group of enemies, dealing 150/225/3141% Ability Power magic damage to enemies in a large area and Stunning them for 1.5/2/15 seconds.",1,Active,On Cast,—,Self,Homing Burst Projectile,Clustered,—,2,4,1,—,Area,Enemies in area,Attack,Damage,150/225/3141% AP,—,—,Once,—,—
+,,,,,,,,,,,,,,,,,,,,,,,Enemies in area,Status,Stun,—,—,—,Once,1.5/2/15,—
+Nilah,4 Gold,Carry,Bilgewater,,Vanquisher,,2,Cone-Auto Duelist,"Formless Blade: Passive: Attacks strike in a cone, dealing 55/55/100% Attack Damage physical damage to up to 2 additional enemies. Every 3rd attack strikes in a line for 170/175/375% Attack Damage physical damage and grants 18/18/40% stacking Attack Speed.Active: Gain 250/375/700% Ability Power Shield for 3 seconds and dash to a safe location.",0,Passive,On Attack,—,Self,Auto-Attack,Current,—,—,2,1,Cone,Area,Additional enemies in cone,Attack,Damage,55/55/100% AD,—,—,Once,—,—
+,,,,,,,,,,,,On 3rd Attack,—,Self,Laser Shot,Current,—,—,2,1,—,Pierce-All,Enemies in path,Attack,Damage,170/175/375% AD,—,—,Once,—,—
+,,,,,,,,,,,,,,,,,,,,,,,Self,Buff,Attack Speed,18/18/40%,Stacking,per 3rd attack,Once,Permanent,—
+,,,,,,,,,,1,Active,On Cast,—,Self,Cast,Self,—,—,2,—,—,None,Self,Buff,Shield,250/375/700% AP,—,—,Once,3,—
+,,,,,,,,,,,,On Cast,—,Self,Leap,Away from enemies,—,—,2,—,—,None,Self,Movement,(reposition),—,—,—,—,—,—
+Miss Fortune,3 Gold,Carry,Bilgewater,,Strategist,,4,X-Rain Shield-Breaker,"X Marks the Spot: Call down an X-shaped rain of bullets, destroying 35% of the target's Shields and dealing 240/360/580% Ability Power magic damage. For 5 seconds, enemies hit have incoming Shields reduced by 35%.",1,Active,On Cast,—,Self,Custom AOE,Current,centred,X-shape,4,1,—,Area,Enemies in area,Debuff,Shield Destroy,35%,—,—,Once,—,—
+,,,,,,,,,,,,,,,,,,,,,,,Enemies in area,Attack,Damage,240/360/580% AP,—,—,Once,—,—
+,,,,,,,,,,,,,,,,,,,,,,,Enemies in area,Debuff,Shield Reduction,35% incoming,—,—,Once,5,—
+Aatrox,5 Gold,Carry,Darkin,,Slayer,Juggernaut,1,Transformed AOE Slayer,"Transform for 10/10/30 seconds, gaining 10% Ability Power Omnivamp and converting 80% of bonus Attack Speed to Attack Damage. While transformed, attacks deal 250/250/2500% Attack Damage physical damage in an area.Omnivamp: Heal for percentage of damage dealt",1,Active,On Cast,—,Self,Cast,Self,—,—,1,—,—,None,Self,Buff,Omnivamp,10% AP,—,—,Once,10/10/30,—
+,,,,,,,,,,,,,,,,,,,,,,,Self,Buff,AD,80% of bonus AS,Derived,converts bonus Attack Speed to AD,Once,10/10/30,—
+,,,,,,,,,,,,,,,,,,,,,,,Self,Debuff,Attack Speed,all bonus AS removed,—,consumed by the AD conversion,Once,10/10/30,—
+,,,,,,,,,,0,Passive,On Attack,While transformed — 1st in loop,Self,Box AOE,Self,rear edge,1×2,1,1,—,Area,Enemies in area,Attack,Damage,250/250/2500% AD,—,—,Once,—,—
+,,,,,,,,,,,,On Attack,While transformed — 2nd in loop,Self,Cone AOE,Self,front edge,Gwen-shaped,1,1,—,Area,Enemies in area,Attack,Damage,250/250/2500% AD,—,—,Once,—,—
+,,,,,,,,,,,,On Attack,While transformed — 3rd in loop,Self,Circle AOE,Self,centred,1,1,1,—,Area,Enemies in area,Attack,Damage,250/250/2500% AD,—,—,Once,—,—
+Neeko,4 Gold,Tank,Ixtal,,Bastion,,2,Leap-Slam Bastion,"Shapesplitter: Leap towards the current target and gain 250/325/425% Ability Power Shield for 3 seconds. Slam down after a brief delay, dealing 300/450/700% Ability Power magic damage to enemies within two hexes.",1,Active,On Cast,—,Self,Leap,Current,—,—,2,—,—,None,Self,Movement,(reposition),—,—,—,—,—,—
+,,,,,,,,,,,,,,,,,,,,,,,Self,Buff,Shield,250/325/425% AP,—,—,Once,3,—
+,,,,,,,,,,2,Active,After Leap,—,Self,Circle AOE,Current,centred,2,2,1,—,Area,Enemies in area,Attack,Damage,300/450/700% AP,—,—,Once,—,—
+Qiyana,2 Gold,Carry,Ixtal,,Rogue,Slayer,1,Elemental Dash-Line Slayer,"Royal Combo: Dash to strike enemies in a line and deal 255/255/270% Attack Damage + 40/60/90% Ability Power physical damage, empowered by whichever elemental terrain is currently active; Stuns and knocks up the first target hit for 1.5 seconds and all other targets for 0.5 seconds.",1,Active,On Cast,—,Self,Leap Behind,Current,—,—,1,—,—,None,Self,Movement,(reposition),—,—,leaps THROUGH the current target,—,—,—
+,,,,,,,,,,2,Active,After Leap,—,Self,Pierce Projectile,Current,—,—,1,1,—,Pierce-All,Enemies in path,Attack,Damage,255/255/270% AD + 40/60/90% AP,—,—,Once,—,—
+,,,,,,,,,,,,,,,,,,,,,,,First hit enemy,Status,Stun,—,—,—,Once,1.5,—
+,,,,,,,,,,,,,,,,,,,,,,,Enemies in path,Status,Stun,—,—,—,Once,0.5,—
+Ryze,5 Gold,Support,Wanderer,,Invoker,,4,Barkskin Zone Invoker,"Create a portal that coats the ground around the current target in a thicket of vines. After a brief delay, deal magic damage to enemies within, scaling with Ryze's own Armor and Magic Resist (150/200/300% of each), and Stun enemies at the epicenter for 2/2/2.5 seconds with a knockup. Allies within are wrapped in Barkskin, granting bonus Armor and Magic Resist equal to 150/200/300% of Ryze's own for 4 seconds (increased by Ability Power).",1,Active,On Cast,—,Self,Circle AOE,Current,centred,2,4,1,—,Area,Enemies in area,Attack,Damage,150/200/300% Armor + 150/200/300% MR,Derived,of Ryze's own Armor and MR,Once,—,—
+,,,,,,,,,,,,,,,,,,,,,,,Enemies at epicenter,Status,Stun,—,—,—,Once,2/2/2.5,—
+,,,,,,,,,,,,,,,,,,,,,,,Allies in area,Buff,Armor,150/200/300% of Ryze's Armor,Derived,increased by AP,Once,4,—
+,,,,,,,,,,,,,,,,,,,,,,,Allies in area,Buff,MR,150/200/300% of Ryze's MR,Derived,increased by AP,Once,4,—
+Jinx,2 Gold,Carry,Zaun,,Gunner,,4,Rocket-Barrage Gunner,Fire 5 rockets at random enemies within 2 hexes of the current target. Each rocket deals 150/155/160% Attack Damage + 15/20/35% Ability Power physical damage.,1,Active,On Cast,—,Self,Homing Projectile,Random (2 hex of Current),—,—,4,5,Each to its own target,Target-Only,Aimed enemy,Attack,Damage,150/155/160% AD + 15/20/35% AP,—,—,Once,—,—
+Warwick,2 Gold,Tank,Zaun,,Juggernaut,Challenger,1,Lifesteal Frenzy Juggernaut,"Passive: Attacks heal for 30/35/40% Ability Power.Active: Gain 100% Attack Speed for 2.5 seconds. Then, Stun adjacent enemies for 1.25/1.5/2 seconds.",1,Active,On Cast,—,Self,Cast,Self,—,—,1,—,—,None,Self,Buff,Attack Speed,100%,—,—,Once,2.5,—
+,,,,,,,,,,2,Active,After Cast,—,Self,Circle AOE,Self,centred,1,1,1,—,Area,Adjacent enemies,Status,Stun,—,—,—,Once,1.25/1.5/2,—
+,,,,,,,,,,0,Passive,On Attack,—,Self,Auto-Attack,Current,—,—,1,1,—,Target-Only,Self,Buff,Heal,30/35/40% AP,—,—,Once,—,—
+Urgot,4 Gold,Tank,Zaun,,Deadeye,,1,Six-Leg Zoner,"Passive: Whenever an enemy enters Attack Range, fire a blast from the leg facing that direction that deals 220% Attack Damage + 40/60/500% Ability Power physical damage. Each of Urgot's 6 legs has a 4/4/1 second cooldown.Active: Gain 350/450/1200% Ability Power Shield for 5 seconds and dash behind the current target. Reset all leg cooldowns.",1,Active,On Cast,—,Self,Cast,Self,—,—,1,—,—,None,Self,Buff,Shield,350/450/1200% AP,—,—,Once,5,—
+,,,,,,,,,,2,Active,After Cast,—,Self,Leap Behind,Current,—,—,1,—,—,None,Self,Movement,(reposition),—,—,resets all leg cooldowns,—,—,—
+,,,,,,,,,,0,Passive,On Enemy Enters Range,Per leg (4/4/1s CD),Self,Burst Projectile,Enemy entering range,—,—,1,1,—,Target-Only,Aimed enemy,Attack,Damage,220% AD + 40/60/500% AP,—,—,Once,—,—
+Zeri,4 Gold,Carry,Zaun,,Gunner,,4,Chain-Lightning Executioner,"Passive: Execute enemies below 8% max Health (increased by Ability Power). Active: For the next 8/8/15 seconds, attacks chain lightning to 3/3/5 additional enemies, dealing 45/45/100% Attack Damage physical damage.",1,Active,On Cast,—,Self,Cast,Self,—,—,4,—,—,None,Self,Buff,On-Hit Damage,attacks chain to 3/3/5 additional enemies,—,—,Once,8/8/15,—
+,,,,,,,,,,2,Passive,On Attack,While empowered,Self,Homing Projectile,Nearest 3/3/5 enemies,—,—,4,3/3/5,Split across nearest N,Target-Only,Aimed enemy,Attack,Damage,45/45/100% AD,—,—,Once,—,—
+,,,,,,,,,,0,Passive,On Attack,Enemy < 8% max HP,Self,Auto-Attack,Current,—,—,4,1,—,Target-Only,Same to Aim Target,Status,Execute,< 8% max HP (increased by AP),—,—,Once,—,—
+Silco,4 Gold,Support,Zaun,,Sorcerer,,4,Chem-Zone Sorcerer,"Undercity Tactics: Throw a vial at the nearest surrounded enemy, covering nearby hexes in chemicals for 6 seconds. Deal 65/100/400% Ability Power magic damage per second to chemical-affected enemies, and heal affected allies for 20/25/120% Ability Power per second. When possible, target unaffected groups.",1,Active,On Cast,—,Self,Circle AOE,Clustered,centred,2,4,1,—,Area,Enemies in area,Attack,Damage,65/100/400% AP,—,—,Every 1s,6,—
+,,,,,,,,,,,,,,,,,,,,,,,Allies in area,Buff,Heal,20/25/120% AP,—,—,Every 1s,6,—
