@@ -15,6 +15,7 @@ Status,Stun,Recipient cannot act for the duration.
 ,Execute,"Instantly kills the recipient when its Health is below a threshold (a percentage of max HP, increased by Ability Power). Not damage — a kill. Zeri executes enemies below 8% max Health."
 ,Knock Up,"Recipient is thrown into the air, unable to act until it lands. The sheet already had 'On Enemy Knocked Up' as a TRIGGER and 'Knocked-up enemy' as an Aim Target - this is the effect that causes what those two referenced."
 ,Soul Link,"Recipient is linked to the caster for the duration. While linked, a share of the damage the RECIPIENT takes is healed back to the caster (Illaoi)."
+,Empowered,"A self-applied state the caster enters for a duration; later steps of the SAME champion gate on it with Condition 'If Empowered'. Does nothing by itself — like Mark, but on the caster and time-boxed. The user's call (2026-07-18): 'If Empowered' was used in several places as a bare window, so the status it checks now exists explicitly. Riven and Urgot enter it on cast and their on-attack steps fire only while it holds; Zeri's chain-lightning window is the same idea (recipient Self)."
 Buff,Attack Speed,Increase the recipient's attack speed.
 ,Bonus HP,Grant bonus / max health.
 ,Shield,Grant a temporary damage-absorbing shield.
@@ -37,6 +38,7 @@ Buff,Attack Speed,Increase the recipient's attack speed.
 ,Untargetable,Recipient cannot be targeted or hit for the duration. Not the same as Damage Reduction: nothing can select them at all.
 ,Range,"Increase the recipient's attack range, in hexes."
 ,CC Immunity,"Recipient ignores crowd control (Stun, Chill, Disarm, Knock Up...) for the duration."
+,Style,"A stack resource held by the caster (Samira). Each stack grants Attack Speed (20% AP per stack), and the active scales off how many are equipped — both read via 'Per Stack' scaling. Gained on a critical strike, capped (max 6), and reset to 0 when the active fires. A counter, not a stat: analogous to Aphelios' Chakram, which other effects read rather than a stat the unit carries."
 Debuff,DEF,Shred the recipient's Defense (armor). TFT calls this 'Sunder' (Vi) or 'Shred' when it is Magic Resist - see Debuff -> MR.
 ,MR,Shred the recipient's Magic Resist.
 ,Mana Reave,Increase the recipient's max Mana until its next cast - delays its next ability.

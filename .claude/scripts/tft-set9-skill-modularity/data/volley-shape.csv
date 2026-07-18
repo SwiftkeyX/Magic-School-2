@@ -1,0 +1,9 @@
+Volley Shape,What it means,Used by
+Cone,"The Count instances fan out in a cone in front of the caster — an emergent SHAPE, not a hitbox (each instance is its own projectile that stops on the first body in its lane).",Ashe (8 arrows)
+360° radial,"One instance expanding from the caster in ALL directions at once. Count stays 1: a single expanding hitbox large enough to reach the board, so it is un-aimed (Aim = Self, Recipient = All enemies).",Ahri (2nd-cast wave)
+Diagonal to Action Source,"The instances fire on DIAGONALS from the ACTION SOURCE (a projectile that has landed), not from the caster.",Vel'Koz (2 pierce bolts split off his first-hit projectile)
+,,
+How to read this tab,,
+"Volley Shape (was 'Spread' until 2026-07-18) says only the GEOMETRIC SHAPE a multi-instance volley makes in space, whoever is standing there: Cone, 360, Diagonal. It is '—' for a single instance and for any volley that is NOT a fixed shape.",,
+"The user split the old 'Spread' column: the SHAPE stays here; the TARGET-SELECTION values (Same target, Each to its own target, Split across nearest/farthest N, Split across marked, Current + Left + Right) moved to Aim Target, because they picked WHICH enemies get hit — which is Aim Target's job, not a shape. See the 'Aim Target Types' tab.",,
+"DISTRIBUTION (converge on one vs split among the set vs each-to-its-own) is inferred from Aim Target + Count: Count > 1 at a single-target aim converges; at a multi-target aim (Nearest N, 4 furthest, Marked...) it splits. Only 'Each to own target' — where each instance RE-PICKS as it fires — is stated on the aim itself.",,
