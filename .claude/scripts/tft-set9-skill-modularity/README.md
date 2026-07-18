@@ -1,7 +1,15 @@
-# `tft-set9-skill` sheet — tooling
+# `tft-skill` sheet — tooling
 
-The Google Sheet `tft-set9-skill` encodes every TFT Set 9 champion's skill as structured data.
+The Google Sheet `tft-skill` (renamed from `tft-set9-skill` / *TFT Set9 Skill Research*; the folder
+keeps its old name) encodes every TFT champion's skill as structured data.
 **Nothing here touches the Unity game** — this is data/schema work.
+
+**Two schema tabs now.** `Hero set 9` and `Hero set 10` (Set 10's 8-Bit/Country champions; both renamed
+from `Hero`/`hero set 10` on review 2026-07-18) use the identical 31-column action schema and the SAME
+reference vocabularies. They are listed in `sheet.SCHEMA_TABS` (tab → CSV); `sync.py` runs its
+merge-derive + vocab-validate pipeline over each, and everything else is a positional reference table.
+Tabs are addressed BY NAME, so a rename is just the sheet title + these strings. See
+`.claude/docs/tft/set10-skill-tab.md`.
 
 **Scope, and why the folder is named so specifically:** this folder writes the **`tft-set9-skill`
 sheet, and nothing else**. Other scripts in `.claude/scripts/` also touch TFT data (`sheet_sync.py`,
@@ -29,8 +37,9 @@ point, and something the old 300-line-patch-script-per-round approach could neve
 | `sheet.py` | Shared helpers: `TABS` (**the** tab↔CSV map, which `sync.py` and `export.py` both derive from), `cols()`, `remerge_hero()`, `post_replies()`. |
 | `context.py` | One batched read for the `/add-champion` skill: schema + the action lookup + conventions + reference vocab (`--origin X` adds source rows, `--missing` lists un-added champions, `--validate` runs the local check). |
 | `builder.py` | Reusable `build(identity, steps)` → 31-col rows with the blanking rules baked in. `from builder import build`. |
-| `fix_append.py` | Reconcile the append-merge quirk after adding NEW champions, then sync to 0. |
-| `force_full.py` | Deterministic escape hatch: write every Hero cell to the CSV literal + one re-merge, when sync/fix_append fight (e.g. after a mid-file insert). |
+| `highlight_changes.py` | **Review aid.** Colours the cells the writers changed amber so a reviewer can see them at a glance, and clears the previous round's highlight. `sync.py`/`force_full.py` record every changed cell (via `sheet.record_changes` → gitignored `changes-state.json`); run `highlight_changes.py` after a round to paint them, `--clear` to remove all. |
+| `fix_append.py` | Reconcile the append-merge quirk after adding NEW champions, then sync to 0. (`Hero` only.) |
+| `force_full.py` | Deterministic escape hatch: `force_full.py ["<tab>"]` writes every cell of a schema tab (default `Hero set 9`; pass `"Hero set 10"`) to the CSV literal + one re-merge — used when sync/fix_append fight (mid-file insert) or to bootstrap a freshly-created schema tab. |
 | `archive/` | 33 retired scripts (~5,000 lines) — the origin passes, the review rounds, and the schema migrations. Kept for history. **Never run them.** |
 
 ## The vocabularies, and what enforces them

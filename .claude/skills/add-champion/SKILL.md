@@ -16,11 +16,11 @@ re-derived interactively every time — re-deriving it is what burned tokens on 
 - **Source of truth:** `.claude/scripts/tft-set9-skill-modularity/data/*.csv` — one file per sheet tab.
 - **The one writer:** `sync.py` — CSV → sheet, derives every merge, then VALIDATEs.
 - **Source champion data:** `tft-set9 → Champions → Skill Description` (a read-only reference sheet).
-- **Schema / merge model:** the `Hero` tab is **31 columns** (`context.py` prints the LIVE schema —
-  never hard-code the count). Only `Step` + `Skill Type` span a whole step; the run columns
-  `Trigger / Condition / Action Source / Legacy action / Count / Spread / Skill Range / Aim Target /
-  Cast` **and `AOE` and `Offset`** merge by value-run (a blank inherits the row above); the effect
-  columns are per-row.
+- **Schema / merge model:** the `Hero set 9` tab is **32 columns** (`context.py` prints the LIVE
+  schema — never hard-code the count). Only `Step` + `Skill Type` span a whole step; the run columns
+  `Trigger / Condition / Action Source / Legacy action / Count / Volley Shape / Fire Timing / Skill
+  Range / Aim Target / Cast` **and `AOE` and `Offset`** merge by value-run (a blank inherits the row above);
+  the effect columns are per-row.
 - **`Legacy action` is a KEY, not a description** — one name (`Pierce Projectile`, `Circle AOE`,
   `Cast`) that must match a row in the **`Action Model` tab** (`data/action-model.csv`) **exactly**,
   or `sync.py` VALIDATE fails. That tab holds the mechanics — **Apply** (DirectApply | Hitbox) ·
@@ -38,8 +38,8 @@ re-derived interactively every time — re-deriving it is what burned tokens on 
   merely added to, it is neither — Nilah's "attacks strike in a cone" is a `Cone AOE`.
 - **What stays per-row:** `Offset` (the hitbox anchor: `centred` / `rear edge` / `front edge` /
   `detached +N` — a cone anchors at its **rear edge**), `AOE (hex)` (the SIZE — a Circle AOE is always
-  a circle, but its radius is per row), `Count`, `Spread`. `Collision` is **not** here — the action
-  decides it.
+  a circle, but its radius is per row), `Count`, `Volley Shape` (Cone/360/Diagonal only), `Fire Timing` (`At Once` | `Consecutive`
+  when Count > 1, else `—`). `Collision` is **not** here — the action decides it.
 - **`Cast (s)` closes the Action block** (after `Collision`), not the effect block — it describes the
   action, so it merges per action like the rest of that block. `—` on an action-start row with no
   cast time; blank on continuations. Rarely set: only Galio (2), Garen (4), Lux (3) have one.
@@ -92,19 +92,21 @@ Actions over inventing new ones; only add a taxonomy term when the user picks it
 
 ### 3. Build in ONE script — import the builder, don't re-derive it
 `from builder import build` (`.claude/scripts/tft-set9-skill-modularity/builder.py`) bakes in every
-blanking rule for the 31-col schema: identity first-row only; Step/Skill Type on step-start; run-cols
+blanking rule for the 32-col schema: identity first-row only; Step/Skill Type on step-start; run-cols
 with `Condition = "—"` on a no-condition defining row (blank inherits the champion above via
 `fill_down`) and blank on continuations; **Skill Range** = the hero's Range on action-starts; **AOE**
 and **Offset** on the action's first effect and blank on continuations (so they merge); effect cols
-every row. The **action tuple** is `(trigger, source, action, count, spread, aim, cast, effects)`
-— `action` is the `Action Model` key and `cast` is that action's channel time; the effect tuple is
+every row. The **action tuple** is `(trigger, source, action, count, volley_shape, fire_timing, aim,
+cast, effects)` — `action` is the `Action Model` key, `volley_shape` is Cone/360/Diagonal or `—`,
+`fire_timing` is `At Once`/`Consecutive` (Count>1) or `—`, and `cast` is that action's channel time;
+the effect tuple is
 `(cond, recip, cat, det, amt, scaltype, scaling, cadence, dur, aoe, offset)`.
 `Cast`/`Move` → `Count "—"`; star-varying counts use slash notation (`6/6/25`). Supply champion data
 only — **never hand-write CSV rows in the chat**.
 
 Prefer an EXISTING action: adding a row to `action-model.csv` adds a concept to the model, so only do
 it when no combination of the axes already describes the champion, and say so when you do. Register
-any **new** action / Collision / Spread / Scaling Type / `(Category, Detail)` pair in its reference
+any **new** action / Collision / Volley Shape / Aim Target / Scaling Type / `(Category, Detail)` pair in its reference
 CSV, or `sync.py` VALIDATE fails. Append/splice into `hero.csv` **idempotently** (cut the
 block by champion name, re-append) so a re-run is safe; existing rows must not move.
 
@@ -124,7 +126,7 @@ Expect `VALIDATE: ok`. (Run from repo root, `PYTHONIOENCODING=utf-8`.)
 
 ### 6. If you ADDED new champions: run the append-merge fix
 `sync.py` cannot merge a freshly-appended champion in one pass (see `[[tft-sheet-scripts]]` #6):
-symptom is `re-merged — N blocks` too high, step-start `Count`/`Spread` blank instead of `—`. One
+symptom is `re-merged — N blocks` too high, step-start `Count`/`Volley Shape` blank instead of `—`. One
 command reconciles it, then confirm:
 ```
 python .claude/scripts/tft-set9-skill-modularity/fix_append.py
