@@ -19,7 +19,7 @@ Current + Left + Right,enemy set,The current target and the enemy on each side o
 Marked enemies,enemy set,Every enemy carrying the Mark a previous step applied (Quinn's arrow rain).
 Adjacent (both sides),enemy set,The one enemy on each side of the caster (Sett's grab — up to 2).
 Row or column with most enemies,enemy set,The line (row or column) holding the most enemies.
-Each to own target,per-instance,"Each of the Count instances RE-PICKS its own target as it fires, so the set is not fixed at cast (Jinx / Soraka)."
+Random (2 hex of Current),single enemy,"A random enemy within 2 hexes of the current target, re-rolled per instance (Jinx)."
 Lowest-HP Ally,single ally,The ally with the least Health.
 Lowest-HP Allies,ally set,The lowest-Health allies (Shen shields the 2 lowest).
 Self,self,The caster's own hex — a self-cast, buff, or the centre of a self-aimed AOE.
