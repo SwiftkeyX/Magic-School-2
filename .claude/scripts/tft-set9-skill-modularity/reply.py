@@ -6,40 +6,36 @@ Overwrite REPLIES each round; git keeps the history. Comments are left UNRESOLVE
 the user's call, always. A MATCH KEY IS A SUBSTRING OF THE COMMENT'S ROOT and fails SILENTLY, so keep
 keys long, distinctive, and never a prefix of another.
 
-THIS ROUND (round 6c): Refactor 1 built — Spread -> Volley Shape (shape only), Aim Target now a
-validated tab that absorbed the target-selection spreads. warn_unmatched=False.
+THIS ROUND (round 7b): summon taxonomy + passive 0.x normalization, both BUILT. warn_unmatched=False.
 """
 
 from sheet import post_replies
 
-SPREAD_AIM = "\n".join([
-    "Built it. 'Spread' is now 'Volley Shape' and holds ONLY the geometric shapes — Cone (Ashe), "
-    "360 radial (Ahri), Diagonal to Action Source (Vel'Koz).",
-    "",
-    "Everything that picked WHICH enemies — Same target, Each to its own target, Split across "
-    "nearest/farthest N, Split across marked, Current + Left + Right — moved into Aim Target, which is "
-    "now a VALIDATED vocabulary (its own 'Aim Target Types' tab, ~30 keys grouped single-enemy / "
-    "enemy-set / ally / self / per-instance / reference). Distribution (converge vs split) is inferred "
-    "from Aim + Count, so it did not need a third column. Two tabs, cleanly separated — as you sketched.",
-])
-
 SUMMON = "\n".join([
-    "Handled by the same change. A summon that just attacks the current target now carries NO Volley "
-    "Shape and NO Fire Timing — its aim is simply Current (or 'Nearest enemy to owner' for the summon's "
-    "own attacks). 'How many soldiers' lives on the Summon action's Count, not a spread. Azir's awkward "
-    "'Same target / At Once' is gone.",
+    "Built it — three summon actions, split by behaviour:",
+    "",
+    "  Static Summon  (spawns, stands, attacks):            Set 9 Zed, Azir",
+    "  Charge Summon  (spawns unit[s] that charge in):      Naafiri, Gangplank  (absorbs 'untethered')",
+    "  Hero Summon    (walks the grid + auto-attacks):      Set 10 Zed",
+    "",
+    "'Summon' and 'Summon (untethered)' are retired. Each spawned unit still becomes a SECOND action "
+    "source for the steps that follow, so its charge/attack rides on it (Naafiri's packmates keep their "
+    "'Charge [collision=Target-Only]' step; the Charge Summon just declares their nature).",
 ])
 
-CURRENT3 = "\n".join([
-    "Right — and it landed there. 'Current + 3 nearest' (Twisted Fate) and 'Split across nearest N' "
-    "(Kai'Sa, now 'Nearest 4 enemies') are both Aim Target 'enemy set' values now, in the SAME column, "
-    "no longer split between Aim and Spread.",
+PASSIVE = "\n".join([
+    "Done — every passive is in the 0.x family now. Single passives moved from '0' to '0.1', and the "
+    "three that were mis-numbered as ACTIVE steps (Zeri's chain, Riven's splash, Urgot's cone, all at "
+    "'2') became 0.1 / 0.2. 30 steps across Set 9 plus the Set 10 passives.",
+    "",
+    "One note: I renumbered in place, so a passive that currently sits BELOW its active in the sheet "
+    "keeps that file position but reads 0.x. If you want them physically reordered to the TOP of each "
+    "champion's block, say so — that is a bigger row-move and I kept it out for now.",
 ])
 
 REPLIES = [
-    ("are really similar", SPREAD_AIM),             # #1
-    ("doesn't sound right", SUMMON),                # #2
-    ("another potential spread member", CURRENT3),  # #6
+    ("made each one a action", SUMMON),        # #2
+    ("should also be step 0.1", PASSIVE),      # #3
 ]
 
 if __name__ == "__main__":
