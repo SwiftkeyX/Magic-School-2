@@ -34,13 +34,11 @@ THE THREE RULES THIS SCRIPT IS BUILT AROUND
 import csv
 import pathlib
 
-from sheet import (HERO_COLUMNS, HERO_TAB, IDENTITY_BLOCK, MERGED_REFERENCE, REFERENCE, RUN_COLUMNS,
-                   col_letter, cols, header_row, open_sheet, remerge_hero, remerge_reference,
-                   unmerge_reference, validate_data)
+from sheet import (HERO_COLUMNS, IDENTITY_BLOCK, MERGED_REFERENCE, REFERENCE, RUN_COLUMNS,
+                   SCHEMA_TABS, col_letter, cols, header_row, open_sheet, record_changes,
+                   remerge_hero, remerge_reference, unmerge_reference, validate_data)
 
 DATA = pathlib.Path(".claude/scripts/tft-set9-skill-modularity/data")
-
-HERO = HERO_TAB
 
 
 def read_csv(name):
@@ -123,8 +121,28 @@ def fill_down(seq, starts=()):
     return out
 
 
-def sync_hero(sh):
-    """Sync Hero by LOGICAL COLUMN NAME, so a renamed or inserted column cannot misalign the write.
+def ensure_schema_tab(sh, tab, csv_name):
+    """Create a schema tab that is DECLARED (in SCHEMA_TABS) but absent from the sheet, seeding it
+    with the CSV's header row. `Hero set 10` started life this way.
+
+    Same act as add_rows / sync_reference's tab-create: the CSV already says the tab exists, so making
+    room for it is not restructuring. The header MUST be seeded here because sync_hero never writes the
+    header row (`for name in HERO_COLUMNS: the header rows are NEVER written`) — without a header,
+    cols() would have nothing to resolve against. A single header row is enough: header_row() finds the
+    `Champion` column whether or not a super-header is later added above it by hand.
+    """
+    if tab in {w.title for w in sh.worksheets()}:
+        return
+    want = trim(read_csv(csv_name))
+    header = want[header_row(want)]
+    ws = sh.add_worksheet(title=tab, rows=len(want) + 5, cols=len(header))
+    ws.update(values=[header], range_name="A1", value_input_option="RAW")
+    print(f"{tab}: created (declared schema tab, absent from the sheet) — header seeded")
+
+
+def sync_hero(sh, tab, csv_name):
+    """Sync a schema tab by LOGICAL COLUMN NAME, so a renamed or inserted column cannot misalign the
+    write. `tab`/`csv_name` select which schema tab (`Hero set 9`/`hero.csv` or `Hero set 10`/its CSV).
 
     THE COMPARISON HAS TO SURVIVE ITS OWN MERGING, and getting that wrong is a stable infinite loop.
 
@@ -141,9 +159,10 @@ def sync_hero(sh):
     reads to find the step BOUNDARIES: fill a continuation row and it looks like a NEW STEP START, so
     it never merges away. They are compared RAW and written LITERALLY, blanks included.
     """
-    ws = sh.worksheet(HERO)
+    ensure_schema_tab(sh, tab, csv_name)
+    ws = sh.worksheet(tab)
     sheet = trim(ws.get_all_values())
-    want = trim(read_csv("hero.csv"))
+    want = trim(read_csv(csv_name))
 
     # The Hero tab carries a merged super-header ('Action'/'Effect') ABOVE its column names, so its
     # real header is row `shr` and data starts at `shr+1`. The CSV stays single-header (row 0). Align
@@ -152,7 +171,7 @@ def sync_hero(sh):
     sc = cols(sheet[shr])   # logical name -> column index in the SHEET
     wc = cols(want[whr])    # logical name -> column index in the CSV
     n = len(want) - (whr + 1)                       # number of DATA rows (from the CSV)
-    check_rows(HERO, len(sheet) - (shr + 1), n)
+    check_rows(tab, len(sheet) - (shr + 1), n)
 
     need = shr + 1 + n                              # header rows + data rows
     if need + 1 > ws.row_count:
@@ -183,7 +202,8 @@ def sync_hero(sh):
             "startColumnIndex": 0,
             "endColumnIndex": max(sc[n2] for n2 in RUN_COLUMNS + ["AOE", "Offset"]) + 1}}}]})
         ws.batch_update(edits, value_input_option="RAW")
-    print(f"{HERO}: {len(edits)} cells updated ({n} rows)")
+    record_changes(tab, [e["range"] for e in edits])   # for highlight_changes.py to colour
+    print(f"{tab}: {len(edits)} cells updated ({n} rows)")
     return bool(edits)
 
 
@@ -227,6 +247,7 @@ def sync_reference(sh):
                                   "values": [[cell(want[i], j)]]})
         if edits:
             ws.batch_update(edits, value_input_option="RAW")
+        record_changes(tab, [e["range"] for e in edits])   # for highlight_changes.py to colour
         if tab in MERGED_REFERENCE:
             remerge_reference(sh, tab, MERGED_REFERENCE[tab])
         changed += len(edits)
@@ -235,38 +256,41 @@ def sync_reference(sh):
 
 
 def validate(sh):
-    """No value used in Hero may be undefined in its reference tab.
+    """No value used in a schema tab may be undefined in its reference tab.
 
     This is the invariant the old `tft-action-templates.py` was checking by hand. It is the thing
     that actually goes wrong when the schema moves: a champion keeps a value whose definition was
     renamed out from under it, and nothing notices.
 
     The CHECK itself lives in sheet.validate_data() — one implementation, shared with context.py.
+    Runs over EVERY schema CSV: Set 10 shares Set 9's reference vocab, so a Set 10 action or effect
+    with no defining row is caught here exactly as a Set 9 one is.
     """
-    problems = validate_data()
+    problems = [f"[{csv_name}] {p}" for csv_name in SCHEMA_TABS.values()
+                for p in validate_data(csv_name)]
     if problems:
         print("VALIDATE: FAILED")
         for p in problems:
             print(f"  !! {p}")
         raise SystemExit(1)
-    print("VALIDATE: ok — every value used in Hero is defined in its reference tab")
+    print("VALIDATE: ok — every value used in each schema tab is defined in its reference tab")
 
 
 def main():
     sh = open_sheet()
-    hero_changed = sync_hero(sh)
-    if hero_changed:
-        # Merges are DERIVED from the values, so they only need recomputing when the values move.
-        #
-        # THIS MUST RUN BEFORE sync_reference, and that ordering is load-bearing. sync_hero writes the
-        # FILLED value into merged columns and depends on this re-merge to absorb the duplicates. If
-        # anything between the two raises — a reference tab tripping check_rows, say — the sheet is
-        # left filled-but-unmerged, and NO LATER SYNC FIXES IT: the comparison is fill_down on both
-        # sides, so a filled continuation and a blank one look identical and every later run reports
-        # 0 while the layout is still wrong. That is invariant #6's masking bug reached by a different
-        # road, and it happened for real: a Trigger Types row-guard failure skipped the re-merge and
-        # left 'After Step 1' written down every continuation row.
-        remerge_hero(sh)
+    for tab, csv_name in SCHEMA_TABS.items():
+        if sync_hero(sh, tab, csv_name):
+            # Merges are DERIVED from the values, so they only need recomputing when the values move.
+            #
+            # THIS MUST RUN BEFORE sync_reference, and that ordering is load-bearing. sync_hero writes
+            # the FILLED value into merged columns and depends on this re-merge to absorb the
+            # duplicates. If anything between the two raises — a reference tab tripping check_rows,
+            # say — the sheet is left filled-but-unmerged, and NO LATER SYNC FIXES IT: the comparison
+            # is fill_down on both sides, so a filled continuation and a blank one look identical and
+            # every later run reports 0 while the layout is still wrong. That is invariant #6's masking
+            # bug reached by a different road, and it happened for real: a Trigger Types row-guard
+            # failure skipped the re-merge and left 'After Step 1' written down every continuation row.
+            remerge_hero(sh, tab)
     sync_reference(sh)
     validate(sh)
 

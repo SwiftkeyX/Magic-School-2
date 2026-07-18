@@ -22,6 +22,37 @@ KEY = "1X5glHjVcgv3yYG4Q2SyV9YJS3sv_wH5XAg3RLOHnUa4"
 CRED = "google-service-credential.json"
 DATA = pathlib.Path(".claude/scripts/tft-set9-skill-modularity/data")
 
+# Review aid: which cells the writers touched, so highlight_changes.py can COLOUR them for the user to
+# review. The one-writer (sync.py / force_full.py) records every A1 cell it changes here; the state
+# ACCUMULATES across runs (a two-pass sync records pass 1's edits then pass 2's zero) until
+# highlight_changes.py consumes `pending`, colours it, and rotates it into `highlighted`. Transient
+# review state, not source — gitignored.
+CHANGES_FILE = pathlib.Path(".claude/scripts/tft-set9-skill-modularity/changes-state.json")
+
+
+def record_changes(tab, a1_cells):
+    """Append the A1 cells a writer just changed on `tab`, deduped, for highlight_changes.py.
+
+    Reusable across sync.py, force_full.py, and across runs — never overwrites, so the acceptance
+    double-sync does not erase pass 1's edits with pass 2's zero. Best-effort: a failure here must
+    never break a sheet write, so it swallows its own errors."""
+    import json
+    cells = [c for c in a1_cells if c]
+    if not cells:
+        return
+    try:
+        state = json.loads(CHANGES_FILE.read_text(encoding="utf-8")) if CHANGES_FILE.exists() else {}
+        pend = state.setdefault("pending", {}).setdefault(tab, [])
+        seen = set(pend)
+        for c in cells:
+            if c not in seen:
+                pend.append(c)
+                seen.add(c)
+        CHANGES_FILE.write_text(json.dumps(state, indent=1), encoding="utf-8")
+    except Exception as e:            # a highlight-bookkeeping failure must not abort a real write
+        print(f"  (record_changes skipped: {e})")
+
+
 D = "—"                        # the sheet's "not applicable" marker
 SAME = "Same to Aim Target"    # recipient shorthand when it equals the Aim Target
 
@@ -36,7 +67,8 @@ SAME = "Same to Aim Target"    # recipient shorthand when it equals the Aim Targ
 # `Action Model` is the lookup Hero's `Legacy action` keys into. Only `Hero` has a logical column
 # schema; the rest are plain tables synced positionally.
 TABS = {
-    "Hero": "hero.csv",
+    "Hero set 9": "hero.csv",
+    "Hero set 10": "hero-set10.csv",
     "Column Explain": "column-explain.csv",
     "Action Model": "action-model.csv",
     "AOE shape": "aoe-shape.csv",
@@ -46,12 +78,29 @@ TABS = {
     "Effect Types": "effect-types.csv",
     "Collision Types": "collision-types.csv",
     "Scaling Types": "scaling-types.csv",
-    "Spread Types": "spread-types.csv",
+    "Volley Shape Types": "volley-shape.csv",     # renamed from 'Spread Types'
+    "Aim Target Types": "aim-target-types.csv",   # new: the validated Aim Target vocabulary
+    "Fire Timing Types": "fire-timing.csv",
     "Design Notes": "design-notes.csv",
 }
 
-HERO_TAB = "Hero"
-REFERENCE = {t: f for t, f in TABS.items() if t != HERO_TAB}
+# Tabs that carry the Hero LOGICAL-COLUMN schema — merge-derived display + vocab validation —
+# rather than being synced positionally like a reference table. There are two of them now: `Hero`
+# (`Hero set 9`) and `Hero set 10`. The Set 10 tab REUSES the identical 31-column schema AND the
+# identical reference vocabularies (Action Model, Effect Types, AOE shape, ...) — a new set's champions
+# are still made of the same actions and effects, so a second schema tab validates against the same
+# tabs. The map is tab -> its CSV, exactly like TABS; sync.py runs its Hero pipeline over each entry.
+# (Tabs were `Hero` / `hero set 10` until 2026-07-18, when the user renamed them for set symmetry —
+# addressed by NAME everywhere, so the rename is just these strings + the sheet titles.)
+SCHEMA_TABS = {
+    "Hero set 9": "hero.csv",
+    "Hero set 10": "hero-set10.csv",
+}
+
+HERO_TAB = "Hero set 9"
+# Everything that is NOT a schema tab is a reference table, synced positionally. Must exclude EVERY
+# schema tab, or `Hero set 10` would be written as a plain table and its merges/validation skipped.
+REFERENCE = {t: f for t, f in TABS.items() if t not in SCHEMA_TABS}
 
 # Reference tab -> the column merged vertically for display (0-based). Same rule as Hero: a merged
 # cell reads back "" on every row but its first, so the CSV carries the blank and the merge is
@@ -86,7 +135,18 @@ HERO_COLUMNS = [
     # `Collision` is GONE from Hero: the action decides it. It was per-row for a real reason until
     # Urgot — the last action whose Collision varied — turned out to be a Cone AOE, not a Burst
     # Projectile. The Action Model tab is now its only home.
-    "Skill Range", "Count", "Spread",
+    "Skill Range", "Count",
+    # `Volley Shape` (was `Spread` until 2026-07-18) holds ONLY the geometric shape of a multi-instance
+    # volley — Cone / 360 / Diagonal — whoever is standing there. The user split the old overloaded
+    # `Spread`: the target-SELECTION values (Same target, Each to its own target, Split across
+    # nearest/farthest N, Split across marked, Current + Left + Right) moved to `Aim Target`, which is
+    # now a validated vocabulary too. Distribution is inferred from Aim + Count (multi-target aim =
+    # split, single = converge).
+    "Volley Shape",
+    # `Fire Timing` (added 2026-07-18) is ORTHOGONAL to both: it says WHEN the Count instances fire —
+    # `At Once` or `Consecutive`. Set only when Count > 1; '—' otherwise. Per-row like Count (a RUN
+    # column), so a branch can change it (Karma's 3rd cast fires 3 at once).
+    "Fire Timing",
     # `Cast` sits at the END of the action region, not with the effects. It describes the ACTION (the
     # user: "the cast is one the element in each action"), and it used to be the sheet's LAST column —
     # marooned past the effect block, which is what made it read as an effect property.
@@ -197,12 +257,17 @@ def merge_request(sheet_id, start, end, col):
 STEP_BLOCK = ACTION_BLOCK
 
 # The columns that merge wherever consecutive rows happen to agree.
-RUN_COLUMNS = ["Trigger", "Condition", "Action Source", "Legacy action", "Count", "Spread",
-               "Skill Range", "Aim Target", "Cast"]
+RUN_COLUMNS = ["Trigger", "Condition", "Action Source", "Legacy action", "Count", "Volley Shape",
+               "Fire Timing", "Skill Range", "Aim Target", "Cast"]
 
 
-def remerge_hero(sh):
-    """Lay out EVERY merge on the Hero tab. The ONE place merges are computed.
+def remerge_hero(sh, tab=HERO_TAB):
+    """Lay out EVERY merge on a schema tab (`Hero set 9` or `Hero set 10`). The ONE place merges live.
+
+    `tab` names the schema tab to lay out. Everything else is DERIVED from that tab's own values and
+    its own header row (via header_row/cols), so the identical logic serves both schema tabs — the
+    Set 10 tab is single-header where Hero carries a two-row super-header, and header_row() absorbs
+    that difference by locating the `Champion` column rather than assuming a fixed row.
 
     MERGES ARE DERIVED FROM THE VALUES, never stored. That is what lets the sheet's data live in a
     plain CSV: re-running this reconstructs the layout exactly. Three layers:
@@ -219,7 +284,7 @@ def remerge_hero(sh):
     This is one function, in one file, on purpose. Two implementations of a merge layout is a merge
     FIGHT waiting to happen: one unmerges what the other merged, on every run, for ever.
     """
-    ws = sh.worksheet("Hero")
+    ws = sh.worksheet(tab)
     vals = ws.get_all_values()
     hr = header_row(vals)          # real header row; data starts at hr+1 (super-header above it stays)
     c = cols(vals[hr])
@@ -273,7 +338,7 @@ def remerge_hero(sh):
                     run = k
 
     sh.batch_update({"requests": reqs})
-    print(f"Hero: re-merged — {len(champions)} champion blocks, {len(steps)} steps")
+    print(f"{tab}: re-merged — {len(champions)} champion blocks, {len(steps)} steps")
 
 
 # The round scripts import this name. Kept as an alias so they keep working until they are archived.
@@ -325,7 +390,9 @@ VOCAB = {
     "Trigger": "trigger-types.csv",
     "Effect Recipient": "effect-recipient-types.csv",
     "Scaling Type": "scaling-types.csv",
-    "Spread": "spread-types.csv",
+    "Volley Shape": "volley-shape.csv",     # Cone | 360 | Diagonal (was 'Spread')
+    "Aim Target": "aim-target-types.csv",   # now validated: absorbed the target-selection spreads
+    "Fire Timing": "fire-timing.csv",       # At Once | Consecutive (Count > 1 only)
 }
 
 # Reference tab -> (its csv, the column to check, the csv defining that column's vocabulary).
@@ -356,16 +423,34 @@ def fill_down(seq):
     return out
 
 
-def validate_data():
-    """No value used in Hero may be undefined in its reference tab. Returns a list of problems.
+COLLISION_OVERRIDE = re.compile(r"\s*\[collision=([^\]]+)\]\s*$")
+
+
+def base_action(s):
+    """Strip a `[collision=Y]` override off a Legacy action, returning the base action name.
+
+    The bracket is a PARSED override now (the user's 2026-07-18 call): `Charge [collision=Target-Only]`
+    is base `Charge` with its Collision overridden to Target-Only, and there is NO dedicated Action
+    Model row for the variant any more. So every place that looks the action up in Action Model — the
+    VOCAB check, the geometry lookup — must resolve to the base first. (Upgrading the convention to a
+    real parse re-opens per-row overrides v2→v3 closed, but the user chose it, for one fewer row.)"""
+    return COLLISION_OVERRIDE.sub("", s).strip()
+
+
+def validate_data(hero_csv="hero.csv"):
+    """No value used in a schema tab may be undefined in its reference tab. Returns a list of problems.
 
     THE ONE implementation. sync.py raises on it; context.py prints it for the /add-champion flow.
     It was written twice - once in each - and they drifted the moment Effect Types gained a merge:
     sync.py learned to fill_down its category column and context.py did not, so the same CSVs passed
     one check and failed the other with 36 phantom errors. Exactly the bug the single tab map and the
     single merge layout exist to prevent. One fact, one function.
+
+    `hero_csv` names which schema CSV to check (`hero.csv` for Set 9, `hero-set10.csv` for Set 10).
+    Both are validated against the SAME shared reference vocabularies — a Set 10 champion using an
+    action or effect with no row in Action Model / Effect Types is exactly the drift this catches.
     """
-    hero = read_data("hero.csv")
+    hero = read_data(hero_csv)
     c = cols(hero[0])
 
     def cell(r, i):
@@ -385,9 +470,14 @@ def validate_data():
                 out.add(cell(r, col).strip())
         return out
 
+    def used_for_vocab(name):
+        # Legacy action may carry a `[collision=Y]` override; the base is what Action Model defines.
+        vals = used(name)
+        return {base_action(v) for v in vals} if name == "Legacy action" else vals
+
     problems = [f"{label}: {sorted(miss)} used in Hero but not defined in {src}"
                 for label, src in VOCAB.items()
-                for miss in [used(label) - defined(src)] if miss]
+                for miss in [used_for_vocab(label) - defined(src)] if miss]
 
     # Effect Types is MERGED by category, so its Category column is blank on every row but a block's
     # first. Reading it raw turns every pair below a block top into ('', Detail) - matching nothing.
@@ -442,36 +532,57 @@ def validate_data():
     eff_off = fill_down([cell(r, c["Offset"]) for r in hero[1:]])
     eff_aoe = fill_down([cell(r, c["AOE"]) for r in hero[1:]])
     for k, r in enumerate(hero[1:]):
-        act = cell(r, c["Legacy action"]).strip()
+        act = base_action(cell(r, c["Legacy action"]).strip())   # strip the [collision=Y] override
         if not act or act not in t_off:
             continue                    # continuation rows inherit; unknown keys are VOCAB's problem
         for axis, tabv, got in (("Offset", t_off[act], eff_off[k].strip()),
                                 ("AOE (hex)", t_shape[act], eff_aoe[k].strip())):
-            fixed = tabv not in (D, "per row", "specify elsewhere",
-                                 "circle", "cone", "box", "custom")
             if axis == "AOE (hex)":
-                fixed = tabv == "1-hex"     # only a fixed 1-hex leaves the row nothing to choose
-            want = (D if tabv == D else "default" if fixed else "a real value")
-            ok = (got == D) if tabv == D else (got == "default") if fixed else (
-                got not in (D, "default", ""))
+                # SHAPE axis. A PROJECTILE's Shape is 'specify elsewhere', and 1-hex is now its DEFAULT
+                # (the user's simplification, 2026-07-18: "1-hex for a projectile should be default for
+                # simplicity"). So a projectile row may read 'default' (the ordinary 1-hex bolt) OR a
+                # real shape for a non-default projectile (Sona's Box 1.5x2, Jhin's Box 1x2) — the one
+                # axis where BOTH are legal. A fixed '1-hex' action (Charge, Spawn At Target, Current
+                # Target Laser) still reads exactly 'default'; a circle/cone/box/custom must state a
+                # size (or 'unknown'); '—' means no hitbox.
+                if tabv == D:
+                    ok, want = got == D, D
+                elif tabv == "specify elsewhere":
+                    ok, want = got not in (D, ""), "'default' (1-hex bolt) or a real shape"
+                elif tabv == "1-hex":
+                    ok, want = got == "default", "default"
+                else:
+                    ok, want = got not in (D, "default", ""), "a real value"
+            else:
+                fixed = tabv not in (D, "per row", "specify elsewhere",
+                                     "circle", "cone", "box", "custom")
+                want = (D if tabv == D else "default" if fixed else "a real value")
+                ok = (got == D) if tabv == D else (got == "default") if fixed else (
+                    got not in (D, "default", ""))
             if not ok:
                 problems.append(f"{axis}: row {k + 2} ('{act}') says {got!r} but the action's "
                                 f"{axis.split()[0]} is {tabv!r} — expected {want}")
 
+    # `X [collision=Y]` is a PARSED override in HERO now, not a dedicated Action Model row (the user's
+    # 2026-07-18 call — one fewer row, at the price of a Hero cell that is a mini-language). So the
+    # check moved here, onto the Hero cell: the base `X` must be a real action, and `Y` must be a real
+    # collision. Collision is not a Hero column, so nothing else verifies `Y` — this is its only guard.
     am = read_data("action-model.csv")
     names = {cell(r, 0).strip() for r in am[1:] if cell(r, 0).strip()}
-    ci = am[0].index("Collision")
-    for r in am[1:]:
-        m = re.fullmatch(r"(.+?)\s*\[collision=(.+?)\]", cell(r, 0).strip())
-        if not m:
+    collisions = defined("collision-types.csv")
+    seen_override = set()
+    for k, r in enumerate(hero[1:]):
+        val = cell(r, c["Legacy action"]).strip()
+        m = COLLISION_OVERRIDE.search(val)
+        if not m or val in seen_override:
             continue
-        base, declared = m.group(1).strip(), m.group(2).strip()
+        seen_override.add(val)
+        base, declared = base_action(val), m.group(1).strip()
         if base not in names:
-            problems.append(f"action-model.csv: '{cell(r, 0).strip()}' overrides '{base}', "
-                            f"which is not an action")
-        if cell(r, ci).strip() != declared:
-            problems.append(f"action-model.csv: '{cell(r, 0).strip()}' says collision={declared} "
-                            f"but its Collision cell says '{cell(r, ci).strip()}'")
+            problems.append(f"Legacy action: '{val}' overrides '{base}', which is not an action")
+        if declared not in collisions:
+            problems.append(f"Legacy action: '{val}' has collision={declared!r}, "
+                            f"not defined in collision-types.csv")
     return problems
 
 

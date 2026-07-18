@@ -1,31 +1,40 @@
-"""Deterministic reconcile: write EVERY Hero cell to the CSV literal, then re-merge once.
+"""Deterministic reconcile: write EVERY cell of a schema tab to the CSV literal, then re-merge once.
 
 The escape hatch when `sync.py` and `fix_append.py` FIGHT and never reach 0 — which happens after a
 mid-file row insert (sync compares by row position, so everything below the insert shifts and the
-fill_down merge logic oscillates). This ignores fill_down entirely: it makes the sheet EXACTLY equal
-the CSV literal, then `remerge_hero` derives the merges. Run from repo-root cwd, PYTHONIOENCODING=utf-8:
+fill_down merge logic oscillates), AND when a schema tab is FRESHLY CREATED: sync writes the filled
+identity down every row (the sheet started blank), and remerge then splits on every non-blank cell so
+the identity block never merges (invariant #6, for the whole tab at once). This ignores fill_down
+entirely: it makes the sheet EXACTLY equal the CSV literal — blanks included — then `remerge_hero`
+derives the merges from those literal blanks. Run from repo-root cwd, PYTHONIOENCODING=utf-8:
 
-    python .claude/scripts/tft-set9-skill-modularity/force_full.py
+    python .claude/scripts/tft-set9-skill-modularity/force_full.py ["<tab>"]
     python .claude/scripts/tft-set9-skill-modularity/sync.py    # then confirm 0
 
-If it raises "can't merge cells that cross the borders of an existing filter", clear the Hero basic
+`<tab>` defaults to `Hero set 9`; pass `"Hero set 10"` (a key of SCHEMA_TABS) for the Set 10 tab. Its
+CSV is looked up from SCHEMA_TABS, so the two never drift.
+
+If it raises "can't merge cells that cross the borders of an existing filter", clear the tab's basic
 filter first (clearBasicFilter) — see [[tft-sheet-scripts]] #7.
 """
 import csv
 import pathlib
+import sys
 
 import gspread
 
-from sheet import CRED, KEY, HERO_COLUMNS, col_letter, cols, header_row, remerge_hero
+from sheet import (CRED, KEY, HERO_COLUMNS, HERO_TAB, SCHEMA_TABS, col_letter, cols, header_row,
+                   record_changes, remerge_hero)
 
 DATA = pathlib.Path(".claude/scripts/tft-set9-skill-modularity/data")
 
 
-def main():
+def main(tab=HERO_TAB):
+    csv_name = SCHEMA_TABS[tab]                      # KeyError here = not a schema tab, which is right
     sh = gspread.service_account(filename=CRED).open_by_key(KEY)
-    ws = sh.worksheet("Hero")
+    ws = sh.worksheet(tab)
     vals = ws.get_all_values()
-    with open(DATA / "hero.csv", encoding="utf-8", newline="") as f:
+    with open(DATA / csv_name, encoding="utf-8", newline="") as f:
         want = [r for r in csv.reader(f)]
     while want and not any(x.strip() for x in want[-1]):
         want.pop()
@@ -55,9 +64,10 @@ def main():
                 edits.append({"range": f"{col_letter(c[name])}{si + 1}", "values": [[lit]]})
     if edits:
         ws.batch_update(edits, value_input_option="RAW")
-    print(f"force_full: wrote {len(edits)} cells to CSV literal")
-    remerge_hero(sh)
+    record_changes(tab, [e["range"] for e in edits])   # for highlight_changes.py to colour
+    print(f"{tab}: force_full wrote {len(edits)} cells to CSV literal")
+    remerge_hero(sh, tab)
 
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv[1] if len(sys.argv) > 1 else HERO_TAB)

@@ -55,8 +55,8 @@ def _targeting(r, c, prof):
     cnt = r[c["Count"]].strip()
     if "Count" in prof and cnt and cnt not in (D, "1"):
         p.append("×" + cnt)
-    spr = r[c["Spread"]].strip()
-    if "Spread" in prof and spr and spr != D:
+    spr = r[c["Volley Shape"]].strip()   # was 'Spread' until the 2026-07-18 split (dashboard is parked)
+    if "Volley Shape" in prof and spr and spr != D:
         p.append(spr)
     off = r[c["Offset"]].strip()
     if "Offset" in prof and off and off != D:

@@ -90,7 +90,8 @@ def print_reference():
     print("\n=== REFERENCE VALUES (sync.py VALIDATE enforces these) ===")
     print("  Triggers     :", col0("trigger-types.csv"))
     print("  Collisions   :", col0("collision-types.csv"))
-    print("  Spreads      :", col0("spread-types.csv"))
+    print("  Volley Shapes:", col0("volley-shape.csv"))
+    print("  Aim Targets  :", col0("aim-target-types.csv"))
     print("  Scaling Types:", col0("scaling-types.csv"))
     # Offset is checked like the rest now, so a champion-adder has to be able to SEE the legal
     # anchors. An enforced vocabulary that the adding tool never prints is a trap, not a guard.

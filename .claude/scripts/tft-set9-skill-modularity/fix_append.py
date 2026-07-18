@@ -22,17 +22,19 @@ import pathlib
 
 import gspread
 
-from sheet import (CRED, KEY, IDENTITY_BLOCK, RUN_COLUMNS, STEP_BLOCK, col_letter, cols, header_row,
-                   remerge_hero)
+from sheet import (CRED, KEY, HERO_TAB, IDENTITY_BLOCK, RUN_COLUMNS, SCHEMA_TABS, STEP_BLOCK,
+                   col_letter, cols, header_row, remerge_hero)
 
 DATA = pathlib.Path(".claude/scripts/tft-set9-skill-modularity/data")
 
 
 def main():
+    # fix_append is the Set 9 append flow (the /add-champion skill runs it). Addressed by NAME via
+    # HERO_TAB, so it survived the 2026-07-18 'Hero' -> 'Hero set 9' rename with one constant.
     sh = gspread.service_account(filename=CRED).open_by_key(KEY)
-    ws = sh.worksheet("Hero")
+    ws = sh.worksheet(HERO_TAB)
     vals = ws.get_all_values()
-    with (DATA / "hero.csv").open(encoding="utf-8", newline="") as f:
+    with (DATA / SCHEMA_TABS[HERO_TAB]).open(encoding="utf-8", newline="") as f:
         want = list(csv.reader(f))
     while want and not any(x.strip() for x in want[-1]):
         want.pop()
