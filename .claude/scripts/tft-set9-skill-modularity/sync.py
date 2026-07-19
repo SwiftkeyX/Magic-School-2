@@ -277,6 +277,13 @@ def validate(sh):
 
 
 def main():
+    # The flat mirror is DERIVED from the schema CSVs, exactly like the merges are derived from the
+    # values — so it is rebuilt here rather than maintained. Doing it before anything is written is
+    # what makes drift impossible: there is no state in which the sheet has a flat tab that
+    # disagrees with the hero CSVs it came from.
+    from flatten import build_flat
+    build_flat(verbose=True)
+
     sh = open_sheet()
     for tab, csv_name in SCHEMA_TABS.items():
         if sync_hero(sh, tab, csv_name):

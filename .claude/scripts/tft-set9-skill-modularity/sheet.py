@@ -81,7 +81,18 @@ TABS = {
     "Volley Shape Types": "volley-shape.csv",     # renamed from 'Spread Types'
     "Aim Target Types": "aim-target-types.csv",   # new: the validated Aim Target vocabulary
     "Fire Timing Types": "fire-timing.csv",
+    # Action Source became a validated vocabulary in round 14: it had drifted into structural keys
+    # (Self, Summon, Step N Projectile) mixed with champion pet names (Dreadway, Child of the Star,
+    # Shadow) — prose in a column with no tab, the same road that gave AOE (hex) 'Gwen-shaped'.
+    "Action Source Types": "action-source-types.csv",
     "Design Notes": "design-notes.csv",
+    # TEMPORARY review surface for the proposed 'Hero archetype' column (round 11). Built by
+    # build_archetype_review.py. Delete this entry and the tab once the tags move onto the Hero tabs.
+    "Archetype Review": "archetype-review.csv",
+    # DERIVED, not authored: the un-blanked mirror of both schema tabs, rebuilt by flatten.py at the
+    # top of every sync. It exists because the Hero tabs are merged for human reading and cannot be
+    # machine-read — see flatten.py. Never edit hero-flat.csv by hand.
+    "Hero flat": "hero-flat.csv",
 }
 
 # Tabs that carry the Hero LOGICAL-COLUMN schema — merge-derived display + vocab validation —
@@ -393,6 +404,9 @@ VOCAB = {
     "Volley Shape": "volley-shape.csv",     # Cone | 360 | Diagonal (was 'Spread')
     "Aim Target": "aim-target-types.csv",   # now validated: absorbed the target-selection spreads
     "Fire Timing": "fire-timing.csv",       # At Once | Consecutive (Count > 1 only)
+    # Names the thing that ACTS, which is not always the champion. Validated since round 14 — it was
+    # the last structural column taking free text, and it had already drifted to pet names.
+    "Action Source": "action-source-types.csv",
 }
 
 # Reference tab -> (its csv, the column to check, the csv defining that column's vocabulary).
