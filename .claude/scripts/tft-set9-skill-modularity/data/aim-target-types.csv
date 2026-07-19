@@ -11,7 +11,12 @@ Highest HP (within 2 hex),single enemy,The highest-Health enemy within 2 hexes (
 Knocked-up enemy,single enemy,The enemy that was knocked up.
 Enemy entering range,single enemy,The enemy that just entered attack range (an On-Enemy-Enters-Range trigger's target).
 Closest enemy behind Step 1 Aim target,single enemy,The enemy directly behind an earlier step's target (a pierce's second victim).
+Nearest 3 enemies,enemy set,The 3 nearest enemies (Lulu's 3rd-cast stun hits each).
 Nearest 4 enemies,enemy set,The 4 nearest enemies (Count splits among them).
+4/4/6 lowest-HP enemies,enemy set,The N lowest-Health enemies by star level (Karthus). Count splits one instance each.
+3 enemies that damaged Self most,enemy set,"The 3 enemies that dealt the most damage to the caster during a preceding window — it is resolved from damage taken, not from position (Pantheon)."
+Board centre,position,"The centre of the board, independent of any unit — summons pile toward it (Yorick)."
+Nearest enemies (one each),enemy set,"The Count nearest enemies, one instance each — no enemy is targeted twice (Ziggs' bomblets). Unlike 'Nearest N enemies' the set SIZE follows Count, so it survives a Count that grows per cast."
 Nearest 4/5/7 enemies,enemy set,The N nearest enemies by trait tier (Kai'Sa's barrage splits among them).
 4 furthest enemies,enemy set,The 4 farthest enemies — one shot each (Caitlyn).
 Current + 3 nearest,enemy set,The current target plus the 3 nearest enemies (Twisted Fate's cards split among them).
@@ -20,6 +25,11 @@ Marked enemies,enemy set,Every enemy carrying the Mark a previous step applied (
 Adjacent (both sides),enemy set,The one enemy on each side of the caster (Sett's grab — up to 2).
 Row or column with most enemies,enemy set,The line (row or column) holding the most enemies.
 Random (2 hex of Current),single enemy,"A random enemy within 2 hexes of the current target, re-rolled per instance (Jinx)."
+Random enemy in range,per-instance,"A random enemy within the caster's range, re-rolled per instance (Kennen's Jolts)."
+Bench slot,position,An empty slot on the player's BENCH — off-board. The only aim that is not a board hex; Jhin's Grand Finale Rifles are summoned there and fire from it.
+Highest-HP Ally,single ally,The ally with the most Health (Neeko cosplays them).
+Nearest ally,single ally,The closest ally (Lillia's secondary heal).
+Farthest unmarked enemy,single enemy,The farthest enemy NOT already carrying this skill's Mark — so repeat casts spread the mark outward instead of re-marking one unit (Akali's shuriken).
 Lowest-HP Ally,single ally,The ally with the least Health.
 Lowest-HP Allies,ally set,The lowest-Health allies (Shen shields the 2 lowest).
 Self,self,The caster's own hex — a self-cast, buff, or the centre of a self-aimed AOE.
@@ -28,6 +38,7 @@ Step 1 Aim target,reference,Whatever an earlier Step 1 aimed at (a sequenced fol
 Step 2 Aim target,reference,Whatever an earlier Step 2 aimed at.
 Nearest enemy to owner,reference,The nearest enemy to a SUMMON's owner (the summon's own attack target).
 Summon,reference,The summoned unit itself acts (a second action source).
+Hex That Projectile Hit,reference,"The hex where an earlier step's projectile actually landed. An AOE that detonates on impact centres HERE — not on the unit the projectile was aimed at, which is a different claim: a First-Hit projectile can stop on whoever it meets first, and re-reading 'Current'/'Clustered' at detonation time can drift to a hex the projectile never reached."
 Clustered,enemy set,The densest cluster of enemies — the AOE centres on it (Jarvan / Sona / Thresh).
 ,,
 How to read this tab,,

@@ -55,7 +55,7 @@ Zed,2 Gold,Carry,Ionia,,Rogue,Slayer,1,Shadow Twin Assassin,Ionia Bonus: +15% Cr
 Karma,3 Gold,Carry,Ionia,,Invoker,,4,Burst Spell Spammer,"Ionia Bonus: +25 Ability Power. Active: fire a burst of energy that explodes on impact, dealing magic damage to enemies adjacent to the target. Every third cast launches 3 bursts.",0.1,Passive,Game Start,If Ionia Active,Self,Cast,Self,—,—,4,—,—,—,—,Same to Aim Target,Buff,AP,25,—,—,Once,Permanent
 ,,,,,,,,,,1,Active,On Cast,If 1st or 2nd Cast,Self,First hit Projectile,Current,default,default,4,1,—,—,—,—,—,—,—,—,—,—,—
 ,,,,,,,,,,,,,If 3rd Cast,,,Current + Left + Right,,,,3,—,At Once,,—,—,—,—,—,—,—,—
-,,,,,,,,,,2,Active,On Projectile Hit,—,Step 1 Projectile,Circle AOE,Current,centred,Circle 1 hex,4,1,—,—,—,Enemies in area,Attack,Damage,200/300/470% AP,—,—,Once,—
+,,,,,,,,,,2,Active,On Projectile Hit,—,Step 1 Projectile,Circle AOE,Hex That Projectile Hit,centred,Circle 1 hex,4,1,—,—,—,Enemies in area,Attack,Damage,200/300/470% AP,—,—,Once,—
 Shen,4 Gold,Tank,Ionia,,Bastion,Invoker,1,Ally-Shielding Burst Tank,"Ionia Bonus: +8% Damage Reduction. Active: shield self and the 2 lowest-Health allies for 4s. After ally's shield duration expire, Shen's Shield refreshes and burst, dealing magic damage to adjacent enemies.",0.1,Passive,Game Start,If Ionia Active,Self,Cast,Self,—,—,1,—,—,—,—,Same to Aim Target,Buff,Damage Reduction,8%,—,—,Once,Permanent
 ,,,,,,,,,,1,Active,On Cast,—,Self,Cast,Self,—,—,1,—,—,—,—,Same to Aim Target,Buff,Shield,350/450/2000% AP,—,—,Once,4
 ,,,,,,,,,,,,,,,,Lowest-HP Allies,,,,,,,,Same to Aim Target,Buff,Shield,225/275/1500% AP,—,—,Once,4
@@ -114,7 +114,7 @@ Ekko,3 Gold,Carry,Zaun,Piltover,Rogue,,1,Retroactive-Heal Assassin,"Heal for 20%
 Jayce,3 Gold,Support,Piltover,,Gunner,,4,Flank-Buff Gunner,"Grant himself Attack Speed and his left and right neighbours Ability Power for 3s, then fire a blast that detonates on the first enemy hit, damaging everyone near the blast.",1,Active,On Cast,—,Self,Cast,Self,—,—,4,—,—,—,—,Same to Aim Target,Buff,Attack Speed,30/40/50% AP,—,—,Once,3
 ,,,,,,,,,,,,,,,,,,,,,,,,Adjacent allies (left & right),Buff,AP,15%,—,—,Once,3
 ,,,,,,,,,,2,Active,After Step 1,—,Self,First hit Projectile,Current,default,default,4,1,—,—,—,—,—,—,—,—,—,—,—
-,,,,,,,,,,3,Active,On Projectile Hit,—,Step 2 Projectile,Circle AOE,Current,centred,Circle 1 hex,4,1,—,—,—,Enemies in area,Attack,Damage,275/275/295% AD,—,—,Once,—
+,,,,,,,,,,3,Active,On Projectile Hit,—,Step 2 Projectile,Circle AOE,Hex That Projectile Hit,centred,Circle 1 hex,4,1,—,—,—,Enemies in area,Attack,Damage,275/275/295% AD,—,—,Once,—
 Viego,1 Gold,Carry,Shadow Isles,,Rogue,,1,Stacking Melee Assassin,"Deal 110/165/250% Ability Power magic damage to the current target. For the rest of combat, Viego's attacks deal 20/30/45% Ability Power bonus stacking magic damage.",1,Active,On Cast,—,Self,Laser Shot,Current,default,unknown,1,1,—,—,—,Enemies in path,Attack,Damage,110/165/250% AP,—,—,Once,—
 ,,,,,,,,,,,,,,,,Self,,,,—,,—,,Enemies in path,Buff,On-Hit Damage,20/30/45% AP,Stacking,stacking,Once,Permanent
 Maokai,1 Gold,Tank,Shadow Isles,,Bastion,,1,Mana-Leeching Healing Tank,"Sap Magic: Passive: Whenever an enemy casts an Ability, gain 5 Mana. Active: On his next attack, heal for 220/260/300% Ability Power.",0.1,Passive,On Enemy Cast,—,Self,Cast,Self,—,—,1,—,—,—,—,Same to Aim Target,Buff,Mana,5,—,—,Once,—
@@ -135,7 +135,7 @@ Soraka,2 Gold,Support,Targon,,Invoker,,4,Star-Fall Healer,"Heal the lowest healt
 Taric,3 Gold,Tank,Targon,,Bastion,Sorcerer,1,Damage-Redirecting Shield Tank,Gain 500/580/680% Ability Power Shield for 4 seconds. It redirects 50% of the damage received by adjacent allies.,1,Active,On Cast,—,Self,Cast,Self,—,—,1,—,—,—,—,Same to Aim Target,Buff,Shield,500/580/680% AP,—,—,Once,4
 ,,,,,,,,,,,,,,,,,,,,,,,,Adjacent allies (left & right),Buff,Damage Redirect,50%,—,—,Once,4
 Aphelios,4 Gold,Carry,Targon,,Deadeye,,4,Chakram-Stacking Moon Carry,"Fire a moon blast at the largest group of enemies that deals 240/240/750% Attack Damage physical damage to enemies within 2 hexes. For 7 seconds, equip 3 Chakram, plus 1 more for each enemy hit by the blast. Attacks deal 7/7/15% Attack Damage bonus physical damage for each Chakram equipped. Aphelios heals for 75% of damage dealt by Chakrams (increased by Ability Power).",1,Active,On Cast,—,Self,Homing Projectile,Clustered,default,default,4,1,—,—,—,—,—,—,—,—,—,—,—
-,,,,,,,,,,2,Active,On Projectile Hit,—,Step 1 Projectile,Circle AOE,Clustered,centred,Circle 2 hex,4,1,—,—,—,Enemies in area,Attack,Damage,240/240/750% AD,—,—,Once,—
+,,,,,,,,,,2,Active,On Projectile Hit,—,Step 1 Projectile,Circle AOE,Hex That Projectile Hit,centred,Circle 2 hex,4,1,—,—,—,Enemies in area,Attack,Damage,240/240/750% AD,—,—,Once,—
 ,,,,,,,,,,3,Active,After Step 2,—,Self,Cast,Self,—,—,4,—,—,—,—,Same to Aim Target,Buff,Chakram,3,Per Target Hit,+1 per enemy hit by the blast,Once,7
 ,,,,,,,,,,0.1,Passive,On Attack,If Empowered,Self,Bonus on AA,Current,—,—,4,1,—,—,—,Same to Aim Target,Attack,Damage,7/7/15% AD,Per Stack,per Chakram equipped,Once,—
 ,,,,,,,,,,,,,,,,,,,,,,,,Self,Buff,Omnivamp,75%,Derived,of Chakram damage only; increased by AP,Once,—
@@ -163,12 +163,12 @@ Tristana,1 Gold,Carry,Yordle,,Gunner,,4,Explode-on-Hit Gunner,"Gain 70% Ability 
 ,,,,,,,,,,3,Active,On 10th Attack,If 4-Star,Self,Bonus on AA,Current,—,—,4,1,—,—,—,Same to Aim Target,Attack,Damage,100% AD,—,—,Once,—
 ,,,,,,,,,,,,,,,Circle AOE,Clustered,centred,Circle 1 hex,,,,,,Enemies in area,Attack,Damage,50%,Derived,of the 10th attack's damage,Once,—
 Teemo,2 Gold,Carry,Yordle,,Strategist,Multicaster,4,Wounding Mushroom Mage,"Hurl an explosive heat-seeking mushroom at the current target. When it detonates, enemies within 1 hex are Wounded and dealt 260/390/585% Ability Power magic damage over 3 seconds. 4-Star Upgrade: Increase the explosion radius by 1 hex. Wound: Reduce healing received by 33%",1,Active,On Cast,—,Self,Homing Projectile,Current,default,default,4,1,—,—,—,—,—,—,—,—,—,—,—
-,,,,,,,,,,2,Active,On Projectile Hit,If not 4-Star,Step 1 Projectile,Circle AOE,Current,centred,Circle 1 hex,4,1,—,—,—,Enemies in area,Attack,Damage,260/390/585% AP,—,—,Every 0.5s,3
+,,,,,,,,,,2,Active,On Projectile Hit,If not 4-Star,Step 1 Projectile,Circle AOE,Hex That Projectile Hit,centred,Circle 1 hex,4,1,—,—,—,Enemies in area,Attack,Damage,260/390/585% AP,—,—,Every 0.5s,3
 ,,,,,,,,,,,,,,,,,,,,,,,,Enemies in area,Status,Wound,—,—,—,Once,3
 ,,,,,,,,,,,,,If 4-Star,,,,,Circle 2 hex,,,,,,Enemies in area,Attack,Damage,260/390/585% AP,—,—,Every 0.5s,3
 ,,,,,,,,,,,,,,,,,,,,,,,,Enemies in area,Status,Wound,—,—,—,Once,3
 Heimerdinger,5 Gold,Support,Technogen,Yordle,,,4,Grenade Stun Artillery,"Hurl a grenade towards the largest group of enemies, dealing 150/225/3141% Ability Power magic damage to enemies in a large area and Stunning them for 1.5/2/15 seconds.",1,Active,On Cast,—,Self,Homing Projectile,Clustered,default,default,4,1,—,—,—,—,—,—,—,—,—,—,—
-,,,,,,,,,,2,Active,On Projectile Hit,—,Step 1 Projectile,Circle AOE,Clustered,centred,Circle 2 hex,4,1,—,—,—,Enemies in area,Attack,Damage,150/225/3141% AP,—,—,Once,—
+,,,,,,,,,,2,Active,On Projectile Hit,—,Step 1 Projectile,Circle AOE,Hex That Projectile Hit,centred,Circle 2 hex,4,1,—,—,—,Enemies in area,Attack,Damage,150/225/3141% AP,—,—,Once,—
 ,,,,,,,,,,,,,,,,,,,,,,,,Enemies in area,Status,Stun,—,—,—,Once,1.5/2/15
 Nilah,4 Gold,Carry,Bilgewater,,Vanquisher,,2,Cone-Auto Duelist,"Formless Blade: Passive: Attacks strike in a cone, dealing 55/55/100% Attack Damage physical damage to up to 2 additional enemies. Every 3rd attack strikes in a line for 170/175/375% Attack Damage physical damage and grants 18/18/40% stacking Attack Speed.Active: Gain 250/375/700% Ability Power Shield for 3 seconds and dash to a safe location.",0.1,Passive,On Attack,—,Self,Cone AOE,Current,default,unknown,2,1,—,—,—,Additional enemies in cone,Attack,Damage,55/55/100% AD,—,—,Once,—
 ,,,,,,,,,,,,On 3rd Attack,,,Laser Shot,,,,,,,,,Enemies in path,Attack,Damage,170/175/375% AD,—,—,Once,—
@@ -207,7 +207,7 @@ Zeri,4 Gold,Carry,Zaun,,Gunner,,4,Chain-Lightning Executioner,"Passive: Execute 
 ,,,,,,,,,,0.1,Passive,On Attack,If Empowered,Self,Bounce Homing Projectile,Current,default,default,4,3/3/5,—,Consecutive,—,Aimed enemy,Attack,Damage,45/45/100% AD,—,—,Once,—
 ,,,,,,,,,,0.2,Passive,On Attack,—,Self,Bonus on AA,Current,—,—,4,1,—,—,—,Same to Aim Target,Status,Execute,< 8% max HP (increased by AP),—,—,Once,—
 Silco,4 Gold,Support,Zaun,,Sorcerer,,4,Chem-Zone Sorcerer,"Undercity Tactics: Throw a vial at the nearest surrounded enemy, covering nearby hexes in chemicals for 6 seconds. Deal 65/100/400% Ability Power magic damage per second to chemical-affected enemies, and heal affected allies for 20/25/120% Ability Power per second. When possible, target unaffected groups.",1,Active,On Cast,—,Self,Homing Projectile,Clustered,default,default,4,1,—,—,—,—,—,—,—,—,—,—,—
-,,,,,,,,,,2,Active,On Projectile Hit,—,Step 1 Projectile,Zone AOE,Clustered,centred,Circle 2 hex,4,1,—,—,—,Enemies in area,Attack,Damage,65/100/400% AP,—,—,Every 1s,6
+,,,,,,,,,,2,Active,On Projectile Hit,—,Step 1 Projectile,Zone AOE,Hex That Projectile Hit,centred,Circle 2 hex,4,1,—,—,—,Enemies in area,Attack,Damage,65/100/400% AP,—,—,Every 1s,6
 ,,,,,,,,,,,,,,,,,,,,,,,,Allies in area,Buff,Heal,20/25/120% AP,—,—,Every 1s,6
 Graves,1 Gold,Carry,Bilgewater,,Rogue,Gunner,1,Smoke-Cloud Chiller,"Smoke Grenade: Launch a smoke grenade toward the current target. It explodes on impact dealing physical damage to adjacent enemies, leaving behind a smoke cloud that Chills for a few seconds. Chill: Reduce Attack Speed by 30%. Damage AD: 200% / 200% / 205%. Damage AP: 30% / 45% / 60%.Damage: AD + AP.Duration: 3 / 3.5 / 4 seconds.",1,Active,On Cast,—,Self,Homing Projectile,Current,default,default,1,1,—,—,—,—,—,—,—,—,—,—,—
 ,,,,,,,,,,2,Active,On Projectile Hit,—,Step 1 Projectile,Circle AOE,Step 1 Aim target,centred,Circle 1 hex,1,1,—,—,—,Enemies in area,Attack,Damage,200/200/205% AD + 30/45/60% AP,—,—,Once,—

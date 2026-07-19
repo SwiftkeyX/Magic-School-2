@@ -2,6 +2,7 @@ Effect Category,Effect Detail,Meaning
 Attack,Damage,Deal damage to the recipient.
 ,True Damage,Damage that ignores both Armor and Magic Resist.
 Status,Stun,Recipient cannot act for the duration.
+Status,Weapon Stance,
 ,Wound,Reduce the healing the recipient receives.
 ,Slow,Reduce the recipient's speed. (taxonomy — not used by a Set 9 unit here)
 ,Silence,Prevent the recipient from casting. (taxonomy — not used by a Set 9 unit here)
@@ -51,3 +52,6 @@ Debuff,DEF,Shred the recipient's Defense (armor). TFT calls this 'Sunder' (Vi) o
 Movement,(reposition),A movement / setup step with no direct combat effect.
 ,(setup),"A step with no payload of its own — it only sets up the step that follows. Katarina throwing her daggers before she blinks; a projectile that flies so its burst can land. Was '(setup / daggers)', which put one champion's ability in the vocabulary."
 Summon,(summon),"Spawns a clone/summon that acts as a SECOND action source for the following step - its own action is centred on the clone, not on Self."
+Buff,Move Speed,Movement speed. Yone's stacks for the rest of combat.
+Buff,Gold,
+Buff,Item,
