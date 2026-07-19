@@ -1,0 +1,15 @@
+Action Source,Kind,What it means
+Self,the champion,The champion itself performs the action — the default.
+Summon,a summoned unit,"The unit this champion summoned acts. Use this when the champion has ONE summon, so there is nothing to disambiguate."
+Step N Summon,a summoned unit (pattern),"NOT USED DIRECTLY — the pattern. When a champion has MORE THAN ONE summon, name the step that created the one acting, exactly as 'Step N Projectile' does. Store the literal ('Step 1 Summon')."
+Step 1 Summon,a summoned unit,The summon created by step 1 (Yorick's ghoul horde).
+Step 3 Summon,a summoned unit,The summon created by step 3 (Yorick's BIG ghoul).
+Step 1 Projectile,a projectile in flight,"The projectile step 1 fired — its impact is what acts (a burst, an on-hit AOE)."
+Step 2 Projectile,a projectile in flight,The projectile step 2 fired.
+Step 1 Spawn,a spawned hitbox,"The thing step 1 spawned, where that thing is a HITBOX rather than a unit — Vex's shadow arrives, then detonates."
+Ally,another unit,An allied champion performs it (Sejuani rides an ally).
+Knocked-back enemy,another unit,The enemy a previous step knocked back — its flying body is the hitbox (K'Sante).
+Delayed Blast,a status on the victim,"The bomb a previous step stuck to the victim goes off. It names the EFFECT TYPE (Status / Delayed Blast), not one champion's card — the victim does not explode, the bomb does."
+,,
+How to read this tab,,
+"Action Source names the thing that ACTS in a step, which is not always the champion. It became a validated vocabulary in round 14 because it had drifted into two kinds of value: structural keys (Self, Summon, Step N Projectile) alongside champion pet names (Dreadway, Child of the Star, Shadow). The pet names were not sloppiness — plain ""Summon"" cannot say WHICH summon acts when a champion has two, which is what Yorick and Gangplank both hit. The fix keeps that distinction but spells it the way projectiles already did: name the STEP that produced the actor.",,

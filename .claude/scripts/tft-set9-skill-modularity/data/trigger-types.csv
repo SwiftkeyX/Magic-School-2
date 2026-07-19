@@ -3,6 +3,8 @@ After Step 1,
 After Step 2,
 After Step 3,
 Game Start,
+Every N seconds,"PATTERN, not used directly — a recurring action. Store the literal ('Every 3/3/3 seconds'). A recurrence is a WHEN, so it is a Trigger; Condition means only-if and cannot express a schedule."
+Every 3/3/3 seconds,The action repeats on a 3-second timer for the whole fight (Illaoi's tentacles).
 On 10th Attack,
 On 3rd Attack,
 On 3rd Cast,
