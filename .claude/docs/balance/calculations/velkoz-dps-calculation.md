@@ -38,11 +38,11 @@ This document provides the step-by-step mathematical calculations for Vel'Koz's 
 | :--- | :--- | :--- | :---: | :---: | :---: |
 | ATC | `ceil(Max Mana / 10)` | `ceil(60 / 10)` | 6 | 6 | 6 |
 | Cycle Duration | `ATC / AS + Lockout` | `6 / 0.70 + 0.8` | 9.710s | 9.710s | 9.710s |
-| Auto Attack DPS | `(ATC × AD × Crit) / Cycle` | `(6 × [AD] × 1.10) / 9.710s` | 24.7 | 37.1 | 55.6 |
+| Auto Attack DPS | `(ATC × AD × Crit) / Cycle` | `(6 × [AD] × 1.10) / 9.710s` | 27.2 | 40.8 | 61.2 |
 | Spell Base (1 Target) | `Spell` | `[220, 330, 550]` | 220.0 | 330.0 | 550.0 |
 | Spell Damage | `Spell Base × Splits × Crit` | `[220.0, 330.0, 550.0] × 2.00 × 1.10` (splits perpendicularly on first hit) | 484.0 | 726.0 | 1210.0 |
-| Spell DPS | `Spell Damage / Cycle` | `[Spell Damage] / 9.710s` | 45.3 | 68.0 | 113.3 |
-| **Total DPS** | `Auto DPS + Spell DPS` | `Auto DPS + Spell DPS` | **70.0** | **105.0** | **168.9** |
+| Spell DPS | `Spell Damage / Cycle` | `[Spell Damage] / 9.710s` | 49.8 | 74.8 | 124.6 |
+| **Total DPS** | `Auto DPS + Spell DPS` | `Auto DPS + Spell DPS` | **77.0** | **115.6** | **185.8** |
 
 ---
 
@@ -73,7 +73,7 @@ This document provides the step-by-step mathematical calculations for Vel'Koz's 
 | :--- | :--- | :--- | :---: | :---: | :---: |
 | ATC | `ceil((Max Mana - 10) / 10)` | `ceil((60 - 10) / 10)` | 5 | 5 | 5 |
 | Cycle Duration | `ATC / AS + Lockout` | `5 / 0.70 + 0.8` (Note: cycle duration is 8.290s) | 8.290s | 8.290s | 8.290s |
-| Auto Attack DPS | `(ATC × AD_equipped × Crit) / Cycle` | `(5 × [Equipped AD] × 1.15 Crit) / 8.290s` | 30.9 | 46.4 | 69.5 |
+| Auto Attack DPS | `(ATC × AD_equipped × Crit) / Cycle` | `(5 × [Equipped AD] × 1.28 Crit) / 8.290s` | 30.9 | 46.4 | 69.5 |
 | Spell Base (1 Target) | `Spell` | `[220, 330, 550]` | 220.0 | 330.0 | 550.0 |
 | Spell Damage | `Spell Base × Splits × AP × Crit` | `[220, 330, 550] × 2.00 × 2.00 × 1.28` (Blue Buff + JG + Rabadon) | 1126.4 | 1689.6 | 2816.0 |
 | Spell DPS | `Spell Damage / Cycle` | `[Spell Damage] / 8.290s` | 135.9 | 203.8 | 339.7 |

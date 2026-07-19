@@ -38,11 +38,11 @@ This document provides the step-by-step mathematical calculations for Darius's b
 | :--- | :--- | :--- | :---: | :---: | :---: |
 | ATC | `ceil(Max Mana / 10)` | `ceil(90 / 10)` | 9 | 9 | 9 |
 | Cycle Duration | `ATC / AS + Lockout` | `9 / 0.70 + 1.0` | 15.710s | 15.710s | 15.710s |
-| Auto Attack DPS | `(ATC × AD × Crit) / Cycle` | `(9 × [AD] × 1.10) / 15.710s` | 37.2 | 56.1 | 83.6 |
+| Auto Attack DPS | `(ATC × AD × Crit) / Cycle` | `(9 × [AD] × 1.10) / 15.710s` | 41.0 | 61.8 | 92.0 |
 | Spell Base (1 Target) | `AD × 3.50 + Flat` | `[65, 98, 146] × 3.50 + [55, 80, 110]` | 282.5 | 423.0 | 621.0 |
-| Spell Damage | `Spell Base × Reset Mult` | `[282.5, 423.0, 621.0] × 1.90` (Average 1 reset/2 casts) | 536.8 | 803.7 | 1179.9 |
-| Spell DPS | `Spell Damage / Cycle` | `[Spell Damage] / 15.710s` | 34.2 | 51.2 | 75.1 |
-| **Total DPS** | `Auto DPS + Spell DPS` | `Auto DPS + Spell DPS` | **71.4** | **107.3** | **158.7** |
+| Spell Damage | `Spell Base × Reset Mult × Crit` | `[282.5, 423.0, 621.0] × 1.90 × 1.10` (Average 1 reset/2 casts) | 590.5 | 884.1 | 1297.9 |
+| Spell DPS | `Spell Damage / Cycle` | `[Spell Damage] / 15.710s` | 37.6 | 56.3 | 82.6 |
+| **Total DPS** | `Auto DPS + Spell DPS` | `Auto DPS + Spell DPS` | **78.6** | **118.0** | **174.6** |
 
 ---
 
@@ -73,11 +73,11 @@ This document provides the step-by-step mathematical calculations for Darius's b
 | :--- | :--- | :--- | :---: | :---: | :---: |
 | ATC | `ceil(Max Mana / 10)` | `ceil(90 / 10)` | 9 | 9 | 9 |
 | Cycle Duration | `ATC / AS + Lockout` | `9 / 0.88 + 1.0` (Note: cycle duration is 12.500s) | 12.500s | 12.500s | 12.500s |
-| Auto Attack DPS | `(ATC × AD_equipped × Crit) / Cycle` | `(9 × [Equipped AD] × 1.35 Crit) / 12.500s` | 118.7 | 177.3 | 264.4 |
-| Spell Base (1 Target) | `AD × 3.50 + Flat` | `[114, 172, 256] × 3.50 + [55, 80, 110]` | 282.5 | 423.0 | 621.0 |
-| Spell Damage | `((AD_equipped × 3.50) + (Spell Base × 1.50)) × 1.90 × Crit` | `(([114, 172, 256] × 3.50) + ([55, 80, 110] × 1.50)) × 1.90 × 1.24` | 1291.3 | 1937.8 | 2889.9 |
-| Spell DPS | `Spell Damage / Cycle` | `[Spell Damage] / 12.500s` | 103.3 | 155.0 | 231.2 |
-| **Total DPS** | `Auto DPS + Spell DPS` | `Auto DPS + Spell DPS` | **222.0** | **332.3** | **495.6** |
+| Auto Attack DPS | `(ATC × AD_equipped × Crit) / Cycle` | `(9 × [Equipped AD] × 1.24 Crit) / 12.500s` | 101.8 | 153.6 | 228.6 |
+| Spell Base (1 Target) | `AD_equipped × 3.50 + Flat × AP` | `[114, 172, 256] × 3.50 + [55, 80, 110] × 1.50` | 481.5 | 722.0 | 1061.0 |
+| Spell Damage | `Spell Base × Reset Mult × Crit` | `[481.5, 722.0, 1061.0] × 1.90 × 1.24` | 1134.4 | 1701.0 | 2499.7 |
+| Spell DPS | `Spell Damage / Cycle` | `[Spell Damage] / 12.500s` | 90.8 | 136.1 | 200.0 |
+| **Total DPS** | `Auto DPS + Spell DPS` | `Auto DPS + Spell DPS` | **192.6** | **289.7** | **428.6** |
 
 ---
 

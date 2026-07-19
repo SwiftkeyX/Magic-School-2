@@ -15,7 +15,7 @@ This document provides the step-by-step mathematical calculations for Azir's bas
 | Stat | 1★ | 2★ | 3★ |
 | :--- | :---: | :---: | :---: |
 | **Base AD** | 30 | 45 | 68 |
-| **Base Spell Damage** | 95 | 140 | 1000 |
+| **Base Spell Damage** | 110 | 160 | 500 |
 
 **Fixed stats** *(do not scale with star level)*
 | Stat | Value |
@@ -26,7 +26,7 @@ This document provides the step-by-step mathematical calculations for Azir's bas
 
 ### 3. Skill Description & Mechanics
 *   **Skill**: Passive: Every 3rd attack, Sand Soldiers deal magic damage. Active: Summons a Sand Soldier.
-*   **Mechanical Timing & Assumptions**: spell_base represents flat soldier magic damage ([95, 140, 1000]). Summons Sand Soldiers. Overrides match the time-averaged soldier DPS.
+*   **Mechanical Timing & Assumptions**: spell_base represents flat soldier magic damage ([110, 160, 500]). Summons Sand Soldiers. Overrides match the time-averaged soldier DPS.
 
 ---
 
@@ -38,11 +38,11 @@ This document provides the step-by-step mathematical calculations for Azir's bas
 | :--- | :--- | :--- | :---: | :---: | :---: |
 | ATC | `ceil(Max Mana / 10)` | `ceil(50 / 10)` | 5 | 5 | 5 |
 | Cycle Duration | `ATC / AS + Lockout` | `5 / 0.75 + 0.8` | 7.730s | 7.730s | 7.730s |
-| Auto Attack DPS | `(ATC × AD × Crit) / Cycle` | `(5 × [AD] × 1.10) / 7.730s` | 19.4 | 29.1 | 44.0 |
-| Spell Base (1 Target) | `Spell` | `[95, 140, 1000]` | 95.0 | 140.0 | 1000.0 |
-| Spell Damage | `Spell Base × Target Density` (Sand Soldiers) | `[95.0, 140.0, 1000.0] × 3.0` | 285.0 | 420.0 | 3000.0 |
-| Spell DPS | `Spell Damage / Cycle` | `[Spell Damage] / 7.730s` | 56.4 | 83.1 | 640.4 |
-| **Total DPS** | `Auto DPS + Spell DPS` | `Auto DPS + Spell DPS` | **75.8** | **112.2** | **684.4** |
+| Auto Attack DPS | `(ATC × AD × Crit) / Cycle` | `(5 × [AD] × 1.10) / 7.730s` | 21.3 | 32.0 | 48.4 |
+| Spell Base (1 Target) | `Spell` | `[110, 160, 500]` | 110.0 | 160.0 | 500.0 |
+| Spell Damage | `Time-averaged Soldier Passive + Active Casts × Crit` | `[436.0, 642.4, 4950.0] × [1.10/95] × 110` (Ramped avg 1.68 active soldiers) | 555.4 | 807.8 | 2524.5 |
+| Spell DPS | `Spell Damage / Cycle` | `[Spell Damage] / 7.730s` | 71.8 | 104.5 | 326.6 |
+| **Total DPS** | `Auto DPS + Spell DPS` | `Auto DPS + Spell DPS` | **93.1** | **136.5** | **375.0** |
 
 ---
 
@@ -73,11 +73,11 @@ This document provides the step-by-step mathematical calculations for Azir's bas
 | :--- | :--- | :--- | :---: | :---: | :---: |
 | ATC | `ceil(Max Mana / 10)` | `ceil(50 / 10)` | 5 | 5 | 5 |
 | Cycle Duration | `ATC / AS + Lockout` | `5 / 1.10 + 0.8` (Note: cycle duration is 5.270s) | 5.270s | 5.270s | 5.270s |
-| Auto Attack DPS | `(ATC × AD_equipped × Crit) / Cycle` | `(5 × [Equipped AD] × 1.15 Crit) / 5.270s` | 36.4 | 54.6 | 82.6 |
-| Spell Base (1 Target) | `Spell` | `[95, 140, 1000]` | 95.0 | 140.0 | 1000.0 |
-| Spell Damage | `Spell Base (Equipped Average) × AP × Crit` | `[609.2, 895.5, 6800.0] × 1.90 × 1.28` | 1481.6 | 2177.8 | 16527.4 |
-| Spell DPS | `Spell Damage / Cycle` | `[Spell Damage] / 5.270s` | 281.1 | 416.7 | 2844.7 |
-| **Total DPS** | `Auto DPS + Spell DPS` | `Auto DPS + Spell DPS` | **317.5** | **471.3** | **2927.3** |
+| Auto Attack DPS | `(ATC × AD_equipped × Crit) / Cycle` | `(5 × [Equipped AD] × 1.28 Crit) / 5.270s` | 36.4 | 54.6 | 82.6 |
+| Spell Base (1 Target) | `Spell` | `[110, 160, 500]` | 110.0 | 160.0 | 500.0 |
+| Spell Damage | `Time-Averaged Base (Equipped) × AP × Crit` | `[705.1, 1024.0, 3400.0] × 1.90 × 1.28` (Ramped avg 2.35 active soldiers) | 1714.8 | 2490.4 | 8268.8 |
+| Spell DPS | `Spell Damage / Cycle` | `[Spell Damage] / 5.270s` | 325.4 | 472.6 | 1569.0 |
+| **Total DPS** | `Auto DPS + Spell DPS` | `Auto DPS + Spell DPS` | **361.8** | **527.2** | **1651.6** |
 
 ---
 

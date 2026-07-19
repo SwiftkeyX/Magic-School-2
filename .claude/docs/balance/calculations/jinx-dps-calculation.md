@@ -40,11 +40,11 @@ This document provides the step-by-step mathematical calculations for Jinx's bas
 | :--- | :--- | :--- | :---: | :---: | :---: |
 | ATC | `ceil(Max Mana / 10)` | `ceil(70 / 10)` | 7 | 7 | 7 |
 | Cycle Duration | `ATC / AS + Lockout` | `7 / 0.75 + 1.0` | 10.333s | 10.333s | 10.333s |
-| Auto Attack DPS | `(ATC × AD) / Cycle` | `(7 × [50, 75, 113]) / 10.333s` | 33.9 | 50.9 | 76.6 |
+| Auto Attack DPS | `(ATC × AD × Crit) / Cycle` | `(7 × [50, 75, 113] × 1.10) / 10.333s` | 37.3 | 55.9 | 84.2 |
 | Spell Base (1 Rocket) | `AD × Spell AD Ratio + Spell Flat` | `[50, 75, 113] × [1.50, 1.55, 1.60] + [15, 20, 35]` | 90.0 | 136.25 | 215.8 |
-| Spell Damage (5 Rockets) | `Spell Base × 5` | `[90.0, 136.25, 215.8] × 5` | 450.0 | 681.3 | 1079.0 |
-| Spell DPS | `Spell Damage / Cycle` | `[450.0, 681.3, 1079.0] / 10.333s` | 43.5 | 65.9 | 104.4 |
-| **Total DPS** | `Auto DPS + Spell DPS` | `Auto DPS + Spell DPS` | **77.4** | **116.8** | **181.0** |
+| Spell Damage (5 Rockets) | `Spell Base × 5 × Crit` | `[90.0, 136.25, 215.8] × 5 × 1.10` | 495.0 | 749.4 | 1186.9 |
+| Spell DPS | `Spell Damage / Cycle` | `[495.0, 749.4, 1186.9] / 10.333s` | 47.9 | 72.5 | 114.9 |
+| **Total DPS** | `Auto DPS + Spell DPS` | `Auto DPS + Spell DPS` | **85.2** | **128.4** | **199.1** |
 
 ---
 

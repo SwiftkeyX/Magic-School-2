@@ -38,11 +38,11 @@ This document provides the step-by-step mathematical calculations for Karma's ba
 | :--- | :--- | :--- | :---: | :---: | :---: |
 | ATC | `ceil(Max Mana / 10)` | `ceil(50 / 10)` | 5 | 5 | 5 |
 | Cycle Duration | `ATC / AS + Lockout` | `5 / 0.70 + 0.8` | 8.290s | 8.290s | 8.290s |
-| Auto Attack DPS | `(ATC × AD × Crit) / Cycle` | `(5 × [AD] × 1.10) / 8.290s` | 27.1 | 41.0 | 60.9 |
+| Auto Attack DPS | `(ATC × AD × Crit) / Cycle` | `(5 × [AD] × 1.10) / 8.290s` | 29.9 | 45.1 | 67.0 |
 | Spell Base (1 Target) | `Spell` | `[170, 255, 382.5]` | 170.0 | 255.0 | 382.5 |
 | Spell Damage | `Spell Base × Avg Bursts × Crit` | `[170.0, 255.0, 382.5] × 2.22 × 1.10` (detonates 2.22 bursts average) | 415.1 | 623.7 | 935.6 |
-| Spell DPS | `Spell Damage / Cycle` | `[Spell Damage] / 8.290s` | 45.5 | 68.3 | 102.5 |
-| **Total DPS** | `Auto DPS + Spell DPS` | `Auto DPS + Spell DPS` | **72.7** | **109.3** | **163.4** |
+| Spell DPS | `Spell Damage / Cycle` | `[Spell Damage] / 8.290s` | 50.1 | 75.1 | 112.7 |
+| **Total DPS** | `Auto DPS + Spell DPS` | `Auto DPS + Spell DPS` | **80.0** | **120.2** | **179.7** |
 
 ---
 
@@ -62,7 +62,7 @@ This document provides the step-by-step mathematical calculations for Karma's ba
 | AD Mult | `1.00 + [Item AD Percent]` | `1.00 + [AD buffs]` | 1.00× | 1.00× | 1.00× |
 | Equipped AD | `round(AD_base × AD_Mult)` | `round([AD Array] × 1.00)` | 45 | 68 | 101 |
 | AS Equipped | `AS_base × (1.00 + AS_bonus)` | `AS_average` | 0.70 | 0.70 | 0.70 |
-| AP Total | `AP_base + AP_items` | `100 + [AP buffs]` | 200 | 200 | 200 |
+| AP Total | `AP_base + AP_items` | `100 + [AP buffs]` | 215 | 215 | 215 |
 | Crit Chance | `Crit_base + Crit_items` | `25% + [Crit buffs]` | 40% | 40% | 40% |
 | Crit Damage | `CritDmg_base + CritDmg_items` | `140% + [CritDmg buffs]` | 170% | 170% | 170% |
 | Crit Multiplier | `1 + Crit Chance × (Crit Damage − 1)` | `1 + 0.40 × 0.70` | 1.28 | 1.28 | 1.28 |
@@ -73,11 +73,11 @@ This document provides the step-by-step mathematical calculations for Karma's ba
 | :--- | :--- | :--- | :---: | :---: | :---: |
 | ATC | `ceil((Max Mana - 10) / 10)` | `ceil((50 - 10) / 10)` | 4 | 4 | 4 |
 | Cycle Duration | `ATC / AS + Lockout` | `4 / 0.70 + 0.8` (Note: cycle duration is 6.860s) | 6.860s | 6.860s | 6.860s |
-| Auto Attack DPS | `(ATC × AD_equipped × Crit) / Cycle` | `(4 × [Equipped AD] × 1.15 Crit) / 6.860s` | 33.6 | 50.4 | 75.6 |
+| Auto Attack DPS | `(ATC × AD_equipped × Crit) / Cycle` | `(4 × [Equipped AD] × 1.28 Crit) / 6.860s` | 33.6 | 50.4 | 75.6 |
 | Spell Base (1 Target) | `Spell` | `[170, 255, 382.5]` | 170.0 | 255.0 | 382.5 |
 | Spell Damage | `Spell Base × Avg Bursts × AP × Crit` | `[170, 255, 382.5] × 2.22 × 2.15 × 1.28` (Blue Buff + JG + Archangel) | 1039.2 | 1558.8 | 2338.2 |
-| Spell DPS | `Spell Damage / Cycle` | `[Spell Damage] / 6.860s` | 140.7 | 211.1 | 316.6 |
-| **Total DPS** | `Auto DPS + Spell DPS` | `Auto DPS + Spell DPS` | **174.3** | **261.5** | **392.2** |
+| Spell DPS | `Spell Damage / Cycle` | `[Spell Damage] / 6.860s` | 151.5 | 227.1 | 340.7 |
+| **Total DPS** | `Auto DPS + Spell DPS` | `Auto DPS + Spell DPS` | **185.0** | **277.5** | **416.3** |
 
 ---
 

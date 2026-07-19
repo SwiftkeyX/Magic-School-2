@@ -6,6 +6,9 @@ Putting baseline and itemized calculations in a single document guarantees that 
 
 ---
 
+> [!NOTE]
+> **Mitigation & True Damage Note**: Raw DPS values assume targets have **0 Armor / 0 Magic Resist**. In actual gameplay, champions who deal true damage (**Kalista**, **Rek'Sai**) or possess built-in armor shred/reduction (like **Samira** at Tier 1) will maintain significantly higher effective relative DPS against armored target dummies than shown on paper. A future pass will test these units against standardized high-defense targets.
+
 ### 📊 Master DPS Summary Tables
 
 ### 📘 Table 1: Baseline (Unequipped) DPS Summary
@@ -13,30 +16,30 @@ Putting baseline and itemized calculations in a single document guarantees that 
 
 | Champion | Star | Base AD | AS | Auto Attack DPS | Spell DPS | Total DPS |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Akshan** (Single Target) | 1★<br>2★<br>3★ | 60<br>90<br>135 | 0.75 | 37.4<br>56.0<br>84.1 | 32.3<br>50.1<br>77.7 | **69.6**<br>**106.1**<br>**161.7** |
-| **Darius** (1 Reset / 2 Casts Avg) | 1★<br>2★<br>3★ | 65<br>98<br>146 | 0.70 | 37.2<br>56.1<br>83.6 | 34.2<br>51.2<br>75.1 | **71.4**<br>**107.3**<br>**158.7** <br>*(1 Target Baseline: **62.6** / **94.2** / **139.6**)* |
-| **Ekko** (Single Target) | 1★<br>2★<br>3★ | 50<br>75<br>113 | 0.80 | 35.5<br>53.2<br>80.1 | 36.2<br>53.9<br>80.9 | **71.6**<br>**107.1**<br>**161.0** |
-| **Garen** (1 Target Baseline) | 1★<br>2★<br>3★ | 70<br>105<br>158 | 0.75 | 38.2<br>57.3<br>86.2 | 30.5<br>47.0<br>73.2 | **68.7**<br>**104.2**<br>**159.4** <br>*(2 Target Avg: **99.3** / **151.2** / **232.6**)* |
-| **Kalista** (Single Target, 12 stack Rend) | 1★<br>2★<br>3★ | 45<br>68<br>101 | 0.85 | 33.8<br>51.0<br>75.8 | 27.0<br>40.5<br>67.5 | **60.8**<br>**91.5**<br>**143.2** |
-| **Karma** (1.33 Targets Avg) | 1★<br>2★<br>3★ | 45<br>68<br>101 | 0.70 | 27.1<br>41.0<br>60.9 | 45.5<br>68.3<br>102.5 | **72.7**<br>**109.3**<br>**163.4** <br>*(1 Target Baseline: **61.3** / **92.4** / **138.0**)* |
-| **Katarina** (1.5 Targets / 4.5 hits Avg) | 1★<br>2★<br>3★ | 50<br>75<br>113 | 0.75 | 32.6<br>48.9<br>73.7 | 53.2<br>80.7<br>128.3 | **85.8**<br>**129.6**<br>**202.0** <br>*(1 Target Baseline: **70.4** / **105.6** / **158.7**)* |
-| **Rek'Sai** (Target > 66% HP) | 1★<br>2★<br>3★ | 60<br>90<br>135 | 0.75 | 41.9<br>62.8<br>94.2 | 25.6<br>38.5<br>57.7 | **67.5**<br>**101.2**<br>**151.9** |
-| **Vel'Koz** (2 Targets Avg) | 1★<br>2★<br>3★ | 40<br>60<br>90 | 0.70 | 24.7<br>37.1<br>55.6 | 45.3<br>67.9<br>113.3 | **70.0**<br>**105.0**<br>**168.9** <br>*(1 Target Baseline: **49.1** / **73.6** / **110.4**)* |
+| **Akshan** (Single Target) | 1★<br>2★<br>3★ | 60<br>90<br>135 | 0.75 | 41.1<br>61.6<br>92.5 | 35.5<br>55.1<br>85.5 | **76.6**<br>**116.7**<br>**177.9** |
+| **Darius** (1 Reset / 2 Casts Avg) | 1★<br>2★<br>3★ | 65<br>98<br>146 | 0.70 | 41.0<br>61.8<br>92.0 | 37.6<br>56.3<br>82.6 | **78.6**<br>**118.0**<br>**174.6** <br>*(1 Target Baseline: **60.8** / **91.5** / **135.2**)* |
+| **Ekko** (Single Target) | 1★<br>2★<br>3★ | 50<br>75<br>113 | 0.80 | 39.0<br>58.5<br>88.2 | 39.8<br>59.3<br>88.9 | **78.8**<br>**117.8**<br>**177.1** |
+| **Garen** (1 Target Baseline) | 1★<br>2★<br>3★ | 70<br>105<br>158 | 0.75 | 42.0<br>63.0<br>94.8 | 33.6<br>51.7<br>80.6 | **75.6**<br>**114.7**<br>**175.4** <br>*(2 Target Avg: **109.2** / **166.4** / **256.0**)* |
+| **Kalista** (Single Target, 12 stack Rend) | 1★<br>2★<br>3★ | 45<br>68<br>101 | 0.85 | 37.1<br>56.1<br>83.3 | 27.0<br>40.5<br>67.5 | **64.1**<br>**96.6**<br>**150.8** |
+| **Karma** (1.33 Targets Avg) | 1★<br>2★<br>3★ | 45<br>68<br>101 | 0.70 | 29.9<br>45.1<br>67.0 | 50.1<br>75.1<br>112.7 | **80.0**<br>**120.2**<br>**179.7** <br>*(1 Target Baseline: **67.6** / **101.6** / **151.7**)* |
+| **Katarina** (1.5 Targets / 4.5 hits Avg) | 1★<br>2★<br>3★ | 50<br>75<br>113 | 0.75 | 35.9<br>53.8<br>81.0 | 58.5<br>88.8<br>141.2 | **94.4**<br>**142.6**<br>**222.2** <br>*(1 Target Baseline: **74.9** / **113.0** / **175.1**)* |
+| **Rek'Sai** (Target > 66% HP) | 1★<br>2★<br>3★ | 60<br>90<br>135 | 0.75 | 46.0<br>69.1<br>103.6 | 25.6<br>38.5<br>57.7 | **71.6**<br>**107.6**<br>**161.3** |
+| **Vel'Koz** (2 Targets Avg) | 1★<br>2★<br>3★ | 40<br>60<br>90 | 0.70 | 27.2<br>40.8<br>61.2 | 49.8<br>74.8<br>124.6 | **77.0**<br>**115.6**<br>**185.8** <br>*(1 Target Baseline: **52.1** / **78.2** / **123.5**)* |
 
 ### ⚔️ Table 2: Well-Equipped (3-Item) DPS Summary
 *Consolidated comparison across 1★, 2★, and 3★ star levels with 3 core optimal items equipped. Shows time-averaged stats and DPS (no ramping slashes).*
 
 | Champion | Star | AD | AS | Auto Attack DPS | Spell DPS | Total DPS |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Akshan** (Single Target) | 1★<br>2★<br>3★ | 133<br>200<br>300 | 0.83 | 161.3<br>246.1<br>367.4 | 82.2<br>121.3<br>187.0 | **243.5**<br>**367.4**<br>**554.4** |
-| **Darius** (1 Reset / 2 Casts Avg) | 1★<br>2★<br>3★ | 133<br>200<br>300 | 0.88 | 118.7<br>177.3<br>264.4 | 103.3<br>155.0<br>231.2 | **222.0**<br>**332.3**<br>**495.6** |
-| **Ekko** (Single Target) | 1★<br>2★<br>3★ | 85<br>128<br>191 | 1.00 | 93.8<br>140.3<br>210.5 | 109.7<br>164.0<br>245.9 | **203.5**<br>**304.3**<br>**456.4** |
-| **Garen** (1 Target Typical) | 1★<br>2★<br>3★ | 119<br>179<br>268 | 0.94 | 97.4<br>146.3<br>219.0 | 97.4<br>146.3<br>219.0 | **194.8**<br>**292.6**<br>**438.0** |
-| **Kalista** (Single Target, 12 stack Rend) | 1★<br>2★<br>3★ | 45<br>68<br>101 | 2.02 | 102.7<br>154.1<br>245.7 | 135.5<br>203.3<br>324.2 | **238.2**<br>**357.4**<br>**569.9** |
-| **Karma** (1.33 Targets Avg) | 1★<br>2★<br>3★ | 45<br>68<br>101 | 0.70 | 33.6<br>50.4<br>75.6 | 140.7<br>211.1<br>316.6 | **174.3**<br>**261.5**<br>**392.2** |
-| **Katarina** (1.5 Targets / 4.5 hits Avg) | 1★<br>2★<br>3★ | 50<br>75<br>113 | 0.75 | 41.7<br>62.6<br>93.9 | 113.5<br>172.3<br>274.1 | **155.2**<br>**234.9**<br>**368.0** |
-| **Rek'Sai** (Target < 66% HP, Marked) | 1★<br>2★<br>3★ | 123<br>185<br>277 | 0.94 | 130.3<br>195.5<br>293.2 | 64.4<br>96.6<br>144.9 | **194.7**<br>**292.1**<br>**438.1** |
-| **Vel'Koz** (2 Targets Avg) | 1★<br>2★<br>3★ | 40<br>60<br>90 | 0.70 | 30.9<br>46.4<br>69.5 | 135.9<br>203.8<br>339.7 | **166.8**<br>**250.2**<br>**409.2** |
+| **Akshan** (Single Target) | 1★<br>2★<br>3★ | 133<br>199<br>298 | 0.83 | 161.3<br>241.3<br>361.4 | 82.1<br>125.1<br>190.7 | **243.4**<br>**366.5**<br>**552.2** |
+| **Darius** (1 Reset / 2 Casts Avg) | 1★<br>2★<br>3★ | 114<br>172<br>256 | 0.88 | 101.8<br>153.6<br>228.6 | 90.8<br>136.1<br>200.0 | **192.5**<br>**289.6**<br>**428.5** |
+| **Ekko** (Single Target) | 1★<br>2★<br>3★ | 65<br>98<br>147 | 1.00 | 71.7<br>108.1<br>162.2 | 109.7<br>163.5<br>245.3 | **181.5**<br>**271.7**<br>**407.5** |
+| **Garen** (1 Target Typical) | 1★<br>2★<br>3★ | 98<br>147<br>221 | 0.94 | 80.1<br>120.1<br>180.6 | 80.1<br>123.4<br>192.2 | **160.2**<br>**243.5**<br>**372.8** |
+| **Kalista** (Single Target, 12 stack Rend) | 1★<br>2★<br>3★ | 52<br>78<br>116 | 2.02 | 79.0<br>118.5<br>176.2 | 119.0<br>178.4<br>297.4 | **198.0**<br>**296.9**<br>**473.6** |
+| **Karma** (1.33 Targets Avg) | 1★<br>2★<br>3★ | 45<br>68<br>101 | 0.70 | 33.6<br>50.8<br>75.4 | 151.4<br>227.1<br>340.7 | **185.0**<br>**277.5**<br>**416.0** |
+| **Katarina** (1.5 Targets / 4.5 hits Avg) | 1★<br>2★<br>3★ | 50<br>75<br>113 | 0.75 | 45.9<br>68.9<br>103.7 | 146.0<br>221.5<br>352.4 | **191.9**<br>**290.4**<br>**456.2** |
+| **Rek'Sai** (Target < 66% HP, Marked) | 1★<br>2★<br>3★ | 123<br>184<br>277 | 0.94 | 130.4<br>195.0<br>293.6 | 64.4<br>96.3<br>145.0 | **194.8**<br>**291.3**<br>**438.6** |
+| **Vel'Koz** (2 Targets Avg) | 1★<br>2★<br>3★ | 40<br>60<br>90 | 0.70 | 30.9<br>46.3<br>69.5 | 152.9<br>229.3<br>382.1 | **183.8**<br>**275.6**<br>**451.6** |
 
 ---
 
@@ -80,8 +83,8 @@ Putting baseline and itemized calculations in a single document guarantees that 
 *   **Detailed Math & Formula Proofs**: See [akshan-dps-calculation.md](file:///c:/Organized%20Files/Working/Unity/Unity%20Project/Magic%20School%202/.claude/docs/balance/calculations/akshan-dps-calculation.md)
 *   **Combat Role & Mechanics**: Backline sniper. Channels 6 physical damage shots locking onto the farthest enemy.
 *   **Key DPS Outputs**:
-    *   *Baseline (Unequipped) Total DPS*: **69.7 / 104.4 / 156.7**
-    *   *Well-Equipped (3-Item) Total DPS*: **243.5 / 367.4 / 554.4**
+    *   *Baseline (Unequipped) Total DPS*: **76.6 / 116.7 / 177.9**
+    *   *Well-Equipped (3-Item) Total DPS*: **243.4 / 366.5 / 552.2**
 *   **Aesthetic Balance Note**: Focuses purely on backline sniper value rather than tank melting.
 
 ---
@@ -90,8 +93,8 @@ Putting baseline and itemized calculations in a single document guarantees that 
 *   **Detailed Math & Formula Proofs**: See [darius-dps-calculation.md](file:///c:/Organized%20Files/Working/Unity/Unity%20Project/Magic%20School%202/.claude/docs/balance/calculations/darius-dps-calculation.md)
 *   **Combat Role & Mechanics**: Melee physical execution carry. Slashes target; recasts instantly on kill with slight falloff.
 *   **Key DPS Outputs**:
-    *   *Baseline (Unequipped) Total DPS (1 Target)*: **62.6 / 94.3 / 140.7** (1 Reset Avg: **75.5 / 113.3 / 169.9**)
-    *   *Well-Equipped (3-Item) Total DPS (1 Reset Avg)*: **222.0 / 332.3 / 495.6**
+    *   *Baseline (Unequipped) Total DPS (1 Target)*: **60.8 / 91.5 / 135.2** (1 Reset Avg: **78.6 / 118.0 / 174.6**)
+    *   *Well-Equipped (3-Item) Total DPS (1 Reset Avg)*: **192.5 / 289.6 / 428.5**
 *   **Aesthetic Balance Note**: Balanced hybrid profile of durability and execution.
 
 ---
@@ -100,8 +103,8 @@ Putting baseline and itemized calculations in a single document guarantees that 
 *   **Detailed Math & Formula Proofs**: See [ekko-dps-calculation.md](file:///c:/Organized%20Files/Working/Unity/Unity%20Project/Magic%20School%202/.claude/docs/balance/calculations/ekko-dps-calculation.md)
 *   **Combat Role & Mechanics**: Melee magic assassin. Dives target, dealing magic damage and healing for 20% of damage taken in the last 4s.
 *   **Key DPS Outputs**:
-    *   *Baseline (Unequipped) Total DPS*: **71.7 / 107.5 / 161.5**
-    *   *Well-Equipped (3-Item) Total DPS*: **203.5 / 304.3 / 456.4**
+    *   *Baseline (Unequipped) Total DPS*: **78.8 / 117.8 / 177.1**
+    *   *Well-Equipped (3-Item) Total DPS*: **181.5 / 271.7 / 407.5**
 *   **Aesthetic Balance Note**: Durability-focused assassin whose target-access value compensates for slightly lower raw front-to-back DPS.
 
 ---
@@ -110,8 +113,8 @@ Putting baseline and itemized calculations in a single document guarantees that 
 *   **Detailed Math & Formula Proofs**: See [garen-dps-calculation.md](file:///c:/Organized%20Files/Working/Unity/Unity%20Project/Magic%20School%202/.claude/docs/balance/calculations/garen-dps-calculation.md)
 *   **Combat Role & Mechanics**: Melee physical spinner. Spins for 4s, dealing AD-ratio physical damage to adjacent targets. Spins scale with AS.
 *   **Key DPS Outputs**:
-    *   *Baseline (Unequipped) Total DPS (1 Target Typical)*: **68.7 / 103.1 / 154.9** (2 Targets Avg: **99.2 / 148.9 / 223.6**)
-    *   *Well-Equipped (3-Item) Total DPS (1 Target Typical)*: **194.8 / 292.6 / 438.0**
+    *   *Baseline (Unequipped) Total DPS (1 Target Typical)*: **75.6 / 114.7 / 175.4** (2 Targets Avg: **109.2 / 166.4 / 256.0**)
+    *   *Well-Equipped (3-Item) Total DPS (1 Target Typical)*: **160.2 / 243.5 / 372.8**
 *   **Aesthetic Balance Note**: Judgement is modeled on 1 target typical to maintain fair benchmark alignment with Darius.
 
 ---
@@ -120,8 +123,8 @@ Putting baseline and itemized calculations in a single document guarantees that 
 *   **Detailed Math & Formula Proofs**: See [kalista-dps-calculation.md](file:///c:/Organized%20Files/Working/Unity/Unity%20Project/Magic%20School%202/.claude/docs/balance/calculations/kalista-dps-calculation.md)
 *   **Combat Role & Mechanics**: Single-target tank shredder. Stacks true damage spears and executes target automatically.
 *   **Key DPS Outputs**:
-    *   *Baseline (Unequipped) Total DPS*: **60.0 / 90.3 / 134.6**
-    *   *Well-Equipped (3-Item) Total DPS*: **238.2 / 357.4 / 569.9**
+    *   *Baseline (Unequipped) Total DPS*: **64.1 / 96.6 / 150.8**
+    *   *Well-Equipped (3-Item) Total DPS*: **198.0 / 296.9 / 473.6**
 *   **Aesthetic Balance Note**: True damage and automatic execute thresholds make her a highly efficient anti-tank option.
 
 ---
@@ -130,8 +133,8 @@ Putting baseline and itemized calculations in a single document guarantees that 
 *   **Detailed Math & Formula Proofs**: See [karma-dps-calculation.md](file:///c:/Organized%20Files/Working/Unity/Unity%20Project/Magic%20School%202/.claude/docs/balance/calculations/karma-dps-calculation.md)
 *   **Combat Role & Mechanics**: Backline AP burst carry. Fires energy bursts in splash area, with every 3rd cast firing 3 bursts.
 *   **Key DPS Outputs**:
-    *   *Baseline (Unequipped) Total DPS (1 Target)*: **70.3 / 105.7 / 158.0** (2 Targets Avg: **112.3 / 168.6 / 252.4**)
-    *   *Well-Equipped (3-Item) Total DPS (2 Targets Avg)*: **245.2 / 367.8 / 551.7**
+    *   *Baseline (Unequipped) Total DPS (1 Target)*: **67.6 / 101.6 / 151.7** (1.33 Targets Avg: **80.0 / 120.2 / 179.7**)
+    *   *Well-Equipped (3-Item) Total DPS (1.33 Targets Avg)*: **185.0 / 277.5 / 416.0**
 *   **Aesthetic Balance Note**: Large blast hitboxes make Karma one of the most reliable and highest-output splash carries.
 
 ---
@@ -140,8 +143,8 @@ Putting baseline and itemized calculations in a single document guarantees that 
 *   **Detailed Math & Formula Proofs**: See [katarina-dps-calculation.md](file:///c:/Organized%20Files/Working/Unity/Unity%20Project/Magic%20School%202/.claude/docs/balance/calculations/katarina-dps-calculation.md)
 *   **Combat Role & Mechanics**: Melee AP assassin. Teleports to backline, throwing 3 daggers and slashing adjacent targets.
 *   **Key DPS Outputs**:
-    *   *Baseline (Unequipped) Total DPS (1 Target)*: **70.4 / 105.6 / 158.7** (1.5 Targets Avg: **88.6 / 133.0 / 199.9**)
-    *   *Well-Equipped (3-Item) Total DPS (1.5 Targets Avg)*: **155.2 / 234.9 / 368.0**
+    *   *Baseline (Unequipped) Total DPS (1 Target)*: **74.9 / 113.0 / 175.1** (1.5 Targets Avg: **94.4 / 142.6 / 222.2**)
+    *   *Well-Equipped (3-Item) Total DPS (1.5 Targets Avg)*: **191.9 / 290.4 / 456.2**
 *   **Aesthetic Balance Note**: Highest raw baseline and equipped outputs among assassins, with built-in healing reduction utility.
 
 ---
@@ -150,8 +153,8 @@ Putting baseline and itemized calculations in a single document guarantees that 
 *   **Detailed Math & Formula Proofs**: See [reksai-dps-calculation.md](file:///c:/Organized%20Files/Working/Unity/Unity%20Project/Magic%20School%202/.claude/docs/balance/calculations/reksai-dps-calculation.md)
 *   **Combat Role & Mechanics**: Melee physical bruiser. Bite deals physical damage, converting to true damage if target is under 66% HP, and scaling higher on marked targets.
 *   **Key DPS Outputs**:
-    *   *Baseline (Unequipped) Total DPS (<66% HP)*: **67.5 / 101.3 / 151.9**
-    *   *Well-Equipped (3-Item) Total DPS (<66% HP)*: **194.7 / 292.1 / 438.1**
+    *   *Baseline (Unequipped) Total DPS (<66% HP)*: **71.6 / 107.6 / 161.3**
+    *   *Well-Equipped (3-Item) Total DPS (<66% HP)*: **194.8 / 291.3 / 438.6**
 *   **Aesthetic Balance Note**: True damage execution and self-healing provide massive combat efficiency.
 
 ---
@@ -160,6 +163,6 @@ Putting baseline and itemized calculations in a single document guarantees that 
 *   **Detailed Math & Formula Proofs**: See [velkoz-dps-calculation.md](file:///c:/Organized%20Files/Working/Unity/Unity%20Project/Magic%20School%202/.claude/docs/balance/calculations/velkoz-dps-calculation.md)
 *   **Combat Role & Mechanics**: Backline AP carry. Fission bolt splits perpendicularly on first hit, dealing 50% damage to passed targets.
 *   **Key DPS Outputs**:
-    *   *Baseline (Unequipped) Total DPS (1 Target)*: **49.1 / 73.6 / 110.4** (2 Splits Avg: **60.9 / 91.3 / 136.9**)
-    *   *Well-Equipped (3-Item) Total DPS (2 Splits Avg)*: **166.8 / 250.2 / 409.2**
+    *   *Baseline (Unequipped) Total DPS (1 Target)*: **52.1 / 78.2 / 123.5** (2 Splits Avg: **77.0 / 115.6 / 185.8**)
+    *   *Well-Equipped (3-Item) Total DPS (2 Splits Avg)*: **183.8 / 275.6 / 451.6**
 *   **Aesthetic Balance Note**: Splits allow massive frontline-to-backline cleave when enemy boards are clumped.

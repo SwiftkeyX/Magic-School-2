@@ -38,11 +38,11 @@ This document provides the step-by-step mathematical calculations for Zeri's bas
 | :--- | :--- | :--- | :---: | :---: | :---: |
 | ATC | `ceil(Max Mana / 10)` | `ceil(50 / 10)` | 5 | 5 | 5 |
 | Cycle Duration | `ATC / AS + Lockout` | `5 / 0.80 + 0.8` | 7.250s | 7.250s | 7.250s |
-| Auto Attack DPS | `(ATC × AD × Crit) / Cycle` | `(5 × [AD] × 1.10) / 7.250s` | 44.8 | 67.6 | 100.7 |
+| Auto Attack DPS | `(ATC × AD × Crit) / Cycle` | `(5 × [AD] × 1.10) / 7.250s` | 49.3 | 74.3 | 110.8 |
 | Spell Base (1 Target) | `Spell` | `[0, 0, 0]` | 0.0 | 0.0 | 0.0 |
-| Spell Damage | `5.0 attacks × AD × Lightning Ratio` | `5.0 × [65, 98, 146] × 1.50` | 487.5 | 735.0 | 1095.0 |
-| Spell DPS | `Spell Damage / Cycle` | `[Spell Damage] / 7.250s` | 67.2 | 101.4 | 151.0 |
-| **Total DPS** | `Auto DPS + Spell DPS` | `Auto DPS + Spell DPS` | **112.1** | **169.0** | **251.7** |
+| Spell Damage | `5.0 attacks × AD × Lightning Ratio × Crit` | `5.0 × [65, 98, 146] × 1.50 × 1.10` | 536.2 | 808.5 | 1204.5 |
+| Spell DPS | `Spell Damage / Cycle` | `[Spell Damage] / 7.250s` | 74.0 | 111.5 | 166.1 |
+| **Total DPS** | `Auto DPS + Spell DPS` | `Auto DPS + Spell DPS` | **123.3** | **185.9** | **276.9** |
 
 ---
 
@@ -73,9 +73,9 @@ This document provides the step-by-step mathematical calculations for Zeri's bas
 | :--- | :--- | :--- | :---: | :---: | :---: |
 | ATC | `ceil(Max Mana / 10)` | `ceil(50 / 10)` | 5 | 5 | 5 |
 | Cycle Duration | `ATC / AS + Lockout` | `5 / 1.00 + 0.8` (Note: cycle duration is 5.800s) | 5.800s | 5.800s | 5.800s |
-| Auto Attack DPS | `(ATC × AD_equipped × Crit) / Cycle` | `(5 × [Equipped AD] × 1.45 Crit) / 5.800s` | 151.2 | 228.4 | 339.9 |
+| Auto Attack DPS | `(ATC × AD_equipped × Crit) / Cycle` | `(5 × [Equipped AD] × 1.28 Crit) / 5.800s` | 151.2 | 228.4 | 339.9 |
 | Spell Base (1 Target) | `Spell` | `[0, 0, 0]` | 0.0 | 0.0 | 0.0 |
-| Spell Damage | `5.0 attacks × AD_equipped × Lightning Ratio × Crit` | `5.0 × [144, 217, 323] × 1.50 × 1.24` | 1339.2 | 2018.1 | 3003.9 |
+| Spell Damage | `5.0 attacks × AD_equipped × Lightning Ratio × Crit` | `5.0 × [137, 207, 308] × 1.50 × 1.28` | 1315.2 | 1987.2 | 2956.8 |
 | Spell DPS | `Spell Damage / Cycle` | `[Spell Damage] / 5.800s` | 226.8 | 342.6 | 509.8 |
 | **Total DPS** | `Auto DPS + Spell DPS` | `Auto DPS + Spell DPS` | **377.9** | **571.0** | **849.7** |
 

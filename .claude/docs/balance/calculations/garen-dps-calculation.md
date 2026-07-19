@@ -38,11 +38,11 @@ This document provides the step-by-step mathematical calculations for Garen's ba
 | :--- | :--- | :--- | :---: | :---: | :---: |
 | ATC | `ceil(Max Mana / 10)` | `ceil(80 / 10)` | 8 | 8 | 8 |
 | Cycle Duration | `ATC / AS + Lockout` | `8 / 0.75 + 4.0` | 14.670s | 14.670s | 14.670s |
-| Auto Attack DPS | `(ATC × AD × Crit) / Cycle` | `(8 × [AD] × 1.10) / 14.670s` | 38.2 | 57.3 | 86.2 |
+| Auto Attack DPS | `(ATC × AD × Crit) / Cycle` | `(8 × [AD] × 1.10) / 14.670s` | 42.0 | 63.0 | 94.8 |
 | Spell Base (1 Target) | `AD × Spin Ratio × Spins` | `[70, 105, 158] × [0.80, 0.82, 0.85] × 8.0` | 448.0 | 688.8 | 1074.4 |
 | Spell Damage | `Spell Base × Crit` | `[448.0, 688.8, 1074.4] × 1.10` | 492.8 | 757.7 | 1181.8 |
-| Spell DPS | `Spell Damage / Cycle` | `[Spell Damage] / 14.670s` | 30.5 | 47.0 | 73.2 |
-| **Total DPS** | `Auto DPS + Spell DPS` | `Auto DPS + Spell DPS` | **68.7** | **104.2** | **159.4** |
+| Spell DPS | `Spell Damage / Cycle` | `[Spell Damage] / 14.670s` | 33.6 | 51.7 | 80.6 |
+| **Total DPS** | `Auto DPS + Spell DPS` | `Auto DPS + Spell DPS` | **75.6** | **114.7** | **175.4** |
 
 ---
 
@@ -73,11 +73,11 @@ This document provides the step-by-step mathematical calculations for Garen's ba
 | :--- | :--- | :--- | :---: | :---: | :---: |
 | ATC | `ceil(Max Mana / 10)` | `ceil(80 / 10)` | 8 | 8 | 8 |
 | Cycle Duration | `ATC / AS + Lockout` | `8 / 0.94 + 4.0` (Note: cycle duration is 12.530s) | 12.530s | 12.530s | 12.530s |
-| Auto Attack DPS | `(ATC × AD_equipped × Crit) / Cycle` | `(8 × [Equipped AD] × 1.15 Crit) / 12.530s` | 97.4 | 146.3 | 219.0 |
-| Spell Base (1 Target) | `AD × Spin Ratio × Spins` | `[98, 147, 221] × [0.80, 0.82, 0.85] × 8.0` | 448.0 | 688.8 | 1074.4 |
-| Spell Damage | `AD_equipped × Spin Ratio × 10.0 × Crit` | `[98, 147, 221] × [0.80, 0.82, 0.85] × 10.0 × 1.28` (10 spins equipped) | 1218.6 | 1878.6 | 2915.8 |
-| Spell DPS | `Spell Damage / Cycle` | `[Spell Damage] / 12.530s` | 97.4 | 146.3 | 219.0 |
-| **Total DPS** | `Auto DPS + Spell DPS` | `Auto DPS + Spell DPS` | **194.8** | **292.6** | **438.0** |
+| Auto Attack DPS | `(ATC × AD_equipped × Crit) / Cycle` | `(8 × [Equipped AD] × 1.28 Crit) / 12.530s` | 80.1 | 120.1 | 180.6 |
+| Spell Base (1 Target) | `AD_equipped × Spin Ratio × 8.0` | `[98, 147, 221] × [0.80, 0.82, 0.85] × 8.0` | 627.2 | 964.3 | 1502.8 |
+| Spell Damage | `AD_equipped × Spin Ratio × 10.0 × Crit` | `[98, 147, 221] × [0.80, 0.82, 0.85] × 10.0 × 1.28` (10 spins equipped) | 1003.5 | 1545.9 | 2408.0 |
+| Spell DPS | `Spell Damage / Cycle` | `[Spell Damage] / 12.530s` | 80.1 | 123.4 | 192.2 |
+| **Total DPS** | `Auto DPS + Spell DPS` | `Auto DPS + Spell DPS` | **160.2** | **243.5** | **372.8** |
 
 ---
 

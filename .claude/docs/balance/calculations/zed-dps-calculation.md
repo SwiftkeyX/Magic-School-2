@@ -15,7 +15,8 @@ This document provides the step-by-step mathematical calculations for Zed's base
 | Stat | 1★ | 2★ | 3★ |
 | :--- | :---: | :---: | :---: |
 | **Base AD** | 55 | 83 | 124 |
-| **Spell AD Ratio** | 0.30 | 0.30 | 0.35 |
+| **Spell AD Ratio** | 1.40 | 1.40 | 1.50 |
+| **Spell Flat Damage (AP)** | 25 | 40 | 50 |
 
 **Fixed stats** *(do not scale with star level)*
 | Stat | Value |
@@ -40,10 +41,10 @@ This document provides the step-by-step mathematical calculations for Zed's base
 | ATC | `ceil(Max Mana / 10)` | `ceil(70 / 10)` | 7 | 7 | 7 |
 | Cycle Duration | `ATC / AS + Lockout` | `7 / 0.75 + 0.8` (Note: simulation averages combat timing to 10.130s) | 10.130s | 10.130s | 10.130s |
 | Auto Attack DPS | `(ATC × AD × Crit) / Cycle` | `(7 × [55, 83, 124] × 1.10) / 10.130s` | 35.6 | 53.4 | 80.1 |
-| Spell Base (1 Target) | `AD × Spell AD Ratio × Clone Mult` | `[55, 83, 124] × [0.30, 0.30, 0.35] × 3.0` | 49.5 | 74.7 | 130.2 |
-| Spell Damage (Synergy) | `Spell Base × 2.0 Targets × Crit` | `[49.5, 74.7, 130.2] × 2.0 × 1.10` | 339.4 | 509.5 | 760.8 |
-| Spell DPS | `Spell Damage / Cycle` | `[339.4, 509.5, 760.8] / 10.130s` | 33.5 | 50.3 | 75.1 |
-| **Total DPS** | `Auto DPS + Spell DPS` | `Auto DPS + Spell DPS` | **69.1** | **103.7** | **155.2** |
+| Spell Base (1 Target) | `AD × Spell AD Ratio + Spell Flat` | `[55, 83, 124] × [1.40, 1.40, 1.50] + [25, 40, 50]` | 102.0 | 156.2 | 236.0 |
+| Spell Damage (Synergy) | `Spell Base × Clone Mult × Crit` | `[102.0, 156.2, 236.0] × 3.0 × 1.10` | 336.6 | 515.5 | 778.8 |
+| Spell DPS | `Spell Damage / Cycle` | `[336.6, 515.5, 778.8] / 10.130s` | 33.2 | 50.9 | 76.9 |
+| **Total DPS** | `Auto DPS + Spell DPS` | `Auto DPS + Spell DPS` | **68.8** | **104.3** | **157.0** |
 
 ---
 
@@ -75,11 +76,11 @@ This document provides the step-by-step mathematical calculations for Zed's base
 | :--- | :--- | :--- | :---: | :---: | :---: |
 | ATC | `ceil(Max Mana / 10)` | `ceil(70 / 10)` | 7 | 7 | 7 |
 | Cycle Duration | `ATC / AS + Lockout` | `7 / 0.94 + 0.8` (Note: simulation averages combat timing to 8.650s) | 8.650s | 8.650s | 8.650s |
-| Auto Attack DPS | `(ATC × AD_equipped × Crit) / Cycle` | `(7 × [96, 145, 217] × 1.24) / 8.650s` | 56.8 | 85.3 | 127.9 |
-| Spell Base (1 Target) | `AD_equipped × Spell AD Ratio × Clone Mult` | `[96, 145, 217] × [0.30, 0.30, 0.35] × 3.0` | 86.4 | 130.5 | 227.85 |
-| Spell Damage (Synergy) | `Spell Base × 2.0 Targets × Crit` | `[86.4, 130.5, 227.85] × 2.0 × 1.24` | 1054.4 | 1582.1 | 2372.7 |
-| Spell DPS | `Spell Damage / Cycle` | `[1054.4, 1582.1, 2372.7] / 8.650s` | 121.9 | 182.9 | 274.3 |
-| **Total DPS** | `Auto DPS + Spell DPS` | `Auto DPS + Spell DPS` | **178.7** | **268.2** | **402.2** |
+| Auto Attack DPS | `(ATC × AD_equipped × Crit) / Cycle` | `(7 × [96, 145, 217] × 1.24) / 8.650s` | 96.3 | 145.5 | 217.8 |
+| Spell Base (1 Target) | `AD_equipped × Spell AD Ratio + Spell Flat × AP` | `[96, 145, 217] × [1.40, 1.40, 1.50] + [25, 40, 50] × 1.50` | 171.9 | 263.0 | 400.5 |
+| Spell Damage (Synergy) | `Spell Base × Clone Mult × Crit` | `[171.9, 263.0, 400.5] × 3.0 × 1.24` | 639.5 | 978.4 | 1489.9 |
+| Spell DPS | `Spell Damage / Cycle` | `[639.5, 978.4, 1489.9] / 8.650s` | 73.9 | 113.1 | 172.2 |
+| **Total DPS** | `Auto DPS + Spell DPS` | `Auto DPS + Spell DPS` | **170.2** | **258.6** | **390.0** |
 
 ---
 

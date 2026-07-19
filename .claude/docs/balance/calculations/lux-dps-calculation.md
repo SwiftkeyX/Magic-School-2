@@ -38,11 +38,11 @@ This document provides the step-by-step mathematical calculations for Lux's base
 | :--- | :--- | :--- | :---: | :---: | :---: |
 | ATC | `ceil(Max Mana / 10)` | `ceil(40 / 10)` | 4 | 4 | 4 |
 | Cycle Duration | `ATC / AS + Lockout` | `4 / 0.70 + 3.0` | 8.710s | 8.710s | 8.710s |
-| Auto Attack DPS | `(ATC × AD × Crit) / Cycle` | `(4 × [AD] × 1.10) / 8.710s` | 20.7 | 31.2 | 46.4 |
+| Auto Attack DPS | `(ATC × AD × Crit) / Cycle` | `(4 × [AD] × 1.10) / 8.710s` | 22.7 | 34.4 | 51.0 |
 | Spell Base (1 Target) | `Spell` | `[735, 1100, 2750]` | 735.0 | 1100.0 | 2750.0 |
-| Spell Damage | `Spell Base × Target Density` (Single Target) | `[735.0, 1100.0, 2750.0] × 1.0` | 735.0 | 1100.0 | 2750.0 |
-| Spell DPS | `Spell Damage / Cycle` | `[Spell Damage] / 8.710s` | 84.4 | 126.3 | 315.7 |
-| **Total DPS** | `Auto DPS + Spell DPS` | `Auto DPS + Spell DPS` | **105.1** | **157.5** | **362.1** |
+| Spell Damage | `Spell Base × Target Density × Crit` (Single Target) | `[735.0, 1100.0, 2750.0] × 1.0 × 1.10` | 808.5 | 1210.0 | 3025.0 |
+| Spell DPS | `Spell Damage / Cycle` | `[Spell Damage] / 8.710s` | 92.8 | 138.9 | 347.3 |
+| **Total DPS** | `Auto DPS + Spell DPS` | `Auto DPS + Spell DPS` | **115.5** | **173.3** | **398.3** |
 
 ---
 
@@ -73,11 +73,11 @@ This document provides the step-by-step mathematical calculations for Lux's base
 | :--- | :--- | :--- | :---: | :---: | :---: |
 | ATC | `ceil((Max Mana - 10) / 10)` | `ceil((40 - 10) / 10)` | 3 | 3 | 3 |
 | Cycle Duration | `ATC / AS + Lockout` | `3 / 0.70 + 3.0` (Note: cycle duration is 7.290s) | 7.290s | 7.290s | 7.290s |
-| Auto Attack DPS | `(ATC × AD_equipped × Crit) / Cycle` | `(3 × [Equipped AD] × 1.15 Crit) / 7.290s` | 23.7 | 35.6 | 53.4 |
+| Auto Attack DPS | `(ATC × AD_equipped × Crit) / Cycle` | `(3 × [Equipped AD] × 1.28 Crit) / 7.290s` | 23.7 | 35.8 | 53.2 |
 | Spell Base (1 Target) | `Spell` | `[735, 1100, 2750]` | 735.0 | 1100.0 | 2750.0 |
 | Spell Damage | `Spell Base × AP × Crit` | `[735, 1100, 2750] × 2.00 × 1.28` (Blue Buff + JG + Rabadon) | 1881.6 | 2816.0 | 7040.0 |
-| Spell DPS | `Spell Damage / Cycle` | `[Spell Damage] / 7.290s` | 258.2 | 386.3 | 965.7 |
-| **Total DPS** | `Auto DPS + Spell DPS` | `Auto DPS + Spell DPS` | **281.9** | **421.9** | **1019.1** |
+| Spell DPS | `Spell Damage / Cycle` | `[Spell Damage] / 7.290s` | 258.1 | 386.3 | 965.7 |
+| **Total DPS** | `Auto DPS + Spell DPS` | `Auto DPS + Spell DPS` | **281.8** | **422.1** | **1018.9** |
 
 ---
 

@@ -38,11 +38,11 @@ This document provides the step-by-step mathematical calculations for Gwen's bas
 | :--- | :--- | :--- | :---: | :---: | :---: |
 | ATC | `ceil(Max Mana / 10)` | `ceil(35 / 10)` | 4 | 4 | 4 |
 | Cycle Duration | `ATC / AS + Lockout` | `4 / 0.80 + 1.0` | 6.250s | 6.250s | 6.250s |
-| Auto Attack DPS | `(ATC × AD × Crit) / Cycle` | `(4 × [AD] × 1.10) / 6.250s` | 35.2 | 53.1 | 79.4 |
+| Auto Attack DPS | `(ATC × AD × Crit) / Cycle` | `(4 × [AD] × 1.10) / 6.250s` | 38.7 | 58.4 | 87.3 |
 | Spell Base (1 Target) | `Spell` | `[100, 150, 400]` | 100.0 | 150.0 | 400.0 |
-| Spell Damage | `Spell Base × Target Density` (6 hits average) | `[100.0, 150.0, 400.0] × 6.0` | 600.0 | 900.0 | 2400.0 |
-| Spell DPS | `Spell Damage / Cycle` | `[Spell Damage] / 6.250s` | 96.0 | 144.0 | 384.0 |
-| **Total DPS** | `Auto DPS + Spell DPS` | `Auto DPS + Spell DPS` | **131.2** | **197.1** | **463.4** |
+| Spell Damage | `Spell Base × Total Hits × Crit` (3 snips × 2.0 targets avg = 6.0 hits) | `[100.0, 150.0, 400.0] × 6.0 × 1.10` | 660.0 | 990.0 | 2640.0 |
+| Spell DPS | `Spell Damage / Cycle` | `[Spell Damage] / 6.250s` | 105.6 | 158.4 | 422.4 |
+| **Total DPS** | `Auto DPS + Spell DPS` | `Auto DPS + Spell DPS` | **144.3** | **216.8** | **509.7** |
 
 ---
 
@@ -73,9 +73,9 @@ This document provides the step-by-step mathematical calculations for Gwen's bas
 | :--- | :--- | :--- | :---: | :---: | :---: |
 | ATC | `ceil((Max Mana - 10) / 10)` | `ceil((35 - 10) / 10)` | 3 | 3 | 3 |
 | Cycle Duration | `ATC / AS + Lockout` | `3 / 0.80 + 1.0` (Note: cycle duration is 5.000s) | 5.000s | 5.000s | 5.000s |
-| Auto Attack DPS | `(ATC × AD_equipped × Crit) / Cycle` | `(3 × [Equipped AD] × 1.15 Crit) / 5.000s` | 42.2 | 63.7 | 95.2 |
+| Auto Attack DPS | `(ATC × AD_equipped × Crit) / Cycle` | `(3 × [Equipped AD] × 1.28 Crit) / 5.000s` | 42.2 | 63.7 | 95.2 |
 | Spell Base (1 Target) | `Spell` | `[100, 150, 400]` | 100.0 | 150.0 | 400.0 |
-| Spell Damage | `Spell Base × Target Density × AP × Crit` | `[100, 150, 400] × 6.00 × 2.15 × 1.28` | 1651.2 | 2476.8 | 6604.8 |
+| Spell Damage | `Spell Base × Total Hits × AP × Crit` | `[100, 150, 400] × 6.00 × 2.00 × 1.28` (3 snips × 2.0 targets avg = 6.0 hits) | 1536.0 | 2304.0 | 6144.0 |
 | Spell DPS | `Spell Damage / Cycle` | `[Spell Damage] / 5.000s` | 307.2 | 460.8 | 1228.8 |
 | **Total DPS** | `Auto DPS + Spell DPS` | `Auto DPS + Spell DPS` | **349.4** | **524.5** | **1324.0** |
 

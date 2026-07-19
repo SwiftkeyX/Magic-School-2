@@ -38,11 +38,11 @@ This document provides the step-by-step mathematical calculations for Yasuo's ba
 | :--- | :--- | :--- | :---: | :---: | :---: |
 | ATC | `ceil(Max Mana / 10)` | `ceil(110 / 10)` | 11 | 11 | 11 |
 | Cycle Duration | `ATC / AS + Lockout` | `11 / 0.80 + 1.2` | 14.950s | 14.950s | 14.950s |
-| Auto Attack DPS | `(ATC × AD × Crit) / Cycle` | `(11 × [AD] × 1.10) / 14.950s` | 55.2 | 83.1 | 124.3 |
+| Auto Attack DPS | `(ATC × AD × Crit) / Cycle` | `(11 × [AD] × 1.10) / 14.950s` | 60.7 | 91.5 | 136.8 |
 | Spell Base (1 Target) | `Spell` | `[0, 0, 0]` | 0.0 | 0.0 | 0.0 |
-| Spell Damage | `AD × (4.50 whirlwind × 1.50 targets + slash)` | `[75, 113, 169] × (6.75 if idx<2 else 7.125)` | 506.2 | 762.8 | 1204.1 |
-| Spell DPS | `Spell Damage / Cycle` | `[Spell Damage] / 14.950s` | 33.9 | 51.0 | 80.5 |
-| **Total DPS** | `Auto DPS + Spell DPS` | `Auto DPS + Spell DPS` | **89.0** | **134.2** | **204.9** |
+| Spell Damage | `AD × (4.50 whirlwind × 1.50 targets + slash) × Crit` | `[75, 113, 169] × (6.75 if idx<2 else 7.125) × 1.10` | 556.9 | 839.1 | 1324.5 |
+| Spell DPS | `Spell Damage / Cycle` | `[Spell Damage] / 14.950s` | 37.3 | 56.1 | 88.6 |
+| **Total DPS** | `Auto DPS + Spell DPS` | `Auto DPS + Spell DPS` | **98.0** | **147.6** | **225.4** |
 
 ---
 
@@ -73,11 +73,11 @@ This document provides the step-by-step mathematical calculations for Yasuo's ba
 | :--- | :--- | :--- | :---: | :---: | :---: |
 | ATC | `ceil(Max Mana / 10)` | `ceil(110 / 10)` | 11 | 11 | 11 |
 | Cycle Duration | `ATC / AS + Lockout` | `11 / 0.80 + 1.2` (Note: cycle duration is 14.950s) | 14.950s | 14.950s | 14.950s |
-| Auto Attack DPS | `(ATC × AD_equipped × Crit) / Cycle` | `(11 × [Equipped AD] × 1.35 Crit) / 14.950s` | 151.3 | 227.8 | 339.9 |
+| Auto Attack DPS | `(ATC × AD_equipped × Crit) / Cycle` | `(11 × [Equipped AD] × 1.24 Crit) / 14.950s` | 151.5 | 228.1 | 340.3 |
 | Spell Base (1 Target) | `Spell` | `[0, 0, 0]` | 0.0 | 0.0 | 0.0 |
 | Spell Damage | `AD_equipped × (4.50 whirlwind × 1.50 targets + slash) × Crit` | `[166, 250, 373] × (6.75 if idx<2 else 7.125) × 1.24` | 1389.4 | 2092.5 | 3295.4 |
 | Spell DPS | `Spell Damage / Cycle` | `[Spell Damage] / 14.950s` | 92.9 | 140.0 | 220.4 |
-| **Total DPS** | `Auto DPS + Spell DPS` | `Auto DPS + Spell DPS` | **244.2** | **367.8** | **560.3** |
+| **Total DPS** | `Auto DPS + Spell DPS` | `Auto DPS + Spell DPS` | **244.4** | **368.1** | **560.7** |
 
 ---
 
