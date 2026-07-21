@@ -4,19 +4,24 @@
   "description": "Open questions raised in review and deliberately NOT fixed yet — each needs a design decision, not a rename. Parked here instead of as TODO comments so the source stays clean.",
   "steps": [
     {
-      "file": "Assets/Scripts/Battle/Data/HeroData.cs",
-      "description": "**RESOLVED** — `Flags` / `BattleBehaviorFlag` deleted entirely (user decision: delete now rather than defer to the skill rebuild). Removed from `HeroData`, `UnitCombatData`, `CombatantSnapshot`, `Combatant`, the `isMagic` branch in `AutoBattleSimulator.Attack.cs` (now always ATK vs DEF), and the two hero `.asset` files. `Hero.md` Core Rule 6 and `Skill.md` Core Rule 5 rewritten to match — damage archetype has no per-unit representation until a real magic-damage mechanic is designed on the action/skill itself.",
+      "file": "Assets/Scripts/Battle/Data/HeroDataSO.cs",
+      "description": "**RESOLVED** — `Flags` / `BattleBehaviorFlag` deleted entirely (user decision: delete now rather than defer to the skill rebuild). Removed from `HeroDataSO`, `HeroDataSeed`, `CombatantSnapshot`, `HeroDataRuntime`, the `isMagic` branch in `AutoBattleSimulator.Attack.cs` (now always ATK vs DEF), and the two hero `.asset` files. `Hero.md` Core Rule 6 and `Skill.md` Core Rule 5 rewritten to match — damage archetype has no per-unit representation until a real magic-damage mechanic is designed on the action/skill itself.",
       "pattern": "public int MG = 0;"
     },
     {
-      "file": "Assets/Scripts/Battle/Data/HeroData.cs",
-      "description": "**RESOLVED** — `HeroData.Id` removed entirely (user decision: remove rather than turn into an enum or derive from the filename). Its only real consumer, the compound per-instance `Combatant.Id`, now builds from `{Team}_{index}` alone — still guaranteed unique, one fewer ingredient. The `Combatant.HeroId` mirror (confirmed dead — no consumer anywhere) went with it. `Hero.md` Core Rule 2, the Data Model table, and the duplicate-`Id` Edge Case row rewritten to match.",
+      "file": "Assets/Scripts/Battle/Data/HeroDataSO.cs",
+      "description": "**RESOLVED** — `HeroData.Id` removed entirely (user decision: remove rather than turn into an enum or derive from the filename). Its only real consumer, the compound per-instance `HeroDataRuntime.Id`, now builds from `{Team}_{index}` alone — still guaranteed unique, one fewer ingredient. The `HeroId` mirror (confirmed dead — no consumer anywhere) went with it. `Hero.md` Core Rule 2, the Data Model table, and the duplicate-`Id` Edge Case row rewritten to match.",
       "pattern": "public string DisplayName;"
     },
     {
       "file": "Assets/Scripts/Battle/Resolver/AutoBattleSimulator.cs",
-      "description": "**RESOLVED** — renamed `AutoBattleResolver` → `AutoBattleSimulator` across 6 partial-class files, `BattleTest.unity` (scene link survived via `.meta` GUID, unaffected by the file rename), and the doc set (`Combat.md`, `Hero.md`, `Skill.md`, `Trait.md`, `architecture-overview.md`, `systems-design.md`, `reading-guide-battle.md`).\n\n**Still open, deliberately not bundled into this rename:** the proposal for each `Combatant` to tick itself by subscribing to an event from `BattleLoop()`, rather than being mutated by the simulator. That would invert who owns state mutation — `Combat.md` Core Rule 1 still says the simulator is the sole writer.",
+      "description": "**RESOLVED** — renamed `AutoBattleResolver` → `AutoBattleSimulator` across 6 partial-class files, `BattleTest.unity` (scene link survived via `.meta` GUID, unaffected by the file rename), and the doc set (`Combat.md`, `Hero.md`, `Skill.md`, `Trait.md`, `architecture-overview.md`, `systems-design.md`, `reading-guide-battle.md`).\n\n**Still open, deliberately not bundled into this rename:** the proposal for each `HeroDataRuntime` to tick itself by subscribing to an event from `BattleLoop()`, rather than being mutated by the simulator. That would invert who owns state mutation — `Combat.md` Core Rule 1 still says the simulator is the sole writer.",
       "pattern": "public partial class AutoBattleSimulator : MonoBehaviour"
+    },
+    {
+      "file": "Assets/Scripts/Battle/Resolver/HeroDataRuntime.cs",
+      "description": "**RESOLVED** — a code review (see `.tours/codereview.tour`) asked to rename the three pipeline-stage classes. Final decision, after a long back-and-forth about Hero vs. a broader \"Unit\" umbrella term: keep **Hero** as the project's primary noun for now (a real Hero/Summon/non-Hero-Enemy type split doesn't exist in code yet — see the new Open Question in `Hero.md`), and use a shared `HeroData` root with a suffix per pipeline stage:\n- `HeroData` (authored ScriptableObject) → **`HeroDataSO`**\n- `UnitCombatData` (one-time transfer object, produced once by `ToCombatData()` and read once by `SetCombatants()`) → **`HeroDataSeed`**\n- `Combatant` (mutable, tick-by-tick simulation state) → **`HeroDataRuntime`**\n- `TraitData` renamed to `TraitDataSO` too, for suffix consistency with `HeroDataSO`.\n\nAlso done in the same pass: the four guard-rail consts on `HeroDataSO` (`MinMaxHP`/`MinDefense`/`MinAttackSpeed`/`MinSkillMultiplier`) grouped into a nested `Guardrails` class (from `codereview.tour`'s GuardRail comment), and the two-clock comment moved from this file to `AutoBattleSimulator.cs`'s `BattleLoop()` (from the same review's \"these comments shouldn't be here\" comment).",
+      "pattern": "internal class HeroDataRuntime"
     }
   ]
 }

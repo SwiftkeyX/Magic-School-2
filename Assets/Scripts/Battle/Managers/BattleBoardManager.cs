@@ -374,9 +374,9 @@ namespace MagicSchool.Battle
         }
 
         // removed: StudentColor(id) / EnemyColor(id) — hardcoded switch on the literals "knight"
-        // and "archer". Any new HeroData asset fell through to the default case and rendered as a
+        // and "archer". Any new HeroDataSO asset fell through to the default case and rendered as a
         // gray square, which meant adding a hero required a C# edit. Appearance is now authored on
-        // HeroData (Icon / PlayerTint / EnemyTint) and reaches the view via CombatantSnapshot.
+        // HeroDataSO (Icon / PlayerTint / EnemyTint) and reaches the view via CombatantSnapshot.
         // See Hero GDD Core Rule 7 — presentation is data, never a code lookup.
     }
 }

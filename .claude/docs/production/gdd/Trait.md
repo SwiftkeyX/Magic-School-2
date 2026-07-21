@@ -14,7 +14,7 @@ A Trait is a synergy tag shared by Heroes. Fielding enough Heroes with the same 
 
 ## Overview
 
-Traits turn a collection of Heroes into a *composition*. Each `TraitData` defines breakpoints (e.g. 2 units → small buff, 4 units → bigger buff). At battle start, for each team, the system counts how many fielded Heroes carry each Trait, selects the highest satisfied breakpoint, and applies that breakpoint's flat stat bonus to every unit on that team that has the Trait. The player's incentive is to field Heroes that share Traits to cross breakpoints.
+Traits turn a collection of Heroes into a *composition*. Each `TraitDataSO` defines breakpoints (e.g. 2 units → small buff, 4 units → bigger buff). At battle start, for each team, the system counts how many fielded Heroes carry each Trait, selects the highest satisfied breakpoint, and applies that breakpoint's flat stat bonus to every unit on that team that has the Trait. The player's incentive is to field Heroes that share Traits to cross breakpoints.
 
 ## Player Fantasy
 
@@ -26,16 +26,16 @@ Traits turn a collection of Heroes into a *composition*. Each `TraitData` define
 
 ### Core Rules
 
-1. A Trait is a `TraitData : ScriptableObject` created via `Assets/Create → MagicSchool/Trait`, holding `Id`, `DisplayName`, `Description`, and `Breakpoints` (`List<TraitBreakpoint>`).
+1. A Trait is a `TraitDataSO : ScriptableObject` created via `Assets/Create → MagicSchool/Trait`, holding `Id`, `DisplayName`, `Description`, and `Breakpoints` (`List<TraitBreakpoint>`).
 2. A `TraitBreakpoint` holds `UnitCount` (the threshold), a `StatBonus` (flat additive deltas), and a `Description`. Breakpoints are authored in ascending `UnitCount` order.
-3. `StatBonus` is a serializable struct of flat additive deltas: `HP`, `ATK`, `DEF`, `MG`, `MR` (int) and `AttackSpeed` (float). It has `ApplyTo(Combatant)`. Flat additive only — no percentages, no active effects.
+3. `StatBonus` is a serializable struct of flat additive deltas: `HP`, `ATK`, `DEF`, `MG`, `MR` (int) and `AttackSpeed` (float). It has `ApplyTo(HeroDataRuntime)`. Flat additive only — no percentages, no active effects.
 4. The synergy pass (`AutoBattleSimulator.ApplyTraitBonuses()`) runs **once at the top of `BeginBattle()`**, before the battle loop, after placements are known.
 5. Counting is **per team**: for each team independently, count the number of **distinct fielded Heroes** carrying each Trait.
-6. For each Trait, select the **highest** `TraitBreakpoint` whose `UnitCount ≤ count` (`TraitData.GetActiveBreakpoint(count)`). If the count is below the first breakpoint, the Trait is inactive and grants nothing.
+6. For each Trait, select the **highest** `TraitBreakpoint` whose `UnitCount ≤ count` (`TraitDataSO.GetActiveBreakpoint(count)`). If the count is below the first breakpoint, the Trait is inactive and grants nothing.
 7. The selected breakpoint's `StatBonus` is applied to **every combatant on that team that carries the Trait** ("trait members benefit"). Units without the Trait are unaffected.
 8. Bonuses are additive to base stats and applied once (not per tick). `MaxHP` increases also raise `CurrentHP` by the same amount so the unit starts at full effective HP.
 9. Each activated Trait + breakpoint is logged (`Debug.Log`) for verification.
-10. `GetActiveTraits(Team)` exposes `(TraitData, count, activeBreakpoint)` for a future HUD synergy panel. (UI display is out of scope for this pass.)
+10. `GetActiveTraits(Team)` exposes `(TraitDataSO, count, activeBreakpoint)` for a future HUD synergy panel. (UI display is out of scope for this pass.)
 
 ### States and Transitions
 
@@ -71,7 +71,7 @@ finalStat(unit)           = baseStat(unit) + Σ activeBreakpoint(trait).Bonus.st
 | Unit carries two active traits | Both `StatBonus`es apply additively | Multi-trait heroes are the point of comping |
 | `MaxHP` bonus applied | `CurrentHP` raised by the same delta | Unit should start at full effective HP |
 | Enemy team also completes a trait | Enemy units get their own bonus (counted separately) | Per-team counting; future-proofs enemy comps |
-| Duplicate `TraitData` reference on one Hero | Counted once per Hero | Distinct-hero count, not reference count |
+| Duplicate `TraitDataSO` reference on one Hero | Counted once per Hero | Distinct-hero count, not reference count |
 
 ---
 
@@ -79,8 +79,8 @@ finalStat(unit)           = baseStat(unit) + Σ activeBreakpoint(trait).Bonus.st
 
 | System | Direction | Nature |
 |---|---|---|
-| Hero | This depends on it | Data dependency — reads `Combatant.Traits` (sourced from `HeroData.Traits`) |
-| Combat (`AutoBattleSimulator`) | Ownership handoff | The synergy pass is a method on the resolver, invoked at `BeginBattle()`, mutating `Combatant` stats before the loop |
+| Hero | This depends on it | Data dependency — reads `HeroDataRuntime.Traits` (sourced from `HeroDataSO.Traits`) |
+| Combat (`AutoBattleSimulator`) | Ownership handoff | The synergy pass is a method on the resolver, invoked at `BeginBattle()`, mutating `HeroDataRuntime` stats before the loop |
 
 ---
 
@@ -114,12 +114,12 @@ finalStat(unit)           = baseStat(unit) + Σ activeBreakpoint(trait).Bonus.st
 
 ## Acceptance Criteria
 
-- [ ] `TraitData` assets can be created via `MagicSchool/Trait` with multiple ascending breakpoints, editable in the Inspector.
+- [ ] `TraitDataSO` assets can be created via `MagicSchool/Trait` with multiple ascending breakpoints, editable in the Inspector.
 - [ ] Fielding units meeting a breakpoint applies that breakpoint's `StatBonus` to exactly the trait-carrying units on that team, logged at battle start.
 - [ ] Fielding below a breakpoint applies nothing and logs nothing for that trait.
 - [ ] A unit with two active traits receives both bonuses additively.
 - [ ] Enemy synergies are counted and applied independently of player synergies.
-- [ ] No hardcoded bonus values in code — all live on `TraitData`/`StatBonus` assets.
+- [ ] No hardcoded bonus values in code — all live on `TraitDataSO`/`StatBonus` assets.
 
 ---
 
@@ -127,7 +127,7 @@ finalStat(unit)           = baseStat(unit) + Σ activeBreakpoint(trait).Bonus.st
 
 | This Doc References | Target Doc | Element Referenced | Nature |
 |---|---|---|---|
-| Reads a unit's traits | `production/gdd/Hero.md` | `HeroData.Traits` / `UnitCombatData.Traits` | Data dependency |
+| Reads a unit's traits | `production/gdd/Hero.md` | `HeroDataSO.Traits` / `HeroDataSeed.Traits` | Data dependency |
 | Runs inside the battle setup | (Combat resolver) | `BeginBattle()` → `ApplyTraitBonuses()` | Ownership handoff |
 
 ---

@@ -21,7 +21,7 @@ namespace MagicSchool.Battle
                 var counts = CountTraits(members);
                 foreach (var kv in counts)
                 {
-                    TraitData trait = kv.Key;
+                    TraitDataSO trait = kv.Key;
                     int count = kv.Value;
                     TraitBreakpoint bp = trait.GetActiveBreakpoint(count);
                     if (bp == null) continue;   // below the first breakpoint — no bonus
@@ -38,7 +38,7 @@ namespace MagicSchool.Battle
         }
 
         // Read-only active-trait readout for a future HUD synergy panel. Not used in combat.
-        public List<(TraitData trait, int count, TraitBreakpoint active)> GetActiveTraits(Team team)
+        public List<(TraitDataSO trait, int count, TraitBreakpoint active)> GetActiveTraits(Team team)
         {
             var members = _combatants.Where(c => c.Team == team).ToList();
             return CountTraits(members)
@@ -47,9 +47,9 @@ namespace MagicSchool.Battle
         }
 
         // Distinct-hero count per trait across the given combatants.
-        private static Dictionary<TraitData, int> CountTraits(List<Combatant> members)
+        private static Dictionary<TraitDataSO, int> CountTraits(List<HeroDataRuntime> members)
         {
-            var counts = new Dictionary<TraitData, int>();
+            var counts = new Dictionary<TraitDataSO, int>();
             foreach (var c in members)
             {
                 if (c.Traits == null) continue;

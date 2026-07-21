@@ -26,8 +26,8 @@ Skills give each Hero a rhythm: charge up over a few attacks, then unleash a big
 
 ### Core Rules
 
-1. Skill parameters live on `HeroData` (authored) and are copied to `UnitCombatData` → the runtime `Combatant`: `MaxMana`, `ManaPerAttack`, `SkillMultiplier`, `SkillName`.
-2. A `Combatant` tracks runtime `Mana` (starts at 0) and `SkillArmed` (starts false).
+1. Skill parameters live on `HeroDataSO` (authored) and are copied to `HeroDataSeed` → the runtime `HeroDataRuntime`: `MaxMana`, `ManaPerAttack`, `SkillMultiplier`, `SkillName`.
+2. A `HeroDataRuntime` tracks runtime `Mana` (starts at 0) and `SkillArmed` (starts false).
 3. On each basic attack (`AutoBattleSimulator.Attack()`), in order:
    a. Compute mitigated base damage.
    b. **If `SkillArmed`**: `damage = round(damage × SkillMultiplier)`, clear `SkillArmed`, log `SKILL! {name} casts {SkillName}`.
@@ -36,7 +36,7 @@ Skills give each Hero a rhythm: charge up over a few attacks, then unleash a big
 4. A unit with `MaxMana ≤ 0` has no skill and never arms.
 5. The empowered attack uses the same offense type as the basic attack (ATK vs DEF — there is no per-unit magic-damage flag; see `Hero.md` Core Rule 6). The skill only scales the final damage; it does not change targeting or range.
 6. Mana is gained *after* damage resolves, so with `MaxMana 3, ManaPerAttack 1` the 4th attack (then 7th, 10th, …) is empowered.
-7. **Damage applies directly to HP — there is no shield layer.** `Combatant.Shield` and the shield-absorb branch in `ApplyDamageAndCheckKill()` were removed: the field was read on every hit but **never written by anything**, so it was dead weight in the hottest path in the game. Re-add it together with the first mechanic that actually grants shield.
+7. **Damage applies directly to HP — there is no shield layer.** `HeroDataRuntime.Shield` and the shield-absorb branch in `ApplyDamageAndCheckKill()` were removed: the field was read on every hit but **never written by anything**, so it was dead weight in the hottest path in the game. Re-add it together with the first mechanic that actually grants shield.
 
 ### States and Transitions
 
@@ -50,7 +50,7 @@ Skills give each Hero a rhythm: charge up over a few attacks, then unleash a big
 | System | Interaction |
 |---|---|
 | Combat (`AutoBattleSimulator`) | The whole charge/empower loop lives inside `Attack()`. No new per-tick phase. |
-| Hero | Provides `MaxMana`/`ManaPerAttack`/`SkillMultiplier`/`SkillName` via `HeroData` → `UnitCombatData`. |
+| Hero | Provides `MaxMana`/`ManaPerAttack`/`SkillMultiplier`/`SkillName` via `HeroDataSO` → `HeroDataSeed`. |
 | Trait | Independent. Trait bonuses raise base stats (including ATK) before battle; the skill multiplies the *already-buffed* attack, so the two stack. |
 
 ---
@@ -66,9 +66,9 @@ final    = SkillArmed ? round(base × SkillMultiplier) : base
 
 | Variable | Type | Range | Source | Description |
 |---|---|---|---|---|
-| `SkillMultiplier` | float | 1.5–3.0 | ScriptableObject (`HeroData`) | empowered-hit multiplier |
-| `MaxMana` | int | 2–10 | ScriptableObject (`HeroData`) | attacks-to-charge (with ManaPerAttack) |
-| `ManaPerAttack` | int | 1–3 | ScriptableObject (`HeroData`) | mana gained per basic attack |
+| `SkillMultiplier` | float | 1.5–3.0 | ScriptableObject (`HeroDataSO`) | empowered-hit multiplier |
+| `MaxMana` | int | 2–10 | ScriptableObject (`HeroDataSO`) | attacks-to-charge (with ManaPerAttack) |
+| `ManaPerAttack` | int | 1–3 | ScriptableObject (`HeroDataSO`) | mana gained per basic attack |
 
 **Edge cases**: `SkillMultiplier ≤ 1` makes the "empowered" hit no stronger — treated as a misconfiguration, not special-cased.
 
@@ -89,7 +89,7 @@ final    = SkillArmed ? round(base × SkillMultiplier) : base
 
 | System | Direction | Nature |
 |---|---|---|
-| Hero | This depends on it | Data dependency — skill params sourced from `HeroData` |
+| Hero | This depends on it | Data dependency — skill params sourced from `HeroDataSO` |
 | Combat (`AutoBattleSimulator`) | Ownership handoff | The charge/empower loop is inside `Attack()` |
 
 ---
@@ -121,7 +121,7 @@ final    = SkillArmed ? round(base × SkillMultiplier) : base
 - [ ] Mana resets after casting and the cycle repeats.
 - [ ] A unit with `MaxMana ≤ 0` never casts.
 - [ ] Skill and Trait bonuses stack (skill multiplies the trait-buffed attack).
-- [ ] No hardcoded skill values in code — all on `HeroData`.
+- [ ] No hardcoded skill values in code — all on `HeroDataSO`.
 
 ---
 
@@ -129,7 +129,7 @@ final    = SkillArmed ? round(base × SkillMultiplier) : base
 
 | This Doc References | Target Doc | Element Referenced | Nature |
 |---|---|---|---|
-| Skill params come from the hero | `production/gdd/Hero.md` | `HeroData` mana/skill fields | Data dependency |
+| Skill params come from the hero | `production/gdd/Hero.md` | `HeroDataSO` mana/skill fields | Data dependency |
 | Skill scales the basic attack | (Combat resolver) | `Attack()` in `AutoBattleSimulator.Attack.cs` | Ownership handoff |
 | Skill multiplies trait-buffed ATK | `production/gdd/Trait.md` | `StatBonus.ATK` | Rule dependency |
 
@@ -141,3 +141,4 @@ final    = SkillArmed ? round(base × SkillMultiplier) : base
 |---|---|---|---|
 | Should mana also gain when taking damage (TFT-style)? | designer | — | Not in base game — attack-only keeps the loop simple |
 | Should the skill do something other than "attack harder" (heal, AoE)? | designer | — | Not yet — base game skill is a single empowered hit |
+| Should `SkillName` become an enum or SO instead of a hand-typed string? | designer | — | Not yet — there is exactly one skill behavior today (the empowered hit), so a type would enumerate a set of one. Revisit when a second, genuinely distinct skill behavior is designed. |

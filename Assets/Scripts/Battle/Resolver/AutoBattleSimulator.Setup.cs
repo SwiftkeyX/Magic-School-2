@@ -8,8 +8,8 @@ namespace MagicSchool.Battle
     // snapshot/HP accessors UI consumers use.
     public partial class AutoBattleSimulator
     {
-        // Unified seed API: one list of UnitCombatData, each tagged with its Team.
-        public void SetCombatants(List<UnitCombatData> units)
+        // Unified seed API: one list of HeroDataSeed, each tagged with its Team.
+        public void SetCombatants(List<HeroDataSeed> units)
         {
             _combatants.Clear();
             _playerPlacements.Clear();
@@ -17,7 +17,7 @@ namespace MagicSchool.Battle
             int idx = 0;
             foreach (var u in units)
             {
-                _combatants.Add(new Combatant
+                _combatants.Add(new HeroDataRuntime
                 {
                     // Unique per instance so mirror teams (same hero on both sides) never
                     // collide in the grid/_units/placement dictionaries. Purely positional —
@@ -41,7 +41,7 @@ namespace MagicSchool.Battle
                     SkillName       = u.SkillName,
                     Mana        = 0,
                     SkillArmed  = false,
-                    Traits      = u.Traits ?? new List<TraitData>(),
+                    Traits      = u.Traits ?? new List<TraitDataSO>(),
                 });
             }
 
@@ -104,12 +104,12 @@ namespace MagicSchool.Battle
                 return;
             }
 
-            var all = new List<UnitCombatData>();
+            var all = new List<HeroDataSeed>();
             all.AddRange(stub.GetUnits());
             all.AddRange(database.GetUnits());
 
             if (all.Count == 0)
-                Debug.LogWarning($"[AutoBattleSimulator] Roster components on '{name}' contain no HeroData assets — " +
+                Debug.LogWarning($"[AutoBattleSimulator] Roster components on '{name}' contain no HeroDataSO assets — " +
                                  $"the board will be empty.", this);
 
             SetCombatants(all);

@@ -16,18 +16,20 @@ namespace MagicSchool.Battle
         public bool TimedOut;     // true when the battle hit the tick cap instead of a wipe
     }
 
-    // Unified data contract for any unit entering battle, tagged by Team.
-    // Produced by HeroData.ToCombatData(); consumed by AutoBattleSimulator.SetCombatants().
+    // One-time transfer object: any unit entering battle, tagged by Team. Produced fresh by
+    // HeroDataSO.ToCombatData() and read exactly once by AutoBattleSimulator.SetCombatants() —
+    // it carries no fight-state (no HP tracking, no cooldowns); that only exists once
+    // HeroDataRuntime is built from it.
     //
     // Tint is already resolved to the fighting side by ToCombatData(), so nothing downstream
     // has to branch on Team to know how to draw the unit.
     [Serializable]
-    public class UnitCombatData
+    public class HeroDataSeed
     {
         public string DisplayName;
         public Team   Team;
 
-        // Presentation, authored on HeroData. Carrying it here (and on into CombatantSnapshot)
+        // Presentation, authored on HeroDataSO. Carrying it here (and on into CombatantSnapshot)
         // is what lets the board render a unit without a hardcoded Id → color lookup.
         public Sprite Icon;
         public Color  Tint = Color.white;
@@ -46,18 +48,19 @@ namespace MagicSchool.Battle
         public float  SkillMultiplier;
         public string SkillName;
 
-        public List<TraitData>          Traits = new List<TraitData>();
+        public List<TraitDataSO>        Traits = new List<TraitDataSO>();
     }
 
-    // Read-only snapshot exposed to BattleHUD and BattleBoardManager for initialization.
-    // This is the view's ONLY source of unit appearance — see Hero GDD Core Rule 7.
+    // Everything the view needs to draw one unit — position included, but not the point of the
+    // class. Read-only, exposed to BattleHUD and BattleBoardManager for initialization. This is
+    // the view's ONLY source of unit appearance — see Hero GDD Core Rule 7.
     public class CombatantSnapshot
     {
         public string Id;          // unique per combatant instance
         public string DisplayName;
         public bool   IsStudent;   // true when the unit's Team == Team.Player
-        public Sprite Icon;        // authored on HeroData; null → procedural fallback square
-        public Color  Tint;        // authored on HeroData, resolved for this unit's team
+        public Sprite Icon;        // authored on HeroDataSO; null → procedural fallback square
+        public Color  Tint;        // authored on HeroDataSO, resolved for this unit's team
         public int    MaxHP;
         public int    CurrentHP;
         public HexCoord Position;

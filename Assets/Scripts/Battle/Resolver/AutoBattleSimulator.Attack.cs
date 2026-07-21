@@ -8,7 +8,7 @@ namespace MagicSchool.Battle
     // removed: ApplyDamage() — a private wrapper with no caller.
     public partial class AutoBattleSimulator
     {
-        private void Attack(Combatant actor, Combatant target)
+        private void Attack(HeroDataRuntime actor, HeroDataRuntime target)
         {
             actor.CurrentTargetId = target.Id;
 
@@ -48,14 +48,14 @@ namespace MagicSchool.Battle
                 HandleKill(actor, target);
         }
 
-        internal void HandleKill(Combatant actor, Combatant target)
+        internal void HandleKill(HeroDataRuntime actor, HeroDataRuntime target)
         {
             _grid.ClearOccupant(target.Position);
             Debug.Log($"[AutoBattle] {target.DisplayName} DEFEATED");
             OnCombatantDefeated?.Invoke(target.Id);
         }
 
-        private void MoveTowardNearest(Combatant actor, List<Combatant> opponents)
+        private void MoveTowardNearest(HeroDataRuntime actor, List<HeroDataRuntime> opponents)
         {
             var oppPositions = opponents.Select(o => o.Position).ToList();
             var nearest      = _grid.FindNearest(actor.Position, oppPositions);

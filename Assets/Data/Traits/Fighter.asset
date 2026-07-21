@@ -11,7 +11,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6118c28543ca1a5468970f9d5659c7c8, type: 3}
   m_Name: Fighter
-  m_EditorClassIdentifier: Assembly-CSharp::MagicSchool.Battle.TraitData
+  m_EditorClassIdentifier: Assembly-CSharp::MagicSchool.Battle.TraitDataSO
   Id: fighter
   DisplayName: Fighter
   Description: Fielding two Fighters makes both hit harder.

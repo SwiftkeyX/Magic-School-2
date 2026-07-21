@@ -48,12 +48,12 @@ namespace MagicSchool.Battle
         public float SpeedMultiplier { get; set; } = 1f;
 
         // ── State ────────────────────────────────────────────────────────────
-        private readonly List<Combatant> _combatants = new List<Combatant>();
+        private readonly List<HeroDataRuntime> _combatants = new List<HeroDataRuntime>();
         private readonly Dictionary<string, HexCoord> _playerPlacements = new Dictionary<string, HexCoord>();
         private HexGrid _grid;
         private bool _battleRunning;
 
-        // Combatant itself lives in its own file (Combatant.cs), top-level in this namespace.
+        // HeroDataRuntime itself lives in its own file (HeroDataRuntime.cs), top-level in this namespace.
 
         // ── Lifecycle ────────────────────────────────────────────────────────
         // _grid is cached here (not in BeginBattle) because GetAutoEnemyPlacements() needs the
@@ -102,10 +102,10 @@ namespace MagicSchool.Battle
         // TODO(deferred): two open architecture questions, parked — see the CodeTour
         // "Deferred design questions".
         //   1. This class is long, spread across 6 partial files. Divide it by responsibility?
-        //   2. BattleLoop() charges the tick for every Combatant. Should each Combatant instead
-        //      update its own clocks by subscribing to an event fired by BattleLoop()? That would
-        //      invert state ownership — Combat.md Core Rule 1 currently makes the resolver the
-        //      SOLE writer of Combatant state. Decide the rule before moving the code.
+        //   2. BattleLoop() charges the tick for every HeroDataRuntime. Should each HeroDataRuntime
+        //      instead update its own clocks by subscribing to an event fired by BattleLoop()? That
+        //      would invert state ownership — Combat.md Core Rule 1 currently makes the resolver the
+        //      SOLE writer of HeroDataRuntime state. Decide the rule before moving the code.
         private IEnumerator BattleLoop()
         {
             _battleRunning = true;
@@ -115,6 +115,16 @@ namespace MagicSchool.Battle
             while (true)
             {
                 // ── PHASE 1 — CHARGE both clocks ────────────────────────────────
+                // Two INDEPENDENT clocks (see Combat.md). Each is a 0→1 fraction of one cycle, not a
+                // countdown timer. At ≥ 1.0 the unit acts and 1.0 is SUBTRACTED rather than reset to
+                // zero — so overflow carries into the next cycle instead of being discarded. That
+                // carry is what keeps the cadence continuous rather than quantised to the tick rate:
+                // at 0.1s/tick, AttackSpeed 0.35 and 0.30 stay genuinely different.
+                //
+                // AttackCooldown charges at AttackSpeed × tickDelay — PER-UNIT.
+                // MoveCooldown   charges at _moveSpeed  × tickDelay — SHARED by every unit on the board.
+                // They are separate so that attack speed no longer secretly sets walking speed: a hero
+                // that swings faster does not also cross the board faster.
                 // AttackSpeed is per-unit; _moveSpeed is shared. That is the whole point.
                 foreach (var c in _combatants.Where(c => !c.IsDefeated))
                 {

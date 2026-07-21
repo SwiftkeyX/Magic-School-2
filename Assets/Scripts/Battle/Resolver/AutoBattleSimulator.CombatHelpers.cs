@@ -5,9 +5,9 @@ namespace MagicSchool.Battle
     // Targeting helpers and the shared damage choke point.
     public partial class AutoBattleSimulator
     {
-        private Combatant FindInRange(Combatant actor, List<Combatant> opponents)
+        private HeroDataRuntime FindInRange(HeroDataRuntime actor, List<HeroDataRuntime> opponents)
         {
-            Combatant nearest = null;
+            HeroDataRuntime nearest = null;
             int minDist = int.MaxValue;
             foreach (var o in opponents)
             {
@@ -22,9 +22,9 @@ namespace MagicSchool.Battle
         // autoHandleKill: false and check target.IsDefeated themselves afterward.
         //
         // removed: the shield-absorb branch (and the bypassShield / out shieldAbsorbed params).
-        // Combatant.Shield was read on every hit but never written by anything — dead weight in
+        // HeroDataRuntime.Shield was read on every hit but never written by anything — dead weight in
         // the hottest path in the game. Re-add with the first mechanic that actually grants shield.
-        internal int ApplyDamageAndCheckKill(Combatant actor, Combatant target, int damage,
+        internal int ApplyDamageAndCheckKill(HeroDataRuntime actor, HeroDataRuntime target, int damage,
             List<string> tags = null, bool autoHandleKill = true)
         {
             target.CurrentHP -= damage;
