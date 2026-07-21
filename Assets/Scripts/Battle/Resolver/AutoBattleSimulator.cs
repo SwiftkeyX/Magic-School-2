@@ -10,18 +10,18 @@ namespace MagicSchool.Battle
     public partial class AutoBattleSimulator : MonoBehaviour
     {
         // ── Events ──────────────────────────────────────────────────────────
-        // Setup event — fires at the end of SetCombatants(); subscribers call
-        // GetCombatantSnapshots() themselves to get data (no payload per GDD).
+        // Fires once combatants are seeded; subscribers call GetCombatantSnapshots() for data.
         public event Action OnCombatantsSet;
 
+        // A unit attacked: (actorId, targetId, damage, tags).
         public event Action<string, string, int, List<string>> OnCombatantActed;
+        // A unit moved one hex: (id, fromHex, toHex).
         public event Action<string, HexCoord, HexCoord> OnCombatantMoved;
+        // A unit died: (id).
         public event Action<string> OnCombatantDefeated;
+        // This battle ended: carries the result.
         public event Action<BattleResult> OnBattleComplete;
-        // removed: OnSkillCast, OnManaChanged, OnCastStateChanged — skill system, rebuilding fresh
-
-        // Static forwarding event — AudioSystem subscribes here so it does not need
-        // FindObjectOfType to reach a non-singleton AutoBattleSimulator instance.
+        // Static — fires for ANY battle instance, so listeners with no scene reference can subscribe.
         public static event Action<BattleResult> OnAnyBattleComplete;
 
         // ── Tuning ───────────────────────────────────────────────────────────
@@ -34,10 +34,6 @@ namespace MagicSchool.Battle
         [SerializeField, Range(100, 5000), Tooltip("Hard cap on battle length. At 0.1s/tick, 1200 ticks = 120 seconds.")]
         private int _maxBattleTicks = 1200;
 
-        // Movement is deliberately NOT attack speed. Before this existed, a unit spent its whole
-        // attack cycle to take one hex step, so a hero that swung faster also WALKED faster —
-        // an artifact of reusing one timer for two jobs, not a design. Every unit now shares this
-        // one pace. See Combat.md.
         [SerializeField, Range(0.1f, 3f), Tooltip("Hexes per second. SHARED by every unit — movement is deliberately NOT attack speed.")]
         private float _moveSpeed = 0.65f;
 
@@ -45,7 +41,7 @@ namespace MagicSchool.Battle
         // IMPORTANT: this scales only how fast you *watch* the battle — the simulation step
         // (the two cooldown clocks below) is unchanged, so the outcome is identical
         // at any speed. Speeding up must never alter who wins.
-        public float SpeedMultiplier { get; set; } = 1f;
+        public float GameSpeedMultiplier { get; set; } = 1f;
 
         // ── State ────────────────────────────────────────────────────────────
         private readonly List<HeroDataRuntime> _combatants = new List<HeroDataRuntime>();
@@ -69,34 +65,29 @@ namespace MagicSchool.Battle
             if (_battleRunning) { Debug.LogWarning("[AutoBattleSimulator] Battle already running."); return; }
             if (_grid == null) { Debug.LogError("[AutoBattleSimulator] HexGrid component required on the same GameObject.", this); return; }
 
-            // _combatants holds BOTH teams — SetCombatants() takes every unit at once and stamps each
-            // with a Team. The two sides only differ in where their positions come from, hence the two
-            // loops below. Player units go wherever the player dragged them...
-            foreach (var kv in _playerPlacements)
-            {
-                var c = _combatants.FirstOrDefault(x => x.Id == kv.Key);
-                if (c == null) continue;
-                c.Position = kv.Value;
-                _grid.SetOccupant(kv.Value, c.Id);
-            }
+            // Place player's unit on the grid — wherever the player dragged it.
+            PlaceUnitOnGrid(_playerPlacements);
 
-            // ...while enemies have no author, so their layout is GENERATED — from the SAME source
-            // the view spawns them from. This loop used to be re-implemented inline here, in parallel
-            // with GetAutoEnemyPlacements() — BattleBoardManager spawns enemy GameObjects from that
-            // method, while the simulation placed them from this one. Two copies of the same
-            // rule meant a change to either silently desynced the sprites from the sim.
-            foreach (var kv in GetAutoEnemyPlacements())
-            {
-                var c = _combatants.FirstOrDefault(x => x.Id == kv.Key);
-                if (c == null) continue;
-                c.Position = kv.Value;
-                _grid.SetOccupant(kv.Value, c.Id);
-            }
+            // Place enemy's unit on the grid — auto-generated from the SAME source
+            // BattleBoardManager spawns enemy GameObjects from, so sprites and sim can't desync.
+            PlaceUnitOnGrid(GetAutoEnemyPlacements());
 
             // Apply flat trait-synergy bonuses once, per team, before the loop starts.
             ApplyTraitBonuses();
 
             StartCoroutine(BattleLoop());
+        }
+
+        // Stamps each placed combatant's grid Position and marks the cell occupied.
+        private void PlaceUnitOnGrid(Dictionary<string, HexCoord> placements)
+        {
+            foreach (var kv in placements)
+            {
+                var c = _combatants.FirstOrDefault(x => x.Id == kv.Key);
+                if (c == null) continue;
+                c.Position = kv.Value;
+                _grid.SetOccupant(kv.Value, c.Id);
+            }
         }
 
         // TODO(deferred): two open architecture questions, parked — see the CodeTour
@@ -115,17 +106,6 @@ namespace MagicSchool.Battle
             while (true)
             {
                 // ── PHASE 1 — CHARGE both clocks ────────────────────────────────
-                // Two INDEPENDENT clocks (see Combat.md). Each is a 0→1 fraction of one cycle, not a
-                // countdown timer. At ≥ 1.0 the unit acts and 1.0 is SUBTRACTED rather than reset to
-                // zero — so overflow carries into the next cycle instead of being discarded. That
-                // carry is what keeps the cadence continuous rather than quantised to the tick rate:
-                // at 0.1s/tick, AttackSpeed 0.35 and 0.30 stay genuinely different.
-                //
-                // AttackCooldown charges at AttackSpeed × tickDelay — PER-UNIT.
-                // MoveCooldown   charges at _moveSpeed  × tickDelay — SHARED by every unit on the board.
-                // They are separate so that attack speed no longer secretly sets walking speed: a hero
-                // that swings faster does not also cross the board faster.
-                // AttackSpeed is per-unit; _moveSpeed is shared. That is the whole point.
                 foreach (var c in _combatants.Where(c => !c.IsDefeated))
                 {
                     c.AttackCooldown += c.AttackSpeed * _tickDelay;
@@ -210,9 +190,10 @@ namespace MagicSchool.Battle
                     yield break;
                 }
 
-                // Only the wall-clock wait is scaled by SpeedMultiplier — the sim step above is not.
-                yield return new WaitForSeconds(_tickDelay / Mathf.Max(0.01f, SpeedMultiplier));
+                // Only the wall-clock wait is scaled by GameSpeedMultiplier — the sim step above is not.
+                yield return new WaitForSeconds(_tickDelay / Mathf.Max(0.01f, GameSpeedMultiplier));
             }
+            
             // A label — the jump target of `goto BattleEnd` in the attack phase. It exists to escape
             // the foreach AND the enclosing while(true) in one jump: a plain `break` would only leave
             // the inner foreach, and the battle would keep ticking with a dead team. This is the one

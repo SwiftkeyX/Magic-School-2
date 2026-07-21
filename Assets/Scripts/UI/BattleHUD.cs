@@ -138,13 +138,13 @@ namespace MagicSchool.Battle
 
         private void HandleSpeedUpStarted()
         {
-            if (_resolver != null) _resolver.SpeedMultiplier = _speedUpMultiplier;
+            if (_resolver != null) _resolver.GameSpeedMultiplier = _speedUpMultiplier;
             SetDisplay(_speedIndicator, true);
         }
 
         private void HandleSpeedUpCancelled()
         {
-            if (_resolver != null) _resolver.SpeedMultiplier = 1f;
+            if (_resolver != null) _resolver.GameSpeedMultiplier = 1f;
             SetDisplay(_speedIndicator, false);
         }
 

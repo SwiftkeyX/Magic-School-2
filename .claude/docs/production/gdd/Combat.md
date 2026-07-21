@@ -41,7 +41,7 @@ The player arranges heroes on a hex board, presses go, and watches. Each tick (0
 7. **Subtracting `1.0` (rather than resetting to `0`) is load-bearing.** The overflow carries into the next cycle, which is what keeps `AttackSpeed` continuous instead of quantised to the tick rate: at `_tickDelay = 0.1`, `AttackSpeed` 0.35 and 0.30 must remain genuinely different.
 8. **The clamp is a separate phase and must stay one.** See *Why the clamp is its own phase* below — folding it into the charge silently breaks Rule 7.
 9. **A battle ends** when either team has no living combatants. If `_maxBattleTicks` is reached first, the team with more surviving units wins and the result is flagged `TimedOut`.
-10. **`SpeedMultiplier` scales only the wall-clock wait between ticks — never the simulation step.** The outcome of a battle is identical at any playback speed. Speeding up what you watch must never change who wins.
+10. **`GameSpeedMultiplier` scales only the wall-clock wait between ticks — never the simulation step.** The outcome of a battle is identical at any playback speed. Speeding up what you watch must never change who wins.
 
 ### Why the clamp is its own phase
 
@@ -163,7 +163,7 @@ Recorded because both were true *before* this design and silently stopped being 
 - [ ] A unit that crosses the board attacks **once** on arrival, not a burst.
 - [ ] Attack speed stays continuous: `AttackSpeed` 0.30 and 0.35 produce measurably different attack counts, not the same tick-quantised count.
 - [ ] A battle always terminates — by wipe, or by the `_maxBattleTicks` cap with `TimedOut = true`.
-- [ ] `SpeedMultiplier` changes only how fast the battle is *watched*; the winner and tick count are identical at any speed.
+- [ ] `GameSpeedMultiplier` changes only how fast the battle is *watched*; the winner and tick count are identical at any speed.
 - [ ] No hardcoded values — `_moveSpeed`, `_tickDelay`, `_maxBattleTicks` are all Inspector-exposed.
 
 ---

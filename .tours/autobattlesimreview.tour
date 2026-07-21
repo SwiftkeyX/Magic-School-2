@@ -1,0 +1,31 @@
+{
+  "$schema": "https://aka.ms/codetour-schema",
+  "title": "AutoBattleSimReview",
+  "steps": [
+    {
+      "file": "Assets/Scripts/Battle/Resolver/AutoBattleSimulator.cs",
+      "description": "Could you comment on those Event here too? What does it do?\r\nBut make them short and easy to understand.\r\n\r\n---\r\n**RESOLVED.** Added a one-line comment above each event: what it fires on and what its payload carries.",
+      "line": 15
+    },
+    {
+      "file": "Assets/Scripts/Battle/Resolver/AutoBattleSimulator.cs",
+      "description": "Rename this to GameSpeedMultiPlier.\r\n\r\nIs that make sense?\r\n\r\n---\r\n**RESOLVED.** Renamed `SpeedMultiplier` → `GameSpeedMultiplier` here, at its two call sites in `BattleHUD.cs`, and in `Combat.md` (Core Rule 10 + an Acceptance Criterion, both named it directly).",
+      "line": 40
+    },
+    {
+      "file": "Assets/Scripts/Battle/Resolver/AutoBattleSimulator.cs",
+      "description": "THe comment is confusing, use short easy to understand comment instead.\r\n\r\nIn short, \"Place player's unit on the grid\", correct?\r\n\r\n---\r\n**RESOLVED.** Comment simplified to \"Place player's unit on the grid — wherever the player dragged it.\" The loop itself was also extracted into a shared `PlaceUnitOnGrid()` method — see the next comment.",
+      "line": 67
+    },
+    {
+      "file": "Assets/Scripts/Battle/Resolver/AutoBattleSimulator.cs",
+      "description": "In short, \"Place enemy's unit on the grid\", correct?\r\n\r\nChange the comment here too.\r\n\r\nMaybe group 67 adn 80 line function as 1 function, \"PlaceUnitOnGrid()\".\r\n\r\nIs that make sense?\r\n\r\n---\r\n**RESOLVED.** The two loops had identical bodies (only the source dictionary differed), so extracted into `private void PlaceUnitOnGrid(Dictionary<string, HexCoord> placements)`, called once for `_playerPlacements` and once for `GetAutoEnemyPlacements()`. Comment simplified to \"Place enemy's unit on the grid — auto-generated from the SAME source BattleBoardManager spawns enemy GameObjects from, so sprites and sim can't desync.\"",
+      "line": 80
+    },
+    {
+      "file": "Assets/Scripts/Battle/Resolver/AutoBattleSimulator.cs",
+      "description": "Working on the comment here.\r\n\r\n---\r\n**SKIPPED FOR NOW.** No concrete ask yet — revisit when there's a specific change wanted here.",
+      "line": 101
+    }
+  ]
+}
