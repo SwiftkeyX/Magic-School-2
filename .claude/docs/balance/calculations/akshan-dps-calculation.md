@@ -38,11 +38,11 @@ This document provides the step-by-step mathematical calculations for Akshan's b
 | :--- | :--- | :--- | :---: | :---: | :---: |
 | ATC | `ceil(Max Mana / 10)` | `ceil(110 / 10)` | 11 | 11 | 11 |
 | Cycle Duration | `ATC / AS + Lockout` | `11 / 0.75 + 3.0` | 17.667s | 17.667s | 17.667s |
-| Auto Attack DPS | `(ATC × AD × Crit) / Cycle` | `(11 × [AD] × 1.10) / 17.667s` | 37.4 | 56.0 | 84.1 |
+| Auto Attack DPS | `(ATC × AD × Crit) / Cycle` | `(11 × [AD] × 1.10) / 17.667s` | 41.1 | 61.6 | 92.5 |
 | Spell Base (1 Target) | `AD × 1.25 + Flat` | `[60, 90, 135] × 1.25 + [20, 35, 60]` | 95.0 | 147.5 | 228.8 |
-| Spell Damage | `Spell Base × 6.0` (6 shots) | `[95.0, 147.5, 228.75] × 6.0` | 570.0 | 885.0 | 1372.5 |
-| Spell DPS | `Spell Damage / Cycle` | `[Spell Damage] / 17.667s` | 32.3 | 50.1 | 77.7 |
-| **Total DPS** | `Auto DPS + Spell DPS` | `Auto DPS + Spell DPS` | **69.6** | **106.1** | **161.7** |
+| Spell Damage | `Spell Base × 6.0 × Crit` (6 shots) | `[95.0, 147.5, 228.75] × 6.0 × 1.10` | 627.0 | 973.5 | 1509.8 |
+| Spell DPS | `Spell Damage / Cycle` | `[Spell Damage] / 17.667s` | 35.5 | 55.1 | 85.5 |
+| **Total DPS** | `Auto DPS + Spell DPS` | `Auto DPS + Spell DPS` | **76.6** | **116.7** | **177.9** |
 
 ---
 

@@ -38,11 +38,11 @@ This document provides the step-by-step mathematical calculations for Rek'Sai's 
 | :--- | :--- | :--- | :---: | :---: | :---: |
 | ATC | `ceil(Max Mana / 10)` | `ceil(80 / 10)` | 8 | 8 | 8 |
 | Cycle Duration | `ATC / AS + Lockout` | `8 / 0.75 + 0.8` | 11.467s | 11.467s | 11.467s |
-| Auto Attack DPS | `(ATC × AD × Crit) / Cycle` | `(8 × [AD] × 1.10) / 11.467s` | 41.9 | 62.8 | 94.2 |
+| Auto Attack DPS | `(ATC × AD × Crit) / Cycle` | `(8 × [AD] × 1.10) / 11.467s` | 46.0 | 69.1 | 103.6 |
 | Spell Base (1 Target) | `AD × Bite Ratio` | `[60, 90, 135] × 2.50` | 150.0 | 225.0 | 337.5 |
 | Spell Damage | `AD × Mark Ratio` (Synergy assumes Bite on Marked target below 66% HP) | `[60, 90, 135] × 4.90` (Bite deals true damage, does not crit) | 294.0 | 441.0 | 661.5 |
 | Spell DPS | `Spell Damage / Cycle` | `[Spell Damage] / 11.467s` | 25.6 | 38.5 | 57.7 |
-| **Total DPS** | `Auto DPS + Spell DPS` | `Auto DPS + Spell DPS` | **67.5** | **101.2** | **151.9** |
+| **Total DPS** | `Auto DPS + Spell DPS` | `Auto DPS + Spell DPS` | **71.6** | **107.6** | **161.3** |
 
 ---
 
@@ -73,7 +73,7 @@ This document provides the step-by-step mathematical calculations for Rek'Sai's 
 | :--- | :--- | :--- | :---: | :---: | :---: |
 | ATC | `ceil(Max Mana / 10)` | `ceil(80 / 10)` | 8 | 8 | 8 |
 | Cycle Duration | `ATC / AS + Lockout` | `8 / 0.94 + 0.8` (Note: cycle duration is 9.360s) | 9.360s | 9.360s | 9.360s |
-| Auto Attack DPS | `(ATC × AD_equipped × Crit) / Cycle` | `(8 × [Equipped AD] × 1.35 Crit) / 9.360s` | 130.3 | 195.5 | 293.2 |
+| Auto Attack DPS | `(ATC × AD_equipped × Crit) / Cycle` | `(8 × [Equipped AD] × 1.24 Crit) / 9.360s` | 130.3 | 195.5 | 293.2 |
 | Spell Base (1 Target) | `AD × Bite Ratio` | `[123, 184, 277] × 2.50` | 150.0 | 225.0 | 337.5 |
 | Spell Damage | `AD_equipped × Mark Ratio` (Bite deals true damage, does not crit) | `[123, 184, 277] × 4.90` (AD mult 2.05: BT + TR + IE) | 602.7 | 906.5 | 1357.3 |
 | Spell DPS | `Spell Damage / Cycle` | `[Spell Damage] / 9.360s` | 64.4 | 96.6 | 144.9 |

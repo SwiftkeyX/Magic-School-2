@@ -81,7 +81,23 @@ TABS = {
     "Volley Shape Types": "volley-shape.csv",     # renamed from 'Spread Types'
     "Aim Target Types": "aim-target-types.csv",   # new: the validated Aim Target vocabulary
     "Fire Timing Types": "fire-timing.csv",
+    # Role stopped being imported source data on 2026-07-21 and became a reviewed judgement, so it
+    # needs a tab for the same reason every other structural column does — nothing else can catch a
+    # sixth noun drifting in. `Damage Types` is the AD/AP axis that used to be glued to it.
+    "Role Types": "role-types.csv",
+    "Damage Types": "damage-types.csv",
+    # Action Source became a validated vocabulary in round 14: it had drifted into structural keys
+    # (Self, Summon, Step N Projectile) mixed with champion pet names (Dreadway, Child of the Star,
+    # Shadow) — prose in a column with no tab, the same road that gave AOE (hex) 'Gwen-shaped'.
+    "Action Source Types": "action-source-types.csv",
     "Design Notes": "design-notes.csv",
+    # TEMPORARY review surface for the proposed 'Hero archetype' column (round 11). Built by
+    # build_archetype_review.py. Delete this entry and the tab once the tags move onto the Hero tabs.
+    "Archetype Review": "archetype-review.csv",
+    # DERIVED, not authored: the un-blanked mirror of both schema tabs, rebuilt by flatten.py at the
+    # top of every sync. It exists because the Hero tabs are merged for human reading and cannot be
+    # machine-read — see flatten.py. Never edit hero-flat.csv by hand.
+    "Hero flat": "hero-flat.csv",
 }
 
 # Tabs that carry the Hero LOGICAL-COLUMN schema — merge-derived display + vocab validation —
@@ -107,13 +123,13 @@ REFERENCE = {t: f for t, f in TABS.items() if t not in SCHEMA_TABS}
 # DERIVED from the values. `Effect Types` groups by category (the user: "merge the cell in Effect
 # category until it left with only 4 row") - which needs the rows SORTED by category first, or a
 # scattered category cannot merge into one block.
-MERGED_REFERENCE = {"Effect Types": 0}
+MERGED_REFERENCE = {"Effect Types": 0, "Aim Target Types": 0}
 
 # Logical name -> header text to look for. Headers carry parenthetical suffixes the user has
 # edited over time ("Collision (If it have one)"), so matching is exact-first, then prefix.
 # Order here MIRRORS the sheet's physical column order (CSV, sheet and builder all read left-to-right
 # the same way). cols() still resolves BY NAME, so order is not load-bearing for lookups — only
-# IDENTITY_BLOCK = HERO_COLUMNS[:10] depends on the first ten being the identity block. The action
+# IDENTITY_BLOCK = HERO_COLUMNS[:11] depends on the first eleven being the identity block. The action
 # region was regrouped for readability (the user's call): who/what/where first — Action Source,
 # Action, Aim Target, Offset, AOE — then the delivery detail (Skill Range, Count, Spread, Collision),
 # then the effect block. `Offset` is the AOE anchor label; it and `AOE` are per-ACTION merged columns.
@@ -122,7 +138,12 @@ MERGED_REFERENCE = {"Effect Types": 0}
 # matches exact-then-prefix, and "Effect Duration (s)".startswith("Duration") is False, so a stale
 # name does not fall back gracefully — it raises, which is the behaviour we want.
 HERO_COLUMNS = [
-    "Champion", "Cost", "Role", "Origin 1", "Origin 2", "Class 1", "Class 2", "Range",
+    # `Role` holds five nouns — Tank / Fighter / Mage / Marksman / Assassin — and `Damage Type` holds
+    # AD / AP. They were ONE glued value until 2026-07-21: Set 10's source spells them together
+    # (`ADTank`, `APCaster`), and Set 9's source states only Carry / Tank / Support. Neither could be
+    # filtered or compared across the two sets, so Role was normalised onto the reviewed vocabulary
+    # from `Archetype Review` and the damage type split into its own column rather than being lost.
+    "Champion", "Cost", "Role", "Damage Type", "Origin 1", "Origin 2", "Class 1", "Class 2", "Range",
     "Summary", "Skill Description",
     "Step", "Skill Type", "Trigger", "Condition",
     # `Legacy action` is a KEY into the `Action Model` tab, which holds the axes (Apply/Spawn/Motion/
@@ -177,7 +198,7 @@ COUNT_DEFAULT = "1"
 SPREAD_DEFAULT = D
 
 # The champion-identity block: merged down every row a champion owns.
-IDENTITY_BLOCK = HERO_COLUMNS[:10]
+IDENTITY_BLOCK = HERO_COLUMNS[:11]     # 11 since `Damage Type` joined it (was 10)
 
 
 def open_sheet():
@@ -393,12 +414,25 @@ VOCAB = {
     "Volley Shape": "volley-shape.csv",     # Cone | 360 | Diagonal (was 'Spread')
     "Aim Target": "aim-target-types.csv",   # now validated: absorbed the target-selection spreads
     "Fire Timing": "fire-timing.csv",       # At Once | Consecutive (Count > 1 only)
+    # Names the thing that ACTS, which is not always the champion. Validated since round 14 — it was
+    # the last structural column taking free text, and it had already drifted to pet names.
+    "Action Source": "action-source-types.csv",
+    # The two identity vocabularies. Note `used()` subtracts '—', so damage-types.csv's '—' row is
+    # documentation of what the em-dash MEANS here (neither stat) rather than a checked value.
+    "Role": "role-types.csv",
+    "Damage Type": "damage-types.csv",
 }
 
 # Reference tab -> (its csv, the column to check, the csv defining that column's vocabulary).
 # Hero is not the only thing that can rot. `Collision` left Hero (the action decides it), so nothing
 # was left to check it against `collision-types.csv` — the taxonomy could drift with no Hero column
 # to notice. A tab's own vocabulary needs validating too.
+# Which column of a reference tab holds the KEY. Column 0 unless stated — `Aim Target Types` gained a
+# `Group` column in front (round 17) so its rows could be sorted and merged into readable blocks
+# (HP / Distance / Current target / ...), pushing the key to column 1. Anything resolving a vocabulary
+# must look the column up here instead of assuming 0, or every aim key silently reads as undefined.
+KEY_COL = {"aim-target-types.csv": 1}
+
 TAB_VOCAB = [("action-model.csv", "Collision", "collision-types.csv"),
              # Offset mostly lives HERE now, not in Hero: an action that fixes its anchor owns it and
              # the Hero cell reads '—' (the rule ~12 actions already followed; Cone AOE and Charge were
@@ -435,6 +469,30 @@ def base_action(s):
     VOCAB check, the geometry lookup — must resolve to the base first. (Upgrading the convention to a
     real parse re-opens per-row overrides v2→v3 closed, but the user chose it, for one fewer row.)"""
     return COLLISION_OVERRIDE.sub("", s).strip()
+
+
+# A vocabulary row whose key contains `[N]` is a PARAMETERISED key: it defines a FAMILY, and the
+# Hero cell keeps the literal number because the number carries meaning (Ezreal's 3rd cast is not his
+# 4th). `On [N] Cast` therefore matches `On 2nd Cast`, `On 3rd Cast`, `On 4th Cast` — but NOT plain
+# `On Cast`, which has no number and is a different trigger entirely.
+#
+# This REVERSES the older rule that Offset Types still stated ("the number is part of the KEY, so add
+# the literal row you need"). The user's call, round 14, applied to Trigger / Aim Target / Offset at
+# once — precisely so the sheet does not end up holding two contradictory conventions, which is what
+# forced the `Spread` split. The tabs were already drifting toward it on their own: `Every N seconds`
+# and the literal `Every 3/3/3 seconds` both existed as rows.
+#
+# N covers every numeric shape these tabs use: plain (1), signed (-1, +2), ordinal (3rd, 10th) and
+# per-star tiers (4/5/7, 3/3/3).
+PARAM_N = r"[-+]?\d+(?:/\d+)*(?:st|nd|rd|th)?"
+
+
+def undefined(used_values, defined_keys):
+    """Which of `used_values` no key in `defined_keys` covers, exact-match or `[N]` family."""
+    patterns = [re.compile(re.escape(k).replace(r"\[N\]", PARAM_N) + r"\Z")
+                for k in defined_keys if "[N]" in k]
+    return {v for v in used_values
+            if v not in defined_keys and not any(p.match(v) for p in patterns)}
 
 
 def validate_data(hero_csv="hero.csv"):
@@ -477,7 +535,7 @@ def validate_data(hero_csv="hero.csv"):
 
     problems = [f"{label}: {sorted(miss)} used in Hero but not defined in {src}"
                 for label, src in VOCAB.items()
-                for miss in [used_for_vocab(label) - defined(src)] if miss]
+                for miss in [undefined(used_for_vocab(label), defined(src, KEY_COL.get(src, 0)))] if miss]
 
     # Effect Types is MERGED by category, so its Category column is blank on every row but a block's
     # first. Reading it raw turns every pair below a block top into ('', Detail) - matching nothing.
@@ -502,7 +560,9 @@ def validate_data(hero_csv="hero.csv"):
                 break
             if cell(r, i).strip():
                 used_t.add(cell(r, i).strip())
-        miss = used_t - defined(vocab) - {D, "per row"}
+        # Same `[N]` family matching as the Hero check — this path has to know about it too, or
+        # Gilgamesh Projectile's `rank -1` fails the moment Offset's rows are parameterised.
+        miss = undefined(used_t - {D, "per row"}, defined(vocab, KEY_COL.get(vocab, 0)))
         if miss:
             problems.append(f"{src} {col}: {sorted(miss)} used but not defined in {vocab}")
 

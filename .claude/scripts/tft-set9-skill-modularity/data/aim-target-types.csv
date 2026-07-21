@@ -1,35 +1,39 @@
-Aim Target,Kind,What it means
-Current,single enemy,The champion's current attack target — the default aim.
-Current (new),single enemy,A freshly re-acquired current target after a kill (Darius' recast).
-Lowest-HP enemy,single enemy,The enemy with the least Health.
-Farthest,single enemy,The farthest enemy on the board.
-Farthest enemy,single enemy,The farthest enemy (Lux's beam origin).
-Farthest (within 2 hex),single enemy,The farthest enemy within 2 hexes.
-Farthest (within 3 hex),single enemy,The farthest enemy within 3 hexes.
-Nearest enemy,single enemy,The nearest enemy.
-Highest HP (within 2 hex),single enemy,The highest-Health enemy within 2 hexes (Jax's leap).
-Knocked-up enemy,single enemy,The enemy that was knocked up.
-Enemy entering range,single enemy,The enemy that just entered attack range (an On-Enemy-Enters-Range trigger's target).
-Closest enemy behind Step 1 Aim target,single enemy,The enemy directly behind an earlier step's target (a pierce's second victim).
-Nearest 4 enemies,enemy set,The 4 nearest enemies (Count splits among them).
-Nearest 4/5/7 enemies,enemy set,The N nearest enemies by trait tier (Kai'Sa's barrage splits among them).
-4 furthest enemies,enemy set,The 4 farthest enemies — one shot each (Caitlyn).
-Current + 3 nearest,enemy set,The current target plus the 3 nearest enemies (Twisted Fate's cards split among them).
-Current + Left + Right,enemy set,The current target and the enemy on each side of it (Karma's 3rd cast).
-Marked enemies,enemy set,Every enemy carrying the Mark a previous step applied (Quinn's arrow rain).
-Adjacent (both sides),enemy set,The one enemy on each side of the caster (Sett's grab — up to 2).
-Row or column with most enemies,enemy set,The line (row or column) holding the most enemies.
-Random (2 hex of Current),single enemy,"A random enemy within 2 hexes of the current target, re-rolled per instance (Jinx)."
-Lowest-HP Ally,single ally,The ally with the least Health.
-Lowest-HP Allies,ally set,The lowest-Health allies (Shen shields the 2 lowest).
-Self,self,The caster's own hex — a self-cast, buff, or the centre of a self-aimed AOE.
-Away from enemies,position,A hex away from enemies — a reposition/flee.
-Step 1 Aim target,reference,Whatever an earlier Step 1 aimed at (a sequenced follow-up / delayed blast rides it).
-Step 2 Aim target,reference,Whatever an earlier Step 2 aimed at.
-Nearest enemy to owner,reference,The nearest enemy to a SUMMON's owner (the summon's own attack target).
-Summon,reference,The summoned unit itself acts (a second action source).
-Clustered,enemy set,The densest cluster of enemies — the AOE centres on it (Jarvan / Sona / Thresh).
-,,
-How to read this tab,,
-"Aim Target is now a VALIDATED vocabulary (2026-07-18, the user's call): it names WHICH unit(s) an action targets, and every Hero cell must be a key here. It absorbed the target-SELECTION values that used to live in 'Spread' (Same target folded into the plain single-target aim; Each to its own target, Split across nearest/farthest N, Split across marked, Current + Left + Right became the 'enemy set' / 'per-instance' rows here). 'Spread' kept only geometric SHAPE and was renamed 'Volley Shape'.",,
-"'Kind' groups the values (single enemy / enemy set / single ally / ally set / self / position / per-instance / reference) — it is documentation, not a separate checked column. A multi-instance action at an 'enemy set' aim SPLITS its Count among that set; at a single aim it converges. '—' means no aim (a passive self-buff with Recipient Self, an untethered summon).",,
+Group,Aim Target,Kind,What it means,,
+HP,Lowest-HP enemy,single enemy,The enemy with the least Health.,,
+,Highest HP,single enemy,The highest-Health enemy within 2 hexes (Jax's leap).,,
+,[N] lowest-HP enemies,enemy set,The N lowest-Health enemies by star level (Karthus). Count splits one instance each.,,
+,Lowest-HP Ally,single ally,The ally with the least Health.,,
+,Highest-HP Ally,single ally,The ally with the most Health (Neeko cosplays them).,,
+,Lowest-HP Allies,ally set,The lowest-Health allies (Shen shields the 2 lowest).,,
+Distance,Nearest enemy,single enemy,The nearest enemy.,,
+,Farthest,single enemy,The farthest enemy on the board.,,
+,Nearest [N] enemies,enemy set,The 3 nearest enemies (Lulu's 3rd-cast stun hits each).,,
+,[N] furthest enemies,enemy set,The 4 farthest enemies — one shot each (Caitlyn).,,
+,Nearest enemies (one each),enemy set,"The Count nearest enemies, one instance each — no enemy is targeted twice (Ziggs' bomblets). Unlike 'Nearest N enemies' the set SIZE follows Count, so it survives a Count that grows per cast.",,
+,Farthest unmarked enemy,single enemy,The farthest enemy NOT already carrying this skill's Mark — so repeat casts spread the mark outward instead of re-marking one unit (Akali's shuriken).,,
+,Nearest ally,single ally,The closest ally (Lillia's secondary heal).,,
+,Closest enemy behind Step 1 Aim target,single enemy,The enemy directly behind an earlier step's target (a pierce's second victim).,,
+,Nearest enemy to owner,reference,The nearest enemy to a SUMMON's owner (the summon's own attack target).,,
+Current target,Current,single enemy,The champion's current attack target — the default aim.,,
+,Current (new),single enemy,A freshly re-acquired current target after a kill (Darius' recast).,,
+,Current + 3 nearest,enemy set,The current target plus the 3 nearest enemies (Twisted Fate's cards split among them).,,
+,Current + Left + Right,enemy set,The current target and the enemy on each side of it (Karma's 3rd cast).,,
+,Random (2 hex of Current),single enemy,"A random enemy within 2 hexes of the current target, re-rolled per instance (Jinx).",,
+Enemy state,Knocked-up enemy,single enemy,The enemy that was knocked up.,,
+,Marked enemies,enemy set,Every enemy carrying the Mark a previous step applied (Quinn's arrow rain).,,
+,Enemy entering range,single enemy,The enemy that just entered attack range (an On-Enemy-Enters-Range trigger's target).,,
+,3 enemies that damaged Self most,enemy set,"The 3 enemies that dealt the most damage to the caster during a preceding window — it is resolved from damage taken, not from position (Pantheon).", or the centre of a self-aimed AOE.,
+Position,Board centre,position,"The centre of the board, independent of any unit — summons pile toward it (Yorick).", or the centre of a self-aimed AOE.,
+,Bench slot,position,An empty slot on the player's BENCH — off-board. The only aim that is not a board hex; Jhin's Grand Finale Rifles are summoned there and fire from it., or the centre of a self-aimed AOE.,
+,Away from enemies,position,A hex away from enemies — a reposition/flee.,,
+,Row or column with most enemies,enemy set,The line (row or column) holding the most enemies., or the centre of a self-aimed AOE.,
+,Clustered,enemy set,The densest cluster of enemies — the AOE centres on it (Jarvan / Sona / Thresh)., or the centre of a self-aimed AOE.,
+Random,Random enemy in range,per-instance,"A random enemy within the caster's range, re-rolled per instance (Kennen's Jolts).",,
+Reference,Step [N] Aim target,reference,Whatever an earlier Step 1 aimed at (a sequenced follow-up / delayed blast rides it).,,
+,Summon,reference,The summoned unit itself acts (a second action source)., or the centre of a self-aimed AOE.,
+,Hex That Projectile Hit,reference,"The hex where an earlier step's projectile actually landed. An AOE that detonates on impact centres HERE — not on the unit the projectile was aimed at, which is a different claim: a First-Hit projectile can stop on whoever it meets first, and re-reading 'Current'/'Clustered' at detonation time can drift to a hex the projectile never reached.", or the centre of a self-aimed AOE.,
+Self,Self,self,The caster's own hex — a self-cast, buff, or the centre of a self-aimed AOE.
+,,,,,
+,How to read this tab,,,,
+,"Aim Target is now a VALIDATED vocabulary (2026-07-18, the user's call): it names WHICH unit(s) an action targets, and every Hero cell must be a key here. It absorbed the target-SELECTION values that used to live in 'Spread' (Same target folded into the plain single-target aim; Each to its own target, Split across nearest/farthest N, Split across marked, Current + Left + Right became the 'enemy set' / 'per-instance' rows here). 'Spread' kept only geometric SHAPE and was renamed 'Volley Shape'.",,,,
+,"'Kind' groups the values (single enemy / enemy set / single ally / ally set / self / position / per-instance / reference) — it is documentation, not a separate checked column. A multi-instance action at an 'enemy set' aim SPLITS its Count among that set; at a single aim it converges. '—' means no aim (a passive self-buff with Recipient Self, an untethered summon).",,,,

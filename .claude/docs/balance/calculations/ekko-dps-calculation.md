@@ -38,11 +38,11 @@ This document provides the step-by-step mathematical calculations for Ekko's bas
 | :--- | :--- | :--- | :---: | :---: | :---: |
 | ATC | `ceil(Max Mana / 10)` | `ceil(50 / 10)` | 5 | 5 | 5 |
 | Cycle Duration | `ATC / AS + Lockout` | `5 / 0.80 + 0.8` | 7.050s | 7.050s | 7.050s |
-| Auto Attack DPS | `(ATC × AD × Crit) / Cycle` | `(5 × [AD] × 1.10) / 7.050s` | 35.5 | 53.2 | 80.1 |
+| Auto Attack DPS | `(ATC × AD × Crit) / Cycle` | `(5 × [AD] × 1.10) / 7.050s` | 39.0 | 58.5 | 88.2 |
 | Spell Base (1 Target) | `Spell` | `[255, 380, 570]` | 255.0 | 380.0 | 570.0 |
 | Spell Damage | `Spell Base × Target Density × Crit` | `[255.0, 380.0, 570.0] × 1.0 × 1.10` | 280.5 | 418.0 | 627.0 |
-| Spell DPS | `Spell Damage / Cycle` | `[Spell Damage] / 7.050s` | 36.2 | 53.9 | 80.9 |
-| **Total DPS** | `Auto DPS + Spell DPS` | `Auto DPS + Spell DPS` | **71.6** | **107.1** | **161.0** |
+| Spell DPS | `Spell Damage / Cycle` | `[Spell Damage] / 7.050s` | 39.8 | 59.3 | 88.9 |
+| **Total DPS** | `Auto DPS + Spell DPS` | `Auto DPS + Spell DPS` | **78.8** | **117.8** | **177.1** |
 
 ---
 
@@ -73,11 +73,11 @@ This document provides the step-by-step mathematical calculations for Ekko's bas
 | :--- | :--- | :--- | :---: | :---: | :---: |
 | ATC | `ceil(Max Mana / 10)` | `ceil(50 / 10)` | 5 | 5 | 5 |
 | Cycle Duration | `ATC / AS + Lockout` | `5 / 1.00 + 0.8` (Note: cycle duration is 5.800s) | 5.800s | 5.800s | 5.800s |
-| Auto Attack DPS | `(ATC × AD_equipped × Crit) / Cycle` | `(5 × [Equipped AD] × 1.15 Crit) / 5.800s` | 93.8 | 140.3 | 210.5 |
+| Auto Attack DPS | `(ATC × AD_equipped × Crit) / Cycle` | `(5 × [Equipped AD] × 1.28 Crit) / 5.800s` | 71.7 | 108.1 | 162.2 |
 | Spell Base (1 Target) | `Spell` | `[255, 380, 570]` | 255.0 | 380.0 | 570.0 |
 | Spell Damage | `Spell Base × AP × Crit` | `[255, 380, 570] × 1.95 × 1.28` (Hextech Gunblade + Titan + JG) | 636.5 | 948.5 | 1422.7 |
-| Spell DPS | `Spell Damage / Cycle` | `[Spell Damage] / 5.800s` | 109.7 | 164.0 | 245.9 |
-| **Total DPS** | `Auto DPS + Spell DPS` | `Auto DPS + Spell DPS` | **203.5** | **304.3** | **456.4** |
+| Spell DPS | `Spell Damage / Cycle` | `[Spell Damage] / 5.800s` | 109.7 | 163.5 | 245.3 |
+| **Total DPS** | `Auto DPS + Spell DPS` | `Auto DPS + Spell DPS` | **181.4** | **271.7** | **407.5** |
 
 ---
 

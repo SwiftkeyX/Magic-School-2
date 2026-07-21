@@ -25,8 +25,8 @@ This document provides the step-by-step mathematical calculations for Aphelios's
 | **Cast Lockout** | 1.0s |
 
 ### 3. Skill Description & Mechanics
-*   **Skill**: Fires a blast dealing physical damage: AD * 2.00 / 2.00 / 2.50 in a 2-hex area. Equips Chakrams (+3 base, +1 per enemy hit). Each Chakram adds +8% AD bonus physical damage on-hit, totaling +48% AD scaling bonus per attack.
-*   **Mechanical Timing & Assumptions**: spell_base is [0, 0, 0] and spell_ad_ratio is [2.00, 2.00, 2.50]. Overrides incorporate complex stacking Chakram damage.
+*   **Skill**: Fires a blast dealing physical damage: AD * 2.40 / 2.40 / 7.50 in a 2-hex area. Equips Chakrams (+3 base, +1 per enemy hit). Each Chakram adds +7/7/15% AD bonus physical damage on-hit, totaling +42/42/90% AD scaling bonus per attack.
+*   **Mechanical Timing & Assumptions**: spell_base is [0, 0, 0] and spell_ad_ratio is [2.40, 2.40, 7.50]. Overrides incorporate complex stacking Chakram damage.
 
 ---
 
@@ -38,11 +38,11 @@ This document provides the step-by-step mathematical calculations for Aphelios's
 | :--- | :--- | :--- | :---: | :---: | :---: |
 | ATC | `ceil(Max Mana / 10)` | `ceil(100 / 10)` | 10 | 10 | 10 |
 | Cycle Duration | `ATC / AS + Lockout` | `10 / 0.75 + 1.0` | 14.670s | 14.670s | 14.670s |
-| Auto Attack DPS | `(ATC × AD × Crit) / Cycle` | `(10 × [AD] × 1.10) / 14.670s` | 44.3 | 66.8 | 99.5 |
+| Auto Attack DPS | `((5.25 × AD × [1.42, 1.42, 1.90] + 4.75 × AD) × Crit) / Cycle` | `([12.205, 12.205, 14.725] × [AD] × 1.10) / 14.670s` | 59.5 | 89.7 | 161.2 |
 | Spell Base (1 Target) | `Spell` | `[0, 0, 0]` | 0.0 | 0.0 | 0.0 |
-| Spell Damage | `AD × (2.00 blast × 3.0 targets + 5.25 Chakrams × 0.48)` | `[65, 98, 146] × (6.00 + 2.52)` | 553.8 | 835.0 | 1462.9 |
-| Spell DPS | `Spell Damage / Cycle` | `[Spell Damage] / 14.670s` | 37.8 | 56.9 | 99.7 |
-| **Total DPS** | `Auto DPS + Spell DPS` | `Auto DPS + Spell DPS` | **82.1** | **123.7** | **199.2** |
+| Spell Damage | `AD × Blast Ratio × Targets × Crit` | `[65, 98, 146] × [7.20, 7.20, 22.50] × 1.10` | 514.8 | 776.2 | 3613.5 |
+| Spell DPS | `Spell Damage / Cycle` | `[Spell Damage] / 14.670s` | 35.1 | 52.9 | 246.3 |
+| **Total DPS** | `Auto DPS + Spell DPS` | `Auto DPS + Spell DPS` | **59.5**<br>*(or 94.6 with Spell)* | **89.7**<br>*(or 142.6 with Spell)* | **161.2**<br>*(or 407.5 with Spell)* |
 
 ---
 
@@ -59,8 +59,8 @@ This document provides the step-by-step mathematical calculations for Aphelios's
 
 | Stat | Formula | Calculation | 1★ | 2★ | 3★ |
 | :--- | :--- | :--- | :---: | :---: | :---: |
-| AD Mult | `1.00 + [Item AD Percent]` | `1.00 + [AD buffs]` | 2.00× | 2.00× | 2.00× |
-| Equipped AD | `round(AD_base × AD_Mult)` | `round([AD Array] × 2.00)` | 130 | 196 | 292 |
+| AD Mult | `1.00 + [Item AD Percent]` | `1.00 + [AD buffs]` | 2.01× | 2.01× | 2.01× |
+| Equipped AD | `round(AD_base × AD_Mult)` | `round([AD Array] × 2.01)` | 131 | 197 | 293 |
 | AS Equipped | `AS_base × (1.00 + AS_bonus)` | `AS_average` | 1.40 | 1.40 | 1.40 |
 | AP Total | `AP_base + AP_items` | `100 + [AP buffs]` | 100 | 100 | 100 |
 | Crit Chance | `Crit_base + Crit_items` | `25% + [Crit buffs]` | 60% | 60% | 60% |
@@ -73,11 +73,11 @@ This document provides the step-by-step mathematical calculations for Aphelios's
 | :--- | :--- | :--- | :---: | :---: | :---: |
 | ATC | `ceil(Max Mana / 10)` | `ceil(100 / 10)` | 10 | 10 | 10 |
 | Cycle Duration | `ATC / AS + Lockout` | `10 / 1.40 + 1.0` (Note: cycle duration is 7.860s) | 7.860s | 7.860s | 7.860s |
-| Auto Attack DPS | `(ATC × AD_equipped × Crit) / Cycle` | `(10 × [Equipped AD] × 1.35 Crit) / 7.860s` | 198.5 | 300.8 | 447.3 |
+| Auto Attack DPS | `((9.8 × AD_equipped × [1.42, 1.42, 1.90] + 0.2 × AD_equipped) × Crit) / Cycle` | `([14.116, 14.116, 18.82] × [Equipped AD] × 1.24 Crit) / 7.860s` | 291.9 | 438.9 | 870.2 |
 | Spell Base (1 Target) | `Spell` | `[0, 0, 0]` | 0.0 | 0.0 | 0.0 |
-| Spell Damage | `AD_equipped × (2.00 blast × 3.0 targets + 9.80 Chakrams × 0.48) × Crit` | `[130, 196, 292] × (6.00 + 4.704) × 1.24` | 1725.7 | 2601.8 | 3875.9 |
-| Spell DPS | `Spell Damage / Cycle` | `[Spell Damage] / 7.860s` | 212.4 | 321.8 | 545.7 |
-| **Total DPS** | `Auto DPS + Spell DPS` | `Auto DPS + Spell DPS` | **410.9** | **622.6** | **993.0** |
+| Spell Damage | `AD_equipped × Blast Ratio × Targets × Crit` | `[131, 197, 293] × [7.20, 7.20, 22.50] × 1.24` | 1169.6 | 1759.6 | 8174.6 |
+| Spell DPS | `Spell Damage / Cycle` | `[Spell Damage] / 7.860s` | 148.8 | 223.9 | 1040.0 |
+| **Total DPS** | `Auto DPS + Spell DPS` | `Auto DPS + Spell DPS` | **291.9**<br>*(or 440.7 with Spell)* | **438.9**<br>*(or 662.8 with Spell)* | **870.2**<br>*(or 1910.2 with Spell)* |
 
 ---
 

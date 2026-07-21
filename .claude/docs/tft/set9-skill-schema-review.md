@@ -594,3 +594,76 @@ A zero-diff first run proves the CSV reproduces the sheet *exactly* — the expo
 A review round used to mean **a new 300-line patch script** that would then be re-run for ever. It now means: **edit the CSV, run one script.** The git diff shows exactly which cells moved — which is the thing a patch script could never show.
 
 And the "two scripts fight over one cell" bug is no longer something the tests catch. **It is something the architecture forbids.**
+
+---
+
+## P. `Role` normalised, `Damage Type` split out (2026-07-21)
+
+The user's question was short: *"The role column in set9 and set10 should only use Tank/Fighter/Mage/Marksman/Assassin following Archetype Review tab. Is that make sense?"*
+
+It did, and the reason it did is that `Role` was the one identity column that could not be **compared across the two sets**:
+
+| Tab | What `Role` held |
+|---|---|
+| `Hero set 9` | Carry 41 · Tank 23 · Support 11 — **3 values** |
+| `Hero set 10` | APTank 14 · ADFighter 8 · ADCarry 5 · ADTank 5 · ADCaster 5 · APCaster 5 · … — **13 values** |
+
+Sixteen strings describing five actual jobs. The `Dashboard` tab has shipped a **Role dropdown filter** since round 14 that could not answer *"show me every Marksman"*, because no such value existed in either set.
+
+### P.1 This reverses D4 — for the second time, and in the other direction
+
+D4 said **"leave `Role` alone as imported source data."** Round 11d had already partly reversed it: `Role` turned out to predict 13 of the user's 17 reviewed champions where the damage proxy predicted 2, so the column stopped being ignored and became the *primary signal*. The distinction drawn then was *"Role is still not written to, but it is now read."*
+
+That distinction is now gone. **`Role` is written to, and is no longer refreshable from source.** It holds the user's reviewed judgement — his 14 corrections and his four flat disagreements with the source (Warwick, Urgot in both sets, and Olaf are Fighters where the source says Tank; Nilah is a Marksman despite being melee at range 2).
+
+### P.2 The derivation became circular, and not harmlessly
+
+`build_archetype_review.py`'s `role()` **read** the imported column. Writing its own output back into its input made it self-feeding — and the failure would not have been a stable no-op:
+
+> Its ranged branch tested `role.startswith("AD")` against source strings like `ADCaster`. Against a normalised `Marksman` that test fails, the champion falls through to be re-judged on class, and **Mage and Marksman flip on a rebuild.** Only the `"Tank" in role` test happens to be idempotent.
+
+So `role()` is now a passthrough, and `CLASS_FN`, `function()`, `is_assassin()` and `USER_ROLE` were **deleted rather than left unused**. This file has already been bitten by a mapping that outlived its vocabulary — `Strategist → Support` kept resolving to a role that no longer existed and sent Teemo to Marksman. **Dead code that still computes a plausible answer is the dangerous kind.**
+
+### P.3 `Snipe Backline` lost its guard silently
+
+The tag excluded Senna with `"Support" not in ch["role"]`. Removing `Support` from the vocabulary made that test **vacuously true for every champion** — the kind of break that raises nothing and changes an output. It was found by grepping for readers of the old vocabulary before the write, not after.
+
+Asked, the user's answer was **yes, Senna belongs** (4 tags → 5). The data had argued the same all along: her beam is `235/250/2000% AD`, the highest of the group, against Akshan's `125%` — and he had called Akshan a sniper. She and Set 10 Lux are otherwise identical rows (Laser Shot, Pierce-All, aim `Farthest`).
+
+### P.4 Damage type had to be kept, because only one set ever stated it
+
+Collapsing sixteen strings onto five nouns throws away the `AD`/`AP` prefix — and **that prefix is the only place either set states a champion's damage type.** `Scaling Type` does not: it holds `Derived` / `Stacking` / `Per Tick`. Recovering it otherwise means regexing `% AD` / `% AP` out of `Amount`.
+
+So it became its own identity column, and the schema went **32 → 33 columns**, `Damage Type` sitting at index 3 directly after `Role`.
+
+**Set 10's values are stated** (read off the prefix before it was overwritten). **Set 9's are derived** — the stat the champion's *ability damage* scales on, meaning an `Attack` category effect row. Utility scaling is deliberately ignored, which is the whole rule: Warwick's only AP number is a `30/35/40% AP` heal and Kled's is an Attack Speed buff, and both deal their damage with auto-attacks.
+
+**The derivation was tested against Set 10 before being trusted on Set 9, where the answer was already stated: 59 of 60.** The single miss is Olaf, and he misses for the honest reason — his ability deals no scaled damage at all, so the rule had nothing to read and fell through to a utility number. That is why the seven Set 9 champions in the same position are **hand calls** (Orianna, Maokai, Taric → AP; Kled, Warwick → AD; Cho'Gath and Ryze → `—`) rather than being handed to a fallback heuristic. **A rule that abstains is worth more than one that always answers.**
+
+`—` is an answer here, not a gap: Cho'Gath scales on `12% of the target's max HP` and Ryze on `150/200/300%` of his own Armor + MR.
+
+### P.5 What was lost, stated plainly
+
+`Role` + `Damage Type` + `Range` reconstruct almost all of Set 10's strings. **`HighMana` (5 champions) and `Crit` (1) have nowhere to go** — Max Mana is not a Hero-tab column. Flagged to the user before the write; he accepted the drop.
+
+### P.6 A column insert breaks every index that was not a name
+
+Invariant #1 says columns are addressed **by name**. Three readers had drifted from it, and inserting at index 3 shifted everything after it:
+
+| Reader | What it would have done |
+|---|---|
+| `flatten.py` `ACTION_COL = 15` | read `Aim Target` as the action name → **all 462 rows lose their `Action group`** |
+| `build_archetype_review.py` `r[7]`, `r[8]` | read a Class as the Range and the Range as the Summary |
+| `build_roster_json.py` `range(32)` | every field after `Role` off by one |
+
+`flatten.py`'s two constants are now **derived from the header**; the archetype reads go through the existing header map. `build_roster_json.py` keeps its positional tuple, which is legitimate — it is checked against the header on load, which is what a positional map needs to be safe.
+
+### P.7 The sheet-side lesson: an insert shifts merges *mid-batch*
+
+`insertDimension` and the super-header merge repair **cannot share a batch**. Google applies requests in order and shifts existing merges as part of the insert, so an `unmergeCells` naming the pre-insert span (`14–24`) then addresses a range that is no longer a whole merged block, and the API rejects the **entire** batch:
+
+```
+[400]: Invalid requests[1].unmergeCells: You must select all cells in a merged range
+```
+
+Batches being atomic made that failure safe — nothing landed, verified before retrying. Split into two phases, the auto-shift turned out to be correct on both tabs (`14–24, 24–32` → `15–25, 25–33`), so phase 2 is an assertion rather than a repair. **It is kept as an assertion**, because a half-covered banner silently swallows every later write to the columns beneath it (invariant #8) and the symptom is slow to recognise.

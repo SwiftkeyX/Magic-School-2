@@ -1,0 +1,12 @@
+Damage Type,What it means,Count,Used by
+AD,The champion's ability damage scales on Attack Damage.,58,"Garen, Samira, Kled, Darius, Sion, Warwick, Caitlyn, Jhin, Twitch, Yasuo, Olaf"
+AP,The champion's ability damage scales on Ability Power.,75,"Kayle, Poppy, Galio, Sona, Jarvan IV, Lux, Taric, Maokai, Orianna, Amumu, Neeko"
+—,"Neither. The champion's damage scales on some OTHER quantity, so the question has no answer for it.",2,"Cho'Gath (12% of the TARGET's max HP), Ryze (150/200/300% of his own Armor + MR)"
+,,,
+How to read this tab,,,
+"Split out of `Role` on 2026-07-21. Set 10's source glues the two together (`ADTank`, `APCaster`, `ADCarryCrit`), so normalising Role onto five nouns would have thrown this away — it is the only place either set states a champion's damage type. Set 9's source never stated it at all.",,,
+"THE TWO SETS' VALUES HAVE DIFFERENT PROVENANCE. Set 10 is STATED: the prefix was read straight off the source's own role string, no inference. Set 9 is DERIVED: it is the stat the champion's ABILITY DAMAGE scales on, read off the `Amount` of its `Attack` effect rows.",,,
+"UTILITY SCALING IS DELIBERATELY IGNORED. A shield or heal that happens to scale on AP does not make a champion a mage — that distinction is the whole rule. Warwick's only AP number is a 30/35/40% AP heal and Kled's is an Attack Speed buff; both deal their damage with auto-attacks, so both are AD.",,,
+"THE DERIVATION WAS TESTED BEFORE IT WAS TRUSTED. Run against Set 10, where the answer is already stated, it agreed on 59 of 60. The single miss is Olaf — and he misses because his ability deals NO scaled damage, so the rule had nothing to read and fell through to a utility number. That is why the seven Set 9 champions in the same position are hand calls (Orianna, Maokai, Taric AP; Kled, Warwick AD; Cho'Gath, Ryze neither) rather than being guessed by a fallback.",,,
+"WHERE A CHAMPION SCALES ON BOTH, THE DAMAGE ROW WINS AND THE LARGER NUMBER TAKES IT, read at TIER 2 — tier 3 is a luxury players do not reach and it skews every comparison (Senna's beam is 235/250/2000% AD, so tier 3 alone would swamp her 200/275% AP).",,,
+"`—` IS AN ANSWER HERE, NOT A GAP. Cho'Gath and Ryze scale on neither stat, and saying so is more useful than forcing them into a bucket they do not belong in.",,,

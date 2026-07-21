@@ -38,11 +38,11 @@ This document provides the step-by-step mathematical calculations for Katarina's
 | :--- | :--- | :--- | :---: | :---: | :---: |
 | ATC | `ceil(Max Mana / 10)` | `ceil(80 / 10)` | 8 | 8 | 8 |
 | Cycle Duration | `ATC / AS + Lockout` | `8 / 0.75 + 1.2` | 12.270s | 12.270s | 12.270s |
-| Auto Attack DPS | `(ATC × AD × Crit) / Cycle` | `(8 × [AD] × 1.10) / 12.270s` | 32.6 | 48.9 | 73.7 |
+| Auto Attack DPS | `(ATC × AD × Crit) / Cycle` | `(8 × [AD] × 1.10) / 12.270s` | 35.9 | 53.8 | 81.0 |
 | Spell Base (1 Target) | `Spell` | `[145, 220, 350]` | 145.0 | 220.0 | 350.0 |
 | Spell Damage | `Spell Base × Dagger Hits × Crit` | `[145.0, 220.0, 350.0] × 4.50 × 1.10` (3 daggers hitting 1.5 targets avg) | 717.8 | 1089.0 | 1732.5 |
-| Spell DPS | `Spell Damage / Cycle` | `[Spell Damage] / 12.270s` | 53.2 | 80.7 | 128.4 |
-| **Total DPS** | `Auto DPS + Spell DPS` | `Auto DPS + Spell DPS` | **85.8** | **129.6** | **202.0** |
+| Spell DPS | `Spell Damage / Cycle` | `[Spell Damage] / 12.270s` | 58.5 | 88.8 | 141.2 |
+| **Total DPS** | `Auto DPS + Spell DPS` | `Auto DPS + Spell DPS` | **94.4** | **142.6** | **222.2** |
 
 ---
 
@@ -73,7 +73,7 @@ This document provides the step-by-step mathematical calculations for Katarina's
 | :--- | :--- | :--- | :---: | :---: | :---: |
 | ATC | `ceil(Max Mana / 10)` | `ceil(80 / 10)` | 8 | 8 | 8 |
 | Cycle Duration | `ATC / AS + Lockout` | `8 / 0.75 + 1.2` (Note: cycle duration is 12.270s) | 12.270s | 12.270s | 12.270s |
-| Auto Attack DPS | `(ATC × AD_equipped × Crit) / Cycle` | `(8 × [Equipped AD] × 1.15 Crit) / 12.270s` | 41.7 | 62.6 | 93.9 |
+| Auto Attack DPS | `(ATC × AD_equipped × Crit) / Cycle` | `(8 × [Equipped AD] × 1.28 Crit) / 12.270s` | 41.7 | 62.6 | 93.9 |
 | Spell Base (1 Target) | `Spell` | `[145, 220, 350]` | 145.0 | 220.0 | 350.0 |
 | Spell Damage | `Spell Base × Dagger Hits × AP × Crit × Spark_amp` | `[145, 220, 350] × 4.50 × 1.55 × 1.28 × 1.15` (JG + Gunblade + Ionic Spark) | 1393.2 | 2113.5 | 3362.2 |
 | Spell DPS | `Spell Damage / Cycle` | `[Spell Damage] / 12.270s` | 113.5 | 172.3 | 274.1 |

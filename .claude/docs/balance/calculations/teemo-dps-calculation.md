@@ -38,11 +38,11 @@ This document provides the step-by-step mathematical calculations for Teemo's ba
 | :--- | :--- | :--- | :---: | :---: | :---: |
 | ATC | `ceil(Max Mana / 10)` | `ceil(50 / 10)` | 5 | 5 | 5 |
 | Cycle Duration | `ATC / AS + Lockout` | `5 / 0.70 + 0.8` | 7.943s | 7.943s | 7.943s |
-| Auto Attack DPS | `(ATC × AD) / Cycle` | `(5 × [40, 60, 90]) / 7.943s` | 25.2 | 37.8 | 56.7 |
+| Auto Attack DPS | `(ATC × AD × Crit) / Cycle` | `(5 × [40, 60, 90] × 1.10) / 7.943s` | 27.7 | 41.6 | 62.3 |
 | Spell Base (1 Target) | `Spell` | `[260, 390, 585]` | 260.0 | 390.0 | 585.0 |
-| Spell Damage | `Spell Base × Target Density` | `[260, 390, 585] × 2.0` | 520.0 | 780.0 | 1170.0 |
-| Spell DPS | `Spell Damage / Cycle` | `[520.0, 780.0, 1170.0] / 7.943s` | 65.5 | 98.2 | 147.3 |
-| **Total DPS** | `Auto DPS + Spell DPS` | `Auto DPS + Spell DPS` | **90.7** | **136.0** | **204.0** |
+| Spell Damage | `Spell Base × Target Density × Crit` | `[260, 390, 585] × 2.0 × 1.10` | 572.0 | 858.0 | 1287.0 |
+| Spell DPS | `Spell Damage / Cycle` | `[572.0, 858.0, 1287.0] / 7.943s` | 72.0 | 108.0 | 162.0 |
+| **Total DPS** | `Auto DPS + Spell DPS` | `Auto DPS + Spell DPS` | **99.7** | **149.6** | **224.3** |
 
 ---
 

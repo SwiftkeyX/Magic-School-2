@@ -1,41 +1,47 @@
 """Reply to the sheet's review comments. Holds the CURRENT round's replies, and nothing else.
 
-Run from repo-root cwd:  python .claude/scripts/tft-set9-skill-modularity/reply.py
+Run from repo-root cwd:
+    python .claude/scripts/tft-set9-skill-modularity/reply.py
 
 Overwrite REPLIES each round; git keeps the history. Comments are left UNRESOLVED — resolving them is
 the user's call, always. A MATCH KEY IS A SUBSTRING OF THE COMMENT'S ROOT and fails SILENTLY, so keep
 keys long, distinctive, and never a prefix of another.
 
-THIS ROUND (round 7b): summon taxonomy + passive 0.x normalization, both BUILT. warn_unmatched=False.
+THIS ROUND (round 17, 2026-07-19): one open comment — grouping the Aim Target tab. Applied.
+warn_unmatched=False: the Skill Range thread was answered last round and must not be re-answered.
 """
 
 from sheet import post_replies
 
-SUMMON = "\n".join([
-    "Built it — three summon actions, split by behaviour:",
+GROUPED = "\n".join([
+    "APPLIED — `Aim Target Types` now has a `Group` column, the rows are sorted into blocks, and the "
+    "group label is merged down each block (the same treatment `Effect Types` gets).",
     "",
-    "  Static Summon  (spawns, stands, attacks):            Set 9 Zed, Azir",
-    "  Charge Summon  (spawns unit[s] that charge in):      Naafiri, Gangplank  (absorbs 'untethered')",
-    "  Hero Summon    (walks the grid + auto-attacks):      Set 10 Zed",
+    "  HP              6   Lowest-HP enemy, Highest HP, [N] lowest-HP enemies,",
+    "                      Lowest-HP Ally, Highest-HP Ally, Lowest-HP Allies",
+    "  Distance        9   Nearest enemy, Farthest, Nearest [N] enemies, ...",
+    "  Current target  5   Current, Current (new), Current + Left + Right, ...",
+    "  Enemy state     4   Knocked-up enemy, Marked enemies, Enemy entering range, ...",
+    "  Position        5   Board centre, Bench slot, Away from enemies, Clustered, ...",
+    "  Reference       3   Step [N] Aim target, Summon, Hex That Projectile Hit",
+    "  Random          1",
+    "  Self            1",
     "",
-    "'Summon' and 'Summon (untethered)' are retired. Each spawned unit still becomes a SECOND action "
-    "source for the steps that follow, so its charge/attack rides on it (Naafiri's packmates keep their "
-    "'Charge [collision=Target-Only]' step; the Charge Summon just declares their nature).",
-])
-
-PASSIVE = "\n".join([
-    "Done — every passive is in the 0.x family now. Single passives moved from '0' to '0.1', and the "
-    "three that were mis-numbered as ACTIVE steps (Zeri's chain, Riven's splash, Urgot's cone, all at "
-    "'2') became 0.1 / 0.2. 30 steps across Set 9 plus the Set 10 passives.",
+    "WHY A NEW COLUMN RATHER THAN REUSING `Kind`. The tab already had `Kind` (single enemy / enemy "
+    "set / single ally / ally set / position / self / reference), but your example cuts ACROSS it: "
+    "`Lowest-HP enemy`, `Lowest-HP Ally` and `[N] lowest-HP enemies` are three different Kinds and you "
+    "want them together. They are two honest axes — `Kind` says WHAT COMES BACK (one unit or many), "
+    "`Group` says HOW THE TARGET IS CHOSEN — so `Kind` stayed as data and `Group` was added for "
+    "reading. Sorting by Kind alone would have split your HP example across three blocks.",
     "",
-    "One note: I renumbered in place, so a passive that currently sits BELOW its active in the sheet "
-    "keeps that file position but reads 0.x. If you want them physically reordered to the TOP of each "
-    "champion's block, say so — that is a bigger row-move and I kept it out for now.",
+    "ONE STRUCTURAL CONSEQUENCE worth recording: `Group` sits in column 0, so the aim KEY moved to "
+    "column 1. Every vocabulary check assumed the key was in column 0, which would have made all 34 "
+    "aim keys read as undefined at once. There is now a `KEY_COL` map naming the exception, and both "
+    "validation paths consult it. VALIDATE passes.",
 ])
 
 REPLIES = [
-    ("made each one a action", SUMMON),        # #2
-    ("should also be step 0.1", PASSIVE),      # #3
+    ("It is still hard to read. Could you also group them", GROUPED),
 ]
 
 if __name__ == "__main__":

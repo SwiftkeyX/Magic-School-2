@@ -26,10 +26,10 @@ All calculations are derived from first principles using base stats sourced dire
 
 | Champion | Hero Archetype | Duration | Star | Base AD | AS | Auto Attack DPS | Spell DPS | Total DPS |
 | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Jinx** | AD backliner, split-target rockets (5 rockets total) | Not specify | 1★<br>2★<br>3★ | 50<br>75<br>113 | 0.75 | 33.9<br>50.9<br>76.6 | 43.5<br>65.9<br>104.4 | **77.4**<br>**116.8**<br>**181.0** |
-| **Teemo** | AP backliner, 1 circular hex AOE (avg to 2 targets) | Not specify | 1★<br>2★<br>3★ | 40<br>60<br>90 | 0.70 | 25.2<br>37.8<br>56.7 | 65.5<br>98.2<br>147.3 | **90.7**<br>**136.0**<br>**204.0** |
-| **Taliyah** | AP backliner, combo knockup synergy (avg to 2 targets) | Not specify | 1★<br>2★<br>3★ | 40<br>60<br>90 | 0.70 | 28.2<br>42.3<br>63.4 | 67.7<br>101.6<br>152.3 | **95.9**<br>**143.9**<br>**215.7** |
-| **Zed** | AD melee assassin, critical strike focus (avg to 2 targets) | Not specify | 1★<br>2★<br>3★ | 55<br>83<br>124 | 0.70 | 35.6<br>53.4<br>80.1 | 33.5<br>50.3<br>75.1 | **69.1**<br>**103.7**<br>**155.2** |
+| **Jinx** | AD backliner, split-target rockets (5 rockets total) | Not specify | 1★<br>2★<br>3★ | 50<br>75<br>113 | 0.75 | 37.3<br>55.9<br>84.2 | 47.9<br>72.5<br>114.9 | **85.2**<br>**128.4**<br>**199.1** |
+| **Teemo** | AP backliner, 1 circular hex AOE (avg to 2 targets) | Not specify | 1★<br>2★<br>3★ | 40<br>60<br>90 | 0.70 | 27.7<br>41.6<br>62.3 | 72.0<br>108.0<br>162.0 | **99.7**<br>**149.6**<br>**224.3** |
+| **Taliyah** | AP backliner, combo knockup synergy (1 active + 2 passive) | Not specify | 1★<br>2★<br>3★ | 40<br>60<br>90 | 0.70 | 28.2<br>42.3<br>63.4 | 54.0<br>81.0<br>121.5 | **82.2**<br>**123.3**<br>**184.9** |
+| **Zed** | AD melee assassin, critical strike focus (3 hits total) | Not specify | 1★<br>2★<br>3★ | 55<br>83<br>124 | 0.75 | 41.8<br>63.1<br>94.3 | 33.2<br>50.9<br>76.9 | **75.0**<br>**114.0**<br>**171.2** |
 
 ### Table 2: Well-Equipped (3-Item) DPS Summary
 *Consolidated comparison across 1★, 2★, and 3★ star levels with 3 core optimal items equipped (applicable for both 15s and 30s fights).*
@@ -39,8 +39,8 @@ All calculations are derived from first principles using base stats sourced dire
 | **Jinx** (Standard) | AD backliner, split-target rockets (5 rockets total) | 15s | 1★<br>2★<br>3★ | 93<br>140<br>210 | 1.35 | 173.7<br>261.4<br>392.2 | 137.4<br>210.8<br>329.9 | **311.1**<br>**472.2**<br>**722.1** |
 | **Jinx** (Standard) | AD backliner, split-target rockets (5 rockets total) | 30s | 1★<br>2★<br>3★ | 93<br>140<br>210 | 1.75 | 214.8<br>323.4<br>485.1 | 170.0<br>260.7<br>408.1 | **384.8**<br>**584.1**<br>**893.2** |
 | **Teemo** (Standard) | AP backliner, 1 circular hex AOE (avg to 2 targets) | Not specify | 1★<br>2★<br>3★ | 40<br>60<br>90 | 0.70 | 29.9<br>44.8<br>67.2 | 194.0<br>291.1<br>436.6 | **223.9**<br>**335.9**<br>**503.8** |
-| **Taliyah** (Standard) | AP backliner, combo knockup synergy (avg to 2 targets) | Not specify | 1★<br>2★<br>3★ | 40<br>60<br>90 | 0.70 | 31.6<br>47.4<br>71.1 | 130.3<br>195.5<br>293.2 | **161.9**<br>**242.9**<br>**364.3** |
-| **Zed** (Standard) | AD melee assassin, critical strike focus (avg to 2 targets) | Not specify | 1★<br>2★<br>3★ | 122<br>183<br>275 | 0.70 | 56.8<br>85.3<br>127.9 | 121.9<br>182.9<br>274.3 | **178.7**<br>**268.2**<br>**402.2** |
+| **Taliyah** (Standard) | AP backliner, combo knockup synergy (1 active + 2 passive) | Not specify | 1★<br>2★<br>3★ | 40<br>60<br>90 | 0.70 | 34.8<br>52.2<br>78.3 | 130.4<br>195.6<br>293.3 | **165.2**<br>**247.8**<br>**371.6** |
+| **Zed** (Standard) | AD melee assassin, critical strike focus (3 hits total) | Not specify | 1★<br>2★<br>3★ | 96<br>145<br>217 | 0.94 | 96.3<br>145.5<br>217.8 | 73.9<br>113.1<br>172.2 | **170.2**<br>**258.6**<br>**390.0** |
 
 ---
 
@@ -56,7 +56,7 @@ All calculations are derived from first principles using base stats sourced dire
 
 #### 🧮 DPS Output Summary
 *   **Baseline (Unequipped)**:
-    *   15s / 30s Fight: 1★: **77.4** | 2★: **116.8** | 3★: **181.0**
+    *   15s / 30s Fight: 1★: **85.2** | 2★: **128.4** | 3★: **199.1**
 *   **Well-Equipped (Guinsoo's + Deathblade + Runaan's)**:
     *   15s Fight (1.35 AS avg): 1★: **311.1** | 2★: **472.2** | 3★: **722.1**
     *   30s Fight (1.75 AS avg): 1★: **384.8** | 2★: **584.1** | 3★: **893.2**
@@ -78,7 +78,7 @@ All calculations are derived from first principles using base stats sourced dire
 
 #### 🧮 DPS Output Summary
 *   **Baseline (Unequipped)**:
-    *   15s / 30s Fight (2.0 targets avg): 1★: **90.7** | 2★: **136.0** | 3★: **204.0**
+    *   15s / 30s Fight (2.0 targets avg): 1★: **99.7** | 2★: **149.6** | 3★: **224.3**
 *   **Well-Equipped (Blue Buff + Jeweled Gauntlet + Deathcap)**:
     *   15s / 30s Fight: 1★: **223.9** | 2★: **335.9** | 3★: **503.8**
 *   **Detailed DPS Calculations**: [Teemo DPS Calculations](file:///c:/Organized%20Files/Working/Unity/Unity%20Project/Magic%20School%202/.claude/docs/balance/calculations/teemo-dps-calculation.md)
@@ -99,9 +99,9 @@ All calculations are derived from first principles using base stats sourced dire
 
 #### 🧮 DPS Output Summary
 *   **Baseline (Unequipped)**:
-    *   15s / 30s Fight (2 boulders): 1★: **95.9** | 2★: **143.9** | 3★: **215.7**
+    *   15s / 30s Fight (1 active + 2 passive): 1★: **82.2** | 2★: **123.3** | 3★: **184.9**
 *   **Well-Equipped (Jeweled Gauntlet + Archangel's + Gunblade)**:
-    *   15s / 30s Fight: 1★: **161.9** | 2★: **242.9** | 3★: **364.3**
+    *   15s / 30s Fight: 1★: **165.2** | 2★: **247.8** | 3★: **371.6**
 *   **Detailed DPS Calculations**: [Taliyah DPS Calculations](file:///c:/Organized%20Files/Working/Unity/Unity%20Project/Magic%20School%202/.claude/docs/balance/calculations/taliyah-dps-calculation.md)
 
 #### 🔍 Analyze DPS
@@ -120,9 +120,9 @@ All calculations are derived from first principles using base stats sourced dire
 
 #### 🧮 DPS Output Summary
 *   **Baseline (Unequipped)**:
-    *   15s / 30s Fight (2 targets): 1★: **69.1** | 2★: **103.7** | 3★: **155.2**
+    *   15s / 30s Fight (3 hits total): 1★: **75.0** | 2★: **114.0** | 3★: **171.2**
 *   **Well-Equipped (Infinity Edge + Titan's + Bloodthirster)**:
-    *   15s / 30s Fight: 1★: **178.7** | 2★: **268.2** | 3★: **402.2**
+    *   15s / 30s Fight: 1★: **170.2** | 2★: **258.6** | 3★: **390.0**
 *   **Detailed DPS Calculations**: [Zed DPS Calculations](file:///c:/Organized%20Files/Working/Unity/Unity%20Project/Magic%20School%202/.claude/docs/balance/calculations/zed-dps-calculation.md)
 
 #### 🔍 Analyze DPS

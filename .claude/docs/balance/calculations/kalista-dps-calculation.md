@@ -38,11 +38,11 @@ This document provides the step-by-step mathematical calculations for Kalista's 
 | :--- | :--- | :--- | :---: | :---: | :---: |
 | ATC | `ceil(Max Mana / 10)` | `ceil(60 / 10)` | 6 | 6 | 6 |
 | Cycle Duration | `ATC / AS + Lockout` | `6 / 0.85 + 0.8` | 8.000s | 8.000s | 8.000s |
-| Auto Attack DPS | `(ATC × AD × Crit) / Cycle` | `(6 × [AD] × 1.10) / 8.000s` | 33.8 | 51.0 | 75.8 |
+| Auto Attack DPS | `(ATC × AD × Crit) / Cycle` | `(6 × [AD] × 1.10) / 8.000s` | 37.1 | 56.1 | 83.3 |
 | Spell Base (1 Target) | `Spell (Spears)` | `[18, 27, 45]` | 18.0 | 27.0 | 45.0 |
 | Spell Damage | `Spell Base × 12.0 spears` (6 attacks + 6 cast) | `[18.0, 27.0, 45.0] × 12.0` (True damage does not crit) | 216.0 | 324.0 | 540.0 |
 | Spell DPS | `Spell Damage / Cycle` | `[Spell Damage] / 8.000s` | 27.0 | 40.5 | 67.5 |
-| **Total DPS** | `Auto DPS + Spell DPS` | `Auto DPS + Spell DPS` | **60.8** | **91.5** | **143.2** |
+| **Total DPS** | `Auto DPS + Spell DPS` | `Auto DPS + Spell DPS` | **64.1** | **96.6** | **150.8** |
 
 ---
 
@@ -73,11 +73,11 @@ This document provides the step-by-step mathematical calculations for Kalista's 
 | :--- | :--- | :--- | :---: | :---: | :---: |
 | ATC | `ceil(Max Mana / 15)` | `ceil(60 / 15)` | 4 | 4 | 4 |
 | Cycle Duration | `ATC / AS + Lockout` | `4 / 2.02 + 0.8` (Note: cycle duration is 3.370s) | 3.370s | 3.370s | 3.370s |
-| Auto Attack DPS | `(ATC × AD_equipped × Crit) / Cycle` | `(4 × [Equipped AD] × 1.15 Crit) / 3.370s` | 102.7 | 154.1 | 245.7 |
+| Auto Attack DPS | `(ATC × AD_equipped × Crit) / Cycle` | `(4 × [Equipped AD] × 1.28 Crit) / 3.370s` | 79.0 | 118.5 | 176.2 |
 | Spell Base (1 Target) | `Spell (Spears)` | `[18, 27, 45]` | 18.0 | 27.0 | 45.0 |
 | Spell Damage | `Spell Base × AP × 12.0 spears × Crit` | `[18, 27, 45] × 1.45 AP × 12.0 × 1.28 Crit` (Spears crit with JG) | 400.9 | 601.3 | 1002.2 |
-| Spell DPS | `Spell Damage / Cycle` | `[Spell Damage] / 3.370s` | 135.5 | 203.3 | 324.2 |
-| **Total DPS** | `Auto DPS + Spell DPS` | `Auto DPS + Spell DPS` | **238.2** | **357.4** | **569.9** |
+| Spell DPS | `Spell Damage / Cycle` | `[Spell Damage] / 3.370s` | 119.0 | 178.4 | 297.4 |
+| **Total DPS** | `Auto DPS + Spell DPS` | `Auto DPS + Spell DPS` | **198.0** | **296.9** | **473.6** |
 
 ---
 

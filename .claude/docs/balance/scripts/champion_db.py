@@ -1,3 +1,4 @@
+
 # champion_db.py
 #
 # ============================================================
@@ -395,32 +396,33 @@ CHAMPIONS = {
 
     # TIER 4 CARRIES
     "Aphelios": {
-        "skill_desc": "Fires a blast dealing physical damage: AD * 2.00 / 2.00 / 2.50 in a 2-hex area. Equips Chakrams (+3 base, +1 per enemy hit). Each Chakram adds +8% AD bonus physical damage on-hit, totaling +48% AD scaling bonus per attack.",
-        "formula_explanation": "spell_base is [0, 0, 0] and spell_ad_ratio is [2.00, 2.00, 2.50]. Overrides incorporate complex stacking Chakram damage.",
+        "skill_desc": "Fires a blast dealing physical damage: AD * 2.40 / 2.40 / 7.50 in a 2-hex area. Equips Chakrams (+3 base, +1 per enemy hit). Each Chakram adds +7/7/15% AD bonus physical damage on-hit, totaling +42/42/90% AD scaling bonus per attack.",
+        "formula_explanation": "spell_base is [0, 0, 0] and spell_ad_ratio is [2.40, 2.40, 7.50]. Overrides incorporate complex stacking Chakram damage.",
         "tier": 4,
         "ad": [65, 98, 146], "as": 0.75, "max_mana": 100, "start_mana": 50, "lockout": 1.0,
         "base_attacks": 10,
         "spell_base": [0, 0, 0],
-        "spell_ad_ratio": [2.00, 2.00, 2.50],
+        "spell_ad_ratio": [2.40, 2.40, 7.50],
         "target_density": 3.0, "nuance": "chakram stacking physical",
-        "base_cycle": 14.67, "base_spell": lambda ad, spell, idx, ratio=[2.00, 2.00, 2.50]: ad * (ratio[idx] * 3.0 + 5.25 * 0.48),
+        "base_cycle": 14.67, "base_spell": lambda ad, spell, idx, ratio=[2.40, 2.40, 7.50]: ad * (ratio[idx] * 3.0 + 5.25 * [0.42, 0.42, 0.90][idx]),
+        "baseline_override": lambda star: [[59.5, 35.1, 94.6], [89.7, 52.9, 142.6], [161.2, 246.3, 407.5]][star-1],
         "equipped_items": ["Guinsoo's Rageblade", "Deathblade", "Infinity Edge"],
-        "eq_ad_mult": 2.00, "eq_as": 1.40, "eq_cycle": 7.86,
-        "eq_spell": lambda ad, spell, idx, ap, crit, amp, ratio=[2.00, 2.00, 2.50]: ad * (ratio[idx] * 3.0 + 9.8 * 0.48) * crit,
-        "equipped_override": lambda star: [[198.5, 212.4, 410.9], [300.8, 321.8, 622.6], [447.3, 545.7, 993.0]][star-1]
+        "eq_ad_mult": 2.01, "eq_as": 1.40, "eq_cycle": 7.86,
+        "eq_spell": lambda ad, spell, idx, ap, crit, amp, ratio=[2.40, 2.40, 7.50]: ad * (ratio[idx] * 3.0 + 9.8 * [0.42, 0.42, 0.90][idx]) * crit,
+        "equipped_override": lambda star: [[291.9, 148.8, 440.7], [438.9, 223.9, 662.8], [870.2, 1040.0, 1910.2]][star-1]
     },
     "Azir": {
         "skill_desc": "Passive: Every 3rd attack, Sand Soldiers deal magic damage. Active: Summons a Sand Soldier.",
-        "formula_explanation": "spell_base represents flat soldier magic damage ([95, 140, 1000]). Summons Sand Soldiers. Overrides match the time-averaged soldier DPS.",
+        "formula_explanation": "spell_base represents flat soldier magic damage ([110, 160, 500]). Summons Sand Soldiers. Overrides match the time-averaged soldier DPS.",
         "tier": 4,
         "ad": [30, 45, 68], "as": 0.75, "max_mana": 50, "start_mana": 10, "lockout": 0.8,
-        "spell_base": [95, 140, 1000], "target_density": 3.0, "nuance": "sand soldier magic",
+        "spell_base": [110, 160, 500], "target_density": 3.0, "nuance": "sand soldier magic",
         "base_cycle": 7.73,
-        "baseline_override": lambda star: [[19.4, 56.4, 75.8], [29.1, 83.1, 112.2], [44.0, 640.4, 684.4]][star-1],
+        "baseline_override": lambda star: [[21.3, 71.8, 93.1], [32.0, 104.5, 136.5], [48.4, 326.6, 375.0]][star-1],
         "equipped_items": ["Guinsoo's Rageblade", "Rabadon's Deathcap", "Jeweled Gauntlet"],
         "eq_cycle": 5.27, "eq_ap": 190.0, "eq_as": 1.10,
-        "eq_spell": lambda ad, spell, idx, ap, crit, amp: [609.2, 895.5, 6800.0][idx] * (ap / 100.0) * crit,
-        "equipped_override": lambda star: [[36.4, 281.1, 317.5], [54.6, 416.7, 471.3], [82.6, 2844.7, 2927.3]][star-1]
+        "eq_spell": lambda ad, spell, idx, ap, crit, amp: [705.1, 1024.0, 3400.0][idx] * (ap / 100.0) * crit,
+        "equipped_override": lambda star: [[36.4, 325.4, 361.8], [54.6, 472.6, 527.2], [82.6, 1569.0, 1651.6]][star-1]
     },
     "Gwen": {
         "skill_desc": "Dashes and snips 3 times in a cone dealing magic damage. Every 3rd cast grants armor and MR.",
