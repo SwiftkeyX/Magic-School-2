@@ -53,19 +53,19 @@ The clamp's actual job is to stop **banking**: without it, a unit that walked 30
 
 ### States and Transitions
 
-A combatant is **Alive** (`CurrentHP > 0`) or **Defeated**. Defeat is terminal — there is no revive, and a defeated unit's grid cell is released immediately. Within Alive, a unit is *engaging* (a target is within `Range`; it attacks, it does not move) or *approaching* (nothing in range; it moves, it does not attack). The transition is re-evaluated every tick from board position — there is no committed state to exit.
+A combatant is **Alive** (`CurrentHP > 0`) or **Dead** (`IsDead`). Death is terminal — there is no revive, and a dead unit's grid cell is released immediately. Within Alive, a unit is *engaging* (a target is within `Range`; it attacks, it does not move) or *approaching* (nothing in range; it moves, it does not attack). The transition is re-evaluated every tick from board position — there is no committed state to exit.
 
 ### Interactions with Other Systems
 
 | System | Interaction |
 |---|---|
-| Hero | `HeroDataSO.ToCombatData(team)` seeds each `HeroDataRuntime`'s stats. The resolver reads them; it never writes back to the asset. |
+| Hero | `HeroDataSeedFactory.ToCombatData(hero, team)` seeds each `HeroDataRuntime`'s stats. The resolver reads them; it never writes back to the asset. |
 | Trait | `ApplyTraitBonuses()` runs **once**, at the top of `BeginBattle()`, before the loop — flat `StatBonus` deltas applied to trait members per team. Stays manager-level; not part of any unit's per-tick turn. |
 | Skill | Mana is gained per **attack**; at `MaxMana` the next attack is empowered by `SkillMultiplier`. The charge/empower logic lives inside `HeroSimulation.TryAttack()`, not the manager. |
 | HeroSimulation | One per unit, wrapping its `HeroDataRuntime`. Owns the actual per-tick writes (`ChargeClocks`/`TryAttack`/`TryMove`/`ClampClocks`); the manager calls into it and translates results into events. Holds no reference back to the manager. |
 | AutoChessHelper | Stateless shared queries the manager needs but doesn't own as its own methods: `GetOpponentsOf()`, `CheckWinCondition()`, `HandleKillIfNeeded()` (grid cleanup + log on a kill). Takes `_combatants`/`_grid` as parameters — same decoupled pattern as `HeroSimulation`, no reference held either direction. Does not fire events; the manager still does that. |
 | HexGrid | Owns occupancy (`SetOccupant` / `ClearOccupant`) and pathing (`FindNearest`, `GetNextStep`). `HeroSimulation.TryMove()` asks (grid passed in directly); the manager also asks for placement. |
-| BattleBoardManager | Subscribes to the resolver's events to drive sprites. Enemy placements come from `GetAutoEnemyPlacements()` — the **same** method the simulation places from, so view and sim cannot desync. |
+| BattleBoardManager | Subscribes to the resolver's events to drive sprites. Enemy placements come from `GetEnemyPlacements()` — the **same** method the simulation places from, so view and sim cannot desync. |
 
 ---
 
@@ -153,7 +153,7 @@ Recorded because both were true *before* this design and silently stopped being 
 
 | This Doc References | Target Doc | Element Referenced | Nature |
 |---|---|---|---|
-| Seeds combatant stats | `production/gdd/Hero.md` | `HeroDataSO.ToCombatData()`, `AttackSpeed` | Data dependency |
+| Seeds combatant stats | `production/gdd/Hero.md` | `HeroDataSeedFactory.ToCombatData()`, `AttackSpeed` | Data dependency |
 | Applies synergy bonuses at start | `production/gdd/Trait.md` | `ApplyTraitBonuses()`, `StatBonus` | Ownership handoff |
 | Mana gain and empowered hit | `production/gdd/Skill.md` | `ManaPerAttack`, `SkillMultiplier`, executed in `HeroSimulation.TryAttack()` | Rule dependency |
 

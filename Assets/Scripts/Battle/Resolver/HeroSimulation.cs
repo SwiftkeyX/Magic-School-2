@@ -23,7 +23,8 @@ namespace MagicSchool.Battle
             Data.MoveCooldown += moveSpeed * tickDelay;
         }
 
-        public void ClampClocks()
+        // This function is to not allow the cooldown to be above 1.
+        public void CooldownCap()
         {
             Data.AttackCooldown = Mathf.Min(Data.AttackCooldown, 1f);
             Data.MoveCooldown = Mathf.Min(Data.MoveCooldown, 1f);
@@ -54,7 +55,7 @@ namespace MagicSchool.Battle
             }
 
             target.CurrentHP -= damage;
-            bool wasKill = target.IsDefeated;
+            bool wasKill = target.IsDead;
 
             Debug.Log($"[AutoBattle] {Data.DisplayName} → {target.DisplayName}: {damage} dmg{(cast ? " [SKILL]" : "")} (HP:{target.CurrentHP}/{target.MaxHP})");
 

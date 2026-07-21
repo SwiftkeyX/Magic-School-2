@@ -11,94 +11,113 @@ namespace MagicSchool.Battle
         // Unified seed API: one list of HeroDataSeed, each tagged with its Team.
         public void SetCombatants(List<HeroDataSeed> units)
         {
-            _combatants.Clear();
+            _data.Combatants.Clear();
             _playerPlacements.Clear();
+            _enemyPlacements.Clear();
 
+            // Unique per instance so mirror teams (same hero on both sides) never collide in
+            // the grid/_units/placement dictionaries. Purely positional -- no authored identity
+            // key is involved (see Hero.md Edge Cases).
             int idx = 0;
             foreach (var u in units)
-            {
-                var data = new HeroDataRuntime
-                {
-                    // Unique per instance so mirror teams (same hero on both sides) never
-                    // collide in the grid/_units/placement dictionaries. Purely positional —
-                    // no authored identity key is involved (see Hero.md Edge Cases).
-                    Id          = $"{u.Team}_{idx++}",
-                    DisplayName = u.DisplayName,
-                    Team        = u.Team,
-                    Icon        = u.Icon,
-                    Tint        = u.Tint,
-                    MaxHP       = u.MaxHP,
-                    CurrentHP   = u.MaxHP,
-                    ATK         = u.ATK,
-                    DEF         = u.DEF,
-                    AttackSpeed = u.AttackSpeed,
-                    Range       = u.Range,
-                    MG          = u.MG,
-                    MR          = u.MR,
-                    MaxMana         = u.MaxMana,
-                    ManaPerAttack   = u.ManaPerAttack,
-                    SkillMultiplier = u.SkillMultiplier,
-                    SkillName       = u.SkillName,
-                    Mana        = 0,
-                    SkillArmed  = false,
-                    Traits      = u.Traits ?? new List<TraitDataSO>(),
-                };
-                _combatants.Add(new HeroSimulation(data));
-            }
+                _data.AddCombatant(u, $"{u.Team}_{idx++}");
 
-            Debug.Log($"[AutoChessManager] SetCombatants complete ({_combatants.Count(c => c.Data.IsPlayer)} players, " +
-                      $"{_combatants.Count(c => !c.Data.IsPlayer)} enemies) — firing OnCombatantsSet.");
+            Debug.Log($"[AutoChessManager] SetCombatants complete ({_data.Combatants.Count(c => c.Data.IsPlayer)} players, " +
+                      $"{_data.Combatants.Count(c => !c.Data.IsPlayer)} enemies) — firing OnCombatantsSet.");
             OnCombatantsSet?.Invoke();
         }
 
-        public void SetUnitPositions(Dictionary<string, HexCoord> placements)
+        public void SetPlayerPlacements(Dictionary<string, HexCoord> placements)
         {
-            if (_battleRunning) { Debug.LogError("[AutoChessManager] SetUnitPositions called after battle started."); return; }
+            if (_battleRunning) { Debug.LogError("[AutoChessManager] SetPlayerPlacements called after battle started."); return; }
             foreach (var kv in placements)
                 _playerPlacements[kv.Key] = kv.Value;
         }
 
-        // The single source of truth for where enemies stand. BeginBattle() places the simulation
-        // from this, and BattleBoardManager spawns the enemy GameObjects from it — so the sprites
-        // and the sim can no longer disagree.
-        public Dictionary<string, HexCoord> GetAutoEnemyPlacements()
+        // Symmetric to SetPlayerPlacements() -- both sides can now receive placement input on
+        // top of their authored default formation (StudentRosterStub / EnemyDatabaseStub).
+        public void SetEnemyPlacements(Dictionary<string, HexCoord> placements)
         {
-            var result = new Dictionary<string, HexCoord>();
-            if (_grid == null) return result;
+            if (_battleRunning) { Debug.LogError("[AutoChessManager] SetEnemyPlacements called after battle started."); return; }
+            foreach (var kv in placements)
+                _enemyPlacements[kv.Key] = kv.Value;
+        }
 
-            int col = 0;
-            int row = _grid.PlayerRowCount;   // first enemy row, immediately past the player's half
-            foreach (var c in _combatants.Where(c => !c.Data.IsPlayer))
+        // Merges manually-set placements (_playerPlacements, via SetPlayerPlacements) over
+        // StudentRosterStub's authored default formation. A unit with neither is left unplaced
+        // -- normal before the player has dragged everything, so this does not error.
+        public Dictionary<string, HexCoord> GetPlayerPlacements()
+        {
+            var result = new Dictionary<string, HexCoord>(_playerPlacements);
+
+            var playerStub = GetComponent<StudentRosterStub>();
+            if (playerStub == null) return result;
+
+            var players  = _data.Combatants.Where(c => c.Data.IsPlayer).ToList();
+            var defaults = playerStub.GetPlacements();
+
+            for (int i = 0; i < players.Count; i++)
             {
-                if (col >= _grid.Cols) { col = 0; row++; }
-                if (row >= _grid.Rows)
-                {
-                    Debug.LogError($"[AutoChessManager] Ran out of enemy rows placing '{c.Data.DisplayName}' — " +
-                                   $"the board ({_grid.Cols}x{_grid.Rows}, {_grid.PlayerRowCount} player rows) " +
-                                   $"cannot seat this many enemies.", this);
-                    break;
-                }
-                result[c.Data.Id] = new HexCoord(col++, row);
+                string id = players[i].Data.Id;
+                if (result.ContainsKey(id) || i >= defaults.Count) continue;
+                result[id] = defaults[i];
             }
             return result;
         }
 
-        // Standalone seed path: populates from the roster components on this GameObject.
-        // Previously this returned silently when a stub was missing, producing an empty board and
-        // an empty bench with no error — the failure mode was indistinguishable from "no heroes
-        // authored". It now names exactly what is missing.
+        // The single source of truth for where enemies stand. BeginBattle() places the simulation
+        // from this, and BattleBoardManager spawns the enemy GameObjects from it — so the sprites
+        // and the sim can no longer disagree. Merges manually-set placements (_enemyPlacements,
+        // via SetEnemyPlacements) over EnemyDatabaseStub's authored default formation — the same
+        // standard as player placement, neither side's starting position is computed.
+        public Dictionary<string, HexCoord> GetEnemyPlacements()
+        {
+            var result = new Dictionary<string, HexCoord>();
+            var enemyStub = GetComponent<EnemyDatabaseStub>();
+            if (enemyStub == null)
+            {
+                Debug.LogError("[AutoChessManager] Cannot place enemies — EnemyDatabaseStub missing from GameObject.", this);
+                return result;
+            }
+
+            var enemies  = _data.Combatants.Where(c => !c.Data.IsPlayer).ToList();
+            var defaults = enemyStub.GetPlacements();
+
+            for (int i = 0; i < enemies.Count; i++)
+            {
+                string id = enemies[i].Data.Id;
+                if (_enemyPlacements.TryGetValue(id, out var input))
+                {
+                    result[id] = input;
+                    continue;
+                }
+                if (i >= defaults.Count)
+                {
+                    Debug.LogError($"[AutoChessManager] No placement for enemy '{enemies[i].Data.DisplayName}' " +
+                                   $"(entry {i}) — not set via SetEnemyPlacements(), and EnemyDatabaseStub has only " +
+                                   $"{defaults.Count} authored placements for {enemies.Count} enemies.", this);
+                    continue;
+                }
+                result[id] = defaults[i];
+            }
+            return result;
+        }
+
+        // Builds the roster from this GameObject's StudentRosterStub + EnemyDatabaseStub, if it
+        // hasn't been seeded already. Errors out naming exactly what's missing, rather than
+        // silently producing an empty board.
         public void EnsureCombatantsInitialized()
         {
-            if (_combatants.Count > 0) return;
+            if (_data.Combatants.Count > 0) return;
 
-            var stub     = GetComponent<StudentRosterStub>();
-            var database = GetComponent<EnemyDatabaseStub>();
+            var playerStub = GetComponent<StudentRosterStub>();
+            var enemyStub  = GetComponent<EnemyDatabaseStub>();
 
-            if (stub == null || database == null)
+            if (playerStub == null || enemyStub == null)
             {
                 var missing = new List<string>();
-                if (stub == null)     missing.Add(nameof(StudentRosterStub));
-                if (database == null) missing.Add(nameof(EnemyDatabaseStub));
+                if (playerStub == null) missing.Add(nameof(StudentRosterStub));
+                if (enemyStub == null)  missing.Add(nameof(EnemyDatabaseStub));
                 Debug.LogError($"[AutoChessManager] Cannot seed the battle — {string.Join(" and ", missing)} " +
                                $"missing from GameObject '{name}'. HexGrid, AutoChessManager, both roster " +
                                $"components and BattleBoardManager must all live on the same GameObject.", this);
@@ -106,8 +125,8 @@ namespace MagicSchool.Battle
             }
 
             var all = new List<HeroDataSeed>();
-            all.AddRange(stub.GetUnits());
-            all.AddRange(database.GetUnits());
+            all.AddRange(playerStub.GetUnits());
+            all.AddRange(enemyStub.GetUnits());
 
             if (all.Count == 0)
                 Debug.LogWarning($"[AutoChessManager] Roster components on '{name}' contain no HeroDataSO assets — " +
@@ -116,26 +135,10 @@ namespace MagicSchool.Battle
             SetCombatants(all);
         }
 
-        public List<CombatantSnapshot> GetCombatantSnapshots()
-        {
-            return _combatants.Select(c => new CombatantSnapshot
-            {
-                Id          = c.Data.Id,
-                DisplayName = c.Data.DisplayName,
-                IsStudent   = c.Data.IsPlayer,
-                Icon        = c.Data.Icon,
-                Tint        = c.Data.Tint,
-                MaxHP       = c.Data.MaxHP,
-                CurrentHP   = c.Data.CurrentHP,
-                Position    = c.Data.Position,
-                Range       = c.Data.Range,
-            }).ToList();
-        }
+        public List<CombatantSnapshot> GetCombatantSnapshots() => _data.GetCombatantSnapshots();
 
-        public int GetCurrentHP(string id) =>
-            _combatants.FirstOrDefault(c => c.Data.Id == id)?.Data.CurrentHP ?? 0;
+        public int GetCurrentHP(string id) => _data.GetCurrentHP(id);
 
-        public int GetMaxHP(string id) =>
-            _combatants.FirstOrDefault(c => c.Data.Id == id)?.Data.MaxHP ?? 0;
+        public int GetMaxHP(string id) => _data.GetMaxHP(id);
     }
 }

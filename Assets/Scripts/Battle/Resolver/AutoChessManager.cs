@@ -44,34 +44,35 @@ namespace MagicSchool.Battle
         public float GameSpeedMultiplier { get; set; } = 1f;
 
         // ── State ────────────────────────────────────────────────────────────
-        // One HeroSimulation per unit, wrapping its HeroDataRuntime. The manager computes turn
-        // order, opponent lists, and win-checks; each HeroSimulation performs its own writes
-        // once told it's that unit's turn (Combat.md Core Rule 1).
-        private readonly List<HeroSimulation> _combatants = new List<HeroSimulation>();
+        // The world state (roster + board) lives in AutoChessData, shared with AutoChessHelper.
+        // HeroSimulation performs its own writes once told it's that unit's turn (Combat.md
+        // Core Rule 1); _playerPlacements/_enemyPlacements and _battleRunning stay here -- pre-
+        // battle setup buffers and the manager's own lifecycle guard, none of it is "world state."
+        private readonly AutoChessData _data = new AutoChessData();
         private readonly Dictionary<string, HexCoord> _playerPlacements = new Dictionary<string, HexCoord>();
-        private HexGrid _grid;
+        private readonly Dictionary<string, HexCoord> _enemyPlacements = new Dictionary<string, HexCoord>();
         private bool _battleRunning;
 
         // ── Lifecycle ────────────────────────────────────────────────────────
-        // _grid is cached here (not in BeginBattle) because GetAutoEnemyPlacements() needs the
-        // board dimensions and is called *before* the battle starts, by BattleBoardManager.
+        // _data.Grid is cached here (not in BeginBattle) because GetEnemyPlacements() needs
+        // the board dimensions and is called *before* the battle starts, by BattleBoardManager.
         private void Awake()
         {
-            _grid = GetComponent<HexGrid>();
+            _data.Grid = GetComponent<HexGrid>();
         }
 
         // ── Battle ───────────────────────────────────────────────────────────
         public void BeginBattle()
         {
             if (_battleRunning) { Debug.LogWarning("[AutoChessManager] Battle already running."); return; }
-            if (_grid == null) { Debug.LogError("[AutoChessManager] HexGrid component required on the same GameObject.", this); return; }
+            if (_data.Grid == null) { Debug.LogError("[AutoChessManager] HexGrid component required on the same GameObject.", this); return; }
 
-            // Place player's unit on the grid — wherever the player dragged it.
-            PlaceUnitOnGrid(_playerPlacements);
+            // Place player's unit on the grid — wherever it was dragged, else its default formation.
+            PlaceUnitOnGrid(GetPlayerPlacements());
 
-            // Place enemy's unit on the grid — auto-generated from the SAME source
-            // BattleBoardManager spawns enemy GameObjects from, so sprites and sim can't desync.
-            PlaceUnitOnGrid(GetAutoEnemyPlacements());
+            // Place enemy's unit on the grid — the SAME source BattleBoardManager spawns enemy
+            // GameObjects from, so sprites and sim can't desync.
+            PlaceUnitOnGrid(GetEnemyPlacements());
 
             // Apply flat trait-synergy bonuses once, per team, before the loop starts.
             ApplyTraitBonuses();
@@ -84,10 +85,10 @@ namespace MagicSchool.Battle
         {
             foreach (var kv in placements)
             {
-                var c = _combatants.FirstOrDefault(x => x.Data.Id == kv.Key);
+                var c = _data.Combatants.FirstOrDefault(x => x.Data.Id == kv.Key);
                 if (c == null) continue;
                 c.Data.Position = kv.Value;
-                _grid.SetOccupant(kv.Value, c.Data.Id);
+                _data.Grid.SetOccupant(kv.Value, c.Data.Id);
             }
         }
 
@@ -99,100 +100,133 @@ namespace MagicSchool.Battle
 
             while (true)
             {
-                // ── PHASE 1 — CHARGE both clocks ────────────────────────────────
-                // Each HeroSimulation charges its own HeroDataRuntime; AttackSpeed is per-unit,
-                // _moveSpeed is shared. That is the whole point.
-                foreach (var c in _combatants.Where(c => !c.Data.IsDefeated))
-                    c.ChargeClocks(_tickDelay, _moveSpeed);
+                // charge attack and move cooldown
+                ChargePhase();
 
-                // ── PHASE 2 — ATTACK  ────────────
-                // Get hero that ready to attack
-                var readyToAttackCombatants = _combatants
-                    .Where(c => !c.Data.IsDefeated && c.Data.AttackCooldown >= 1.0f)
-                    .OrderByDescending(c => c.Data.AttackSpeed)
-                    .ToList();
-
-                foreach (var actor in readyToAttackCombatants)
+                // attack if the attack coolodwn is finished
+                if (AttackPhase())
                 {
-                    if (actor.Data.IsDefeated) continue;
-
-                    var opponents = AutoChessHelper.GetOpponentsOf(_combatants, actor);
-                    if (opponents.Count == 0) break;
-
-                    // Nothing in range: the unit does NOT attack — and does NOT lose its charge.
-                    // It will move in Phase 3 instead. Moving no longer costs a unit its attack.
-                    var result = actor.TryAttack(opponents);
-                    if (result == null) continue;
-
-                    OnCombatantActed?.Invoke(actor.Data.Id, result.Value.TargetId, result.Value.Damage, new List<string>());
-                    AutoChessHelper.HandleKillIfNeeded(_combatants, _grid, result.Value);
-                    if (result.Value.WasKill) OnCombatantDefeated?.Invoke(result.Value.TargetId);
-
-                    if (AutoChessHelper.CheckWinCondition(_combatants)) goto BattleEnd;
-                }
-
-                // ── PHASE 3 — MOVE (charged AND nothing in range) ───────────────
-                var readyToMoveCombatants = _combatants
-                    .Where(c => !c.Data.IsDefeated && c.Data.MoveCooldown >= 1.0f)
-                    .ToList();
-
-                foreach (var actor in readyToMoveCombatants)
-                {
-                    if (actor.Data.IsDefeated) continue;
-
-                    var opponents = AutoChessHelper.GetOpponentsOf(_combatants, actor);
-                    if (opponents.Count == 0) break;
-
-                    // A unit with a target in range stands and fights; TryMove re-checks this itself.
-                    var moveResult = actor.TryMove(opponents, _grid);
-                    if (moveResult != null)
-                        OnCombatantMoved?.Invoke(actor.Data.Id, moveResult.Value.From, moveResult.Value.To);
-                }
-
-                // ── PHASE 4 — CLAMP ─────────────────────────────────────────────
-                // DO NOT fold this into Phase 1. Clamping during the charge (Min(x + delta, 1f))
-                // would pin a unit sitting at 1.02 down to 1.0; it attacks, and lands on 0.0
-                // instead of 0.02 — losing a sliver EVERY cycle and re-quantising attack speed to
-                // the tick rate, which is exactly what the overflow carry above exists to prevent.
-                // Clamping HERE only bites units that could not act, which is what stops a unit
-                // that walked 30 ticks from banking 1.8 attacks and bursting on contact. It
-                // arrives with exactly ONE attack ready. See Combat.md, Core Rules 7-8.
-                foreach (var c in _combatants.Where(c => !c.Data.IsDefeated))
-                    c.ClampClocks();
-
-                // Hard length cap: at _maxBattleTicks (1200 ticks = 120s at 0.1s/tick), declare a
-                // Timeout and end the battle early. The side with more survivors wins.
-                ticks++;
-                if (ticks >= _maxBattleTicks)
-                {
-                    int pCount = _combatants.Count(c => c.Data.IsPlayer && !c.Data.IsDefeated);
-                    int eCount = _combatants.Count(c => !c.Data.IsPlayer && !c.Data.IsDefeated);
-                    var result = new BattleResult { Won = pCount > eCount, TicksElapsed = ticks, TimedOut = true };
-                    Debug.Log($"[AutoBattle] TIMEOUT — {(result.Won ? "PLAYERS WIN" : "PLAYERS LOSE")}");
-                    OnBattleComplete?.Invoke(result);
-                    OnAnyBattleComplete?.Invoke(result);
-                    _battleRunning = false;
+                    bool won = _data.Combatants.Any(c => c.Data.IsPlayer && !c.Data.IsDead);
+                    CompleteBattle(new BattleResult { Won = won, TicksElapsed = ticks, TimedOut = false }, endedEarly: true);
                     yield break;
                 }
+
+                // move if the move cooldown is finished
+                MovePhase();
+
+                // clamp the attack and move cooldown to not make it go above 1
+                ClampPhase();
+
+                ticks++;
+
+                // end the battle early if the time exceed capacity
+                if (OverTimePhase(ticks)) yield break;
 
                 // Only the wall-clock wait is scaled by GameSpeedMultiplier — the sim step above is not.
                 yield return new WaitForSeconds(_tickDelay / Mathf.Max(0.01f, GameSpeedMultiplier));
             }
-            
-            // A label — the jump target of `goto BattleEnd` in the attack phase. It exists to escape
-            // the foreach AND the enclosing while(true) in one jump: a plain `break` would only leave
-            // the inner foreach, and the battle would keep ticking with a dead team. This is the one
-            // case where C# `goto` is the honest tool.
-        BattleEnd:
+        }
+
+        // ── PHASE 1 — CHARGE both clocks ────────────────────────────────────────
+        // Each HeroSimulation charges its own HeroDataRuntime; AttackSpeed is per-unit,
+        // _moveSpeed is shared. That is the whole point.
+        private void ChargePhase()
+        {
+            foreach (var c in _data.Combatants.Where(c => !c.Data.IsDead))
+                c.ChargeClocks(_tickDelay, _moveSpeed);
+        }
+
+        // ── PHASE 2 — ATTACK (charged AND a target in range) ────────────────────
+        // Returns true the instant either side is wiped, so BattleLoop() can end the battle
+        // immediately instead of waiting for the tick to finish.
+        private bool AttackPhase()
+        {
+            var readyToAttackCombatants = _data.Combatants
+                .Where(c => !c.Data.IsDead && c.Data.AttackCooldown >= 1.0f)
+                .OrderByDescending(c => c.Data.AttackSpeed)
+                .ToList();
+
+            foreach (var actor in readyToAttackCombatants)
             {
-                bool won = _combatants.Any(c => c.Data.IsPlayer && !c.Data.IsDefeated);
-                int finalTicks = ticks;
-                var res = new BattleResult { Won = won, TicksElapsed = finalTicks, TimedOut = false };
-                Debug.Log($"[AutoBattle] END — {(won ? "PLAYERS WIN" : "PLAYERS LOSE")} in {finalTicks} ticks");
-                OnBattleComplete?.Invoke(res);
-                OnAnyBattleComplete?.Invoke(res);
-                _battleRunning = false;
+                if (actor.Data.IsDead) continue;
+
+                var opponents = AutoChessHelper.GetOpponentsOf(_data, actor);
+                if (opponents.Count == 0) break;
+
+                // Nothing in range: the unit does NOT attack — and does NOT lose its charge.
+                // It will move in Phase 3 instead. Moving no longer costs a unit its attack.
+                var result = actor.TryAttack(opponents);
+                if (result == null) continue;
+
+                OnCombatantActed?.Invoke(actor.Data.Id, result.Value.TargetId, result.Value.Damage, new List<string>());
+                AutoChessHelper.HandleKillIfNeeded(_data, result.Value);
+                if (result.Value.WasKill) OnCombatantDefeated?.Invoke(result.Value.TargetId);
+
+                if (AutoChessHelper.CheckWinCondition(_data)) return true;
             }
+            return false;
+        }
+
+        // ── PHASE 3 — MOVE (charged AND nothing in range) ───────────────────────
+        private void MovePhase()
+        {
+            var readyToMoveCombatants = _data.Combatants
+                .Where(c => !c.Data.IsDead && c.Data.MoveCooldown >= 1.0f)
+                .ToList();
+
+            foreach (var actor in readyToMoveCombatants)
+            {
+                if (actor.Data.IsDead) continue;
+
+                var opponents = AutoChessHelper.GetOpponentsOf(_data, actor);
+                if (opponents.Count == 0) break;
+
+                // A unit with a target in range stands and fights; TryMove re-checks this itself.
+                var moveResult = actor.TryMove(opponents, _data.Grid);
+                if (moveResult != null)
+                    OnCombatantMoved?.Invoke(actor.Data.Id, moveResult.Value.From, moveResult.Value.To);
+            }
+        }
+
+        // ── PHASE 4 — CLAMP ──────────────────────────────────────────────────────
+        // DO NOT fold this into Phase 1. Clamping during the charge (Min(x + delta, 1f))
+        // would pin a unit sitting at 1.02 down to 1.0; it attacks, and lands on 0.0
+        // instead of 0.02 — losing a sliver EVERY cycle and re-quantising attack speed to
+        // the tick rate, which is exactly what the overflow carry above exists to prevent.
+        // Clamping HERE only bites units that could not act, which is what stops a unit
+        // that walked 30 ticks from banking 1.8 attacks and bursting on contact. It
+        // arrives with exactly ONE attack ready. See Combat.md, Core Rules 7-8.
+        private void ClampPhase()
+        {
+            foreach (var c in _data.Combatants.Where(c => !c.Data.IsDead))
+                c.CooldownCap();
+        }
+
+        // ── PHASE 5 — OVERTIME (tick cap) ────────────────────────────────────────
+        // Hard length cap: at _maxBattleTicks (1200 ticks = 120s at 0.1s/tick), declare a
+        // Timeout and end the battle early. The side with more survivors wins.
+        // Returns true once the battle has ended (BattleLoop() checks this instead of a goto).
+        private bool OverTimePhase(int ticks)
+        {
+            if (ticks < _maxBattleTicks) return false;
+
+            int pCount = _data.Combatants.Count(c => c.Data.IsPlayer && !c.Data.IsDead);
+            int eCount = _data.Combatants.Count(c => !c.Data.IsPlayer && !c.Data.IsDead);
+            CompleteBattle(new BattleResult { Won = pCount > eCount, TicksElapsed = ticks, TimedOut = true }, endedEarly: false);
+            return true;
+        }
+
+        // Fires the battle-end events and resets the running flag. endedEarly distinguishes the
+        // log line only (an early wipe vs. hitting the tick cap) -- both paths are otherwise identical.
+        private void CompleteBattle(BattleResult result, bool endedEarly)
+        {
+            string outcome = result.Won ? "PLAYERS WIN" : "PLAYERS LOSE";
+            Debug.Log(endedEarly
+                ? $"[AutoBattle] END — {outcome} in {result.TicksElapsed} ticks"
+                : $"[AutoBattle] TIMEOUT — {outcome}");
+            OnBattleComplete?.Invoke(result);
+            OnAnyBattleComplete?.Invoke(result);
+            _battleRunning = false;
         }
 
         // Per-hero turn logic (targeting, attack, movement) lives in HeroSimulation.cs; the

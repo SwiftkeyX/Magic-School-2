@@ -64,6 +64,9 @@ namespace MagicSchool.Battle
         [Tooltip("Synergy tags. Fielding enough carriers of a trait activates its bonus.")]
         public List<TraitDataSO> Traits = new List<TraitDataSO>();
 
+        // Projection into the runtime-seed layer lives in HeroDataSeedFactory, not here -- this
+        // asset never needs to know HeroDataSeed exists. See Hero.md Core Rule 3.
+
         // Authoring floors, grouped so a reader sees at a glance that these four are a matched set —
         // each guards one specific silent-failure mode (see the Authoring Guardrails table in
         // Hero.md), not four unrelated constants that happen to sit next to each other.
@@ -86,33 +89,6 @@ namespace MagicSchool.Battle
             SkillMultiplier = Mathf.Max(Guardrails.MinSkillMultiplier, SkillMultiplier);
             MaxMana = Mathf.Max(0, MaxMana);
             Range = Mathf.Max(1, Range);
-        }
-
-        // Projects this hero into a runtime-seed HeroDataSeed for the given team.
-        // Never mutates the asset — Traits is copied into a fresh list.
-        // Tint is resolved to the side this hero is fighting for, so no consumer downstream
-        // ever needs to ask "which team is this?" to know how to draw it.
-        public HeroDataSeed ToCombatData(Team team)
-        {
-            return new HeroDataSeed
-            {
-                DisplayName = DisplayName,
-                Team = team,
-                Icon = Icon,
-                Tint = team == Team.Player ? PlayerTint : EnemyTint,
-                MaxHP = MaxHP,
-                ATK = ATK,
-                DEF = DEF,
-                MG = MG,
-                MR = MR,
-                AttackSpeed = AttackSpeed,
-                Range = Range,
-                MaxMana = MaxMana,
-                ManaPerAttack = ManaPerAttack,
-                SkillMultiplier = SkillMultiplier,
-                SkillName = SkillName,
-                Traits = Traits != null ? new List<TraitDataSO>(Traits) : new List<TraitDataSO>(),
-            };
         }
     }
 }

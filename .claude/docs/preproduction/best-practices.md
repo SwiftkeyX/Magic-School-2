@@ -26,7 +26,7 @@
 // This is a unit's combat data.
 
 // ✅ Names the actual pipeline stage
-// HeroDataSeed: a one-time transfer object, produced once by HeroDataSO.ToCombatData()
+// HeroDataSeed: a one-time transfer object, produced once by HeroDataSeedFactory.ToCombatData()
 // and read once by AutoChessManager.SetCombatants(). Carries no fight-state.
 ```
 

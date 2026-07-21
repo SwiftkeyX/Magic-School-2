@@ -29,7 +29,7 @@ namespace MagicSchool.Battle
         // see the comment above Phase 1 there for how and why.
         public float AttackCooldown;
         public float MoveCooldown;
-        public bool IsDefeated => CurrentHP <= 0;
+        public bool IsDead => CurrentHP <= 0;
 
         public List<TraitDataSO> Traits;        // synergy tags; read by the trait pass at BeginBattle()
         public string CurrentTargetId;        // last basic-attack target

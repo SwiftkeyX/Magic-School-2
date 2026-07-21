@@ -293,9 +293,9 @@ namespace MagicSchool.Battle
             _startBattleButton.style.display = DisplayStyle.None;
             _benchScrollView.style.display   = DisplayStyle.None;
 
-            // Enemy GameObjects are spawned from GetAutoEnemyPlacements() — the same method
+            // Enemy GameObjects are spawned from GetEnemyPlacements() — the same method
             // BeginBattle() now places the simulation from, so sprites and sim cannot disagree.
-            var enemyPlacements = _resolver.GetAutoEnemyPlacements();
+            var enemyPlacements = _resolver.GetEnemyPlacements();
             var enemySnapshots  = _resolver.GetCombatantSnapshots().Where(s => !s.IsStudent);
             foreach (var e in enemySnapshots)
             {
@@ -304,7 +304,7 @@ namespace MagicSchool.Battle
                 if (unit != null) _units[e.Id] = unit;
             }
 
-            _resolver.SetUnitPositions(_pendingPlacements);
+            _resolver.SetPlayerPlacements(_pendingPlacements);
 #if UNITY_EDITOR
             if (_debugPlayerStartHpPct < 1f) _resolver.DebugSetAllPlayerHp(_debugPlayerStartHpPct);
 #endif

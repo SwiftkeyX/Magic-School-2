@@ -10,7 +10,7 @@ namespace MagicSchool.Battle
 #if UNITY_EDITOR
         public void DebugSetAllPlayerHp(float pct)
         {
-            foreach (var c in _combatants)
+            foreach (var c in _data.Combatants)
                 if (c.Data.IsPlayer) c.Data.CurrentHP = Mathf.Max(1, Mathf.RoundToInt(c.Data.MaxHP * pct));
         }
 
