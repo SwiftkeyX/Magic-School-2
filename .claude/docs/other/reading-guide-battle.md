@@ -10,7 +10,7 @@
 
 ## Start here
 
-**`Assets/Scripts/Battle/Resolver/AutoBattleResolver.cs` → the `BattleLoop()` coroutine.**
+**`Assets/Scripts/Battle/Resolver/AutoBattleSimulator.cs` → the `BattleLoop()` coroutine.**
 
 That is the spine of the entire game. Everything else either feeds it data or draws what it decided.
 
@@ -39,11 +39,11 @@ while fighting."
 
 | # | File | Lines | Why this one |
 |---|---|---|---|
-| 4 | **`Resolver/AutoBattleResolver.cs`** | 167 | **The heart.** Go straight to `BattleLoop()`. |
-| 5 | `Resolver/AutoBattleResolver.Attack.cs` | 77 | What one hit does. |
+| 4 | **`Resolver/AutoBattleSimulator.cs`** | 167 | **The heart.** Go straight to `BattleLoop()`. |
+| 5 | `Resolver/AutoBattleSimulator.Attack.cs` | 77 | What one hit does. |
 | 6 | `Resolver/CombatMath.cs` | 27 | The one damage formula. |
-| 7 | `Resolver/AutoBattleResolver.CombatHelpers.cs` | 41 | Targeting + the single damage choke point. |
-| 8 | `Resolver/AutoBattleResolver.Traits.cs` + `Data/TraitData.cs` | 66 + 40 | Synergy. |
+| 7 | `Resolver/AutoBattleSimulator.CombatHelpers.cs` | 41 | Targeting + the single damage choke point. |
+| 8 | `Resolver/AutoBattleSimulator.Traits.cs` + `Data/TraitData.cs` | 66 + 40 | Synergy. |
 
 ### The whole game, in one paragraph
 
@@ -74,7 +74,7 @@ nothing else. See `production/gdd/Combat.md`.
 | # | File | Lines | Why this one |
 |---|---|---|---|
 | 9 | `Managers/HexGrid.cs` + `Data/HexCoord.cs` | 109 + 76 | Where things stand and how they path. `GetNextStep()` is a BFS. `HexCoord` is offset-hex math — read `Distance()` and move on. |
-| 10 | `Resolver/AutoBattleResolver.Setup.cs` | 145 | How a battle gets *seeded*: assets in, `Combatant`s out. |
+| 10 | `Resolver/AutoBattleSimulator.Setup.cs` | 145 | How a battle gets *seeded*: assets in, `Combatant`s out. |
 | 11 | `Managers/BattleBoardManager.cs` | 382 | **Read this last.** |
 | 12 | `Views/BattleUnit.cs` | 310 | One unit's visuals: HP bar, move lerp, attack lunge, death fade. |
 
@@ -145,5 +145,5 @@ Two known gaps you'll notice and should not be confused by:
   `InitManaBar` / `UpdateMana` / `PlayCastText` / `SetCastingVisual`, all marked
   **NOT CURRENTLY CALLED** — they're kept deliberately (per `Skill.md`) for the pass that re-adds
   the events that drive them.
-- **`AutoBattleResolver` has no GDD.** All three existing GDDs (Hero, Skill, Trait) couple to it,
+- **`AutoBattleSimulator` has no GDD.** All three existing GDDs (Hero, Skill, Trait) couple to it,
   but it has no spec of its own. It is the highest-value doc still to write.
