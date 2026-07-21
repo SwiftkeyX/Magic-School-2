@@ -1,14 +1,9 @@
 Trigger,Meaning
-After Step 1,
-After Step 2,
-After Step 3,
+After Step [N],
 Game Start,
-Every N seconds,"PATTERN, not used directly — a recurring action. Store the literal ('Every 3/3/3 seconds'). A recurrence is a WHEN, so it is a Trigger; Condition means only-if and cannot express a schedule."
-Every 3/3/3 seconds,The action repeats on a 3-second timer for the whole fight (Illaoi's tentacles).
-On 10th Attack,
-On 3rd Attack,
-On 3rd Cast,
-On 2nd Cast,"Every other cast — the 2nd, 4th, 6th … (Yorick's BIG ghoul)."
+Every [N] seconds,"PATTERN, not used directly — a recurring action. Store the literal ('Every 3/3/3 seconds'). A recurrence is a WHEN, so it is a Trigger; Condition means only-if and cannot express a schedule."
+On [N] Attack,
+On [N] Cast,"Every other cast — the 2nd, 4th, 6th … (Yorick's BIG ghoul)."
 On Ally Attack,
 On Attack,
 On Bonus-HP Expire,
@@ -23,5 +18,4 @@ On Projectile Hit,
 On Shield Expire,
 When Transformed,
 While Channeling,
-On 4th Cast,The 4th cast of the combat (Annie's passive arms itself there) — the cast-count sibling of 'On 3rd Cast'.
 On Attacked,"The champion was HIT by an attack. The mirror of 'On Attack', which is the champion attacking — Amumu stacks Armor when attacked, not when attacking."
