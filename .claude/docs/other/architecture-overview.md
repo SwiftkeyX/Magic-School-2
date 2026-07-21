@@ -12,7 +12,7 @@
 
 | Coupled To | Type | Strength | Reason |
 |---|---|---|---|
-| Combat (`AutoBattleSimulator`) | Direct method call | High | Feeds `SetCombatants(List<HeroDataSOSeed>)` |
+| Combat (`AutoChessManager`) | Direct method call | High | Feeds `SetCombatants(List<HeroDataSOSeed>)` |
 | Seed sources (`StudentRosterStub`, `EnemyDatabaseStub`) | Direct method call | High | Stubs call `ToCombatData(team)` |
 | Trait | Property read | Low | Exposes `Traits` (`List<TraitDataSO>`); never counts or applies them |
 | Skill | Property read | Low | Exposes `MaxMana` / `ManaPerAttack` / `SkillMultiplier` / `SkillName` |
@@ -25,7 +25,7 @@
 
 | Coupled To | Type | Strength | Reason |
 |---|---|---|---|
-| Combat (`AutoBattleSimulator`) | Direct method call | High | Charge/empower loop lives inside `Attack()` (ownership handoff) |
+| Combat (`AutoChessManager`) | Direct method call | High | Charge/empower loop lives inside `Attack()` (ownership handoff) |
 | Hero | Property read | Low | Reads skill params off `HeroDataSOSeed` |
 | Trait | Rule dependency | Low | No code coupling — skill multiplies the already-buffed `ATK` |
 
@@ -37,7 +37,7 @@
 
 | Coupled To | Type | Strength | Reason |
 |---|---|---|---|
-| Combat (`AutoBattleSimulator`) | Direct method call | High | `ApplyTraitBonuses()` runs at `BeginBattle()`, mutating `HeroDataRuntime` stats |
+| Combat (`AutoChessManager`) | Direct method call | High | `ApplyTraitBonuses()` runs at `BeginBattle()`, mutating `HeroDataRuntime` stats |
 | Battle HUD (`BattleBoardManager`) | Direct method call | High | `RefreshTraitPanel()` calls `GetActiveTraits(Team.Player)` |
 | Hero | Property read | Low | Reads `HeroDataRuntime.Traits` (sourced from `HeroDataSO.Traits`) |
 
@@ -49,7 +49,7 @@ Every GDD couples to these, but none has a GDD of its own.
 
 | System | Type | Strength | Reason |
 |---|---|---|---|
-| Combat (`AutoBattleSimulator`) | GDD NOT FOUND | — | — |
+| Combat (`AutoChessManager`) | GDD NOT FOUND | — | — |
 | Seed sources (`StudentRosterStub`, `EnemyDatabaseStub`) | GDD NOT FOUND | — | — |
 | Battle HUD (`BattleBoardManager`) | GDD NOT FOUND | — | — |
 
