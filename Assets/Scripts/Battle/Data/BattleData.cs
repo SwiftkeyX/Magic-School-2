@@ -9,17 +9,6 @@ namespace MagicSchool.Battle
     // Which side a unit fights for. Replaces the former implicit student/enemy split.
     public enum Team { Player, Enemy }
 
-    // Optional per-unit combat behaviors.
-    //
-    // This enum previously also declared FirstHitDouble, AOEAttack, TakesReducedDamage and
-    // ShadowSurge. None was ever implemented — they appeared in the Inspector dropdown and did
-    // nothing, which is worse than a missing feature because it produces confident, wrong tuning.
-    // Removed per Hero GDD Core Rule 6. Re-add a member only together with the code that reads it.
-    public enum BattleBehaviorFlag
-    {
-        MagicAttack,    // unit strikes with MG/MR instead of ATK/DEF
-    }
-
     public struct BattleResult
     {
         public bool Won;          // true when the player team won
@@ -28,14 +17,13 @@ namespace MagicSchool.Battle
     }
 
     // Unified data contract for any unit entering battle, tagged by Team.
-    // Produced by HeroData.ToCombatData(); consumed by AutoBattleResolver.SetCombatants().
+    // Produced by HeroData.ToCombatData(); consumed by AutoBattleSimulator.SetCombatants().
     //
     // Tint is already resolved to the fighting side by ToCombatData(), so nothing downstream
     // has to branch on Team to know how to draw the unit.
     [Serializable]
     public class UnitCombatData
     {
-        public string Id;
         public string DisplayName;
         public Team   Team;
 
@@ -58,7 +46,6 @@ namespace MagicSchool.Battle
         public float  SkillMultiplier;
         public string SkillName;
 
-        public List<BattleBehaviorFlag> Flags  = new List<BattleBehaviorFlag>();
         public List<TraitData>          Traits = new List<TraitData>();
     }
 
@@ -67,7 +54,6 @@ namespace MagicSchool.Battle
     public class CombatantSnapshot
     {
         public string Id;          // unique per combatant instance
-        public string HeroId;      // hero/type id — stable identity of the unit type
         public string DisplayName;
         public bool   IsStudent;   // true when the unit's Team == Team.Player
         public Sprite Icon;        // authored on HeroData; null → procedural fallback square
@@ -76,6 +62,5 @@ namespace MagicSchool.Battle
         public int    CurrentHP;
         public HexCoord Position;
         public int    Range;
-        public List<BattleBehaviorFlag> Flags;
     }
 }

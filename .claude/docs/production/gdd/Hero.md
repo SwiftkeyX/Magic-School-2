@@ -8,7 +8,7 @@
 
 A Hero is the data definition of a fieldable unit: its identity, base combat stats, presentation, and the Traits it carries. Heroes are authored as `ScriptableObject` assets so designers add or tune units in the Inspector with no recompile. At battle setup a Hero is projected into a runtime `UnitCombatData` for a given team; combat itself is owned by the Combat system, not Hero.
 
-> **Quick reference** — Layer: `Feature` · Priority: `MVP` · Key deps: `Trait`, `Combat (AutoBattleResolver)`
+> **Quick reference** — Layer: `Feature` · Priority: `MVP` · Key deps: `Trait`, `Combat (AutoBattleSimulator)`
 
 > **Governing rule** — `best-practices.md` → *Tunable Data*: ScriptableObject assets, never hardcoded values. Every authored property of a Hero — **including its visual identity** — lives on the asset. A Hero property that requires a C# edit to take effect is a defect, not a design.
 
@@ -30,23 +30,22 @@ The player is assembling a squad of distinct, recognizable characters — each H
 
 1. A Hero is a `HeroData : ScriptableObject` created via `Assets/Create → MagicSchool/Hero`.
 2. A Hero holds:
-   - **Identity** — `Id`, `DisplayName`
+   - **Identity** — `DisplayName`
    - **Presentation** — `Icon` (`Sprite`), `PlayerTint` (`Color`), `EnemyTint` (`Color`). The same Hero fields both teams, tinted differently per side.
    - **Base stats** — `MaxHP`, `ATK`, `DEF`, `MG`, `MR`, `AttackSpeed`, `Range`
    - **Skill params** — `MaxMana`, `ManaPerAttack`, `SkillMultiplier`, `SkillName` (see `Skill.md`)
-   - **Flags** — `List<BattleBehaviorFlag>` (see Rule 6)
    - **Traits** — `List<TraitData>`
-3. `HeroData.ToCombatData(Team team)` returns a `UnitCombatData` copy stamped with `team`, its stats, presentation, `Flags`, and `Traits`. It never mutates the asset.
+3. `HeroData.ToCombatData(Team team)` returns a `UnitCombatData` copy stamped with `team`, its stats, presentation, and `Traits`. It never mutates the asset.
 4. Heroes carry base stats only. Trait bonuses are applied later by the Trait system at battle start — a Hero asset never bakes in synergy bonuses.
 5. Seed sources (`StudentRosterStub` for players, `EnemyDatabaseStub` for enemies) expose `List<HeroData>` and return `UnitCombatData` via `ToCombatData(team)`.
-6. **`BattleBehaviorFlag` contains exactly one member: `MagicAttack`** (unit strikes with MG vs MR instead of ATK vs DEF). The enum previously also declared `FirstHitDouble`, `AOEAttack`, `TakesReducedDamage`, and `ShadowSurge` — **none was ever implemented**. They were removed because an Inspector dropdown that offers a no-op is worse than a missing feature: it produces confident, wrong tuning. Re-add a member only together with the code that reads it.
+6. **There is no per-unit damage-archetype flag.** `BattleBehaviorFlag` (and its sole surviving member, `MagicAttack`) was removed — damage archetype is a property of the *action*, not the unit, so it does not belong on `HeroData` at all. Every attack resolves ATK vs DEF until a real magic-damage mechanic is designed on the skill/action itself (see `Skill.md`).
 7. **Presentation is data, never a code lookup.** No system may map a Hero's `Id` to a color, sprite, or any other visual via a hardcoded `switch`/dictionary. Consumers read `Icon`/`PlayerTint`/`EnemyTint` off the `CombatantSnapshot`. This is what makes Acceptance Criterion 1 (below) hold.
 
 ### Interactions with Other Systems
 
 | System | Interaction |
 |---|---|
-| Combat (`AutoBattleResolver`) | `SetCombatants(List<UnitCombatData>)` consumes the projected data; the resolver builds runtime `Combatant`s. Hero provides data in; owns no combat logic. |
+| Combat (`AutoBattleSimulator`) | `SetCombatants(List<UnitCombatData>)` consumes the projected data; the resolver builds runtime `Combatant`s. Hero provides data in; owns no combat logic. |
 | Trait | Hero exposes `Traits` (`List<TraitData>`). The Trait synergy pass reads these off the resulting `Combatant`s; Hero neither counts nor applies synergies. |
 | Skill | Hero provides the skill params (`MaxMana`/`ManaPerAttack`/`SkillMultiplier`/`SkillName`) consumed by the mana/empower loop in `Attack()`. See `Skill.md`. |
 | Seed sources (`StudentRosterStub`, `EnemyDatabaseStub`) | Hold the authored `HeroData` roster and convert to `UnitCombatData` per team. |
@@ -61,7 +60,7 @@ Replaces the former `StudentCombatData` + `EnemyCombatData` (the duplication was
 
 | Field | Type | Notes |
 |---|---|---|
-| `Id`, `DisplayName` | string | |
+| `DisplayName` | string | |
 | `Team` | `Team` enum (`Player`/`Enemy`) | Replaces the implicit student/enemy split |
 | `Icon` | `Sprite` | Authored on the asset. Null → the procedural fallback square. |
 | `PlayerTint`, `EnemyTint` | `Color` | Per-side tint. Selected by `Team` at projection time. |
@@ -71,7 +70,6 @@ Replaces the former `StudentCombatData` + `EnemyCombatData` (the duplication was
 | `MaxMana`, `ManaPerAttack` | int | Skill charge (0 MaxMana = no skill) — see `Skill.md` |
 | `SkillMultiplier` | float | Empowered-hit multiplier (e.g. 2.0) |
 | `SkillName` | string | Display name of the skill |
-| `Flags` | `List<BattleBehaviorFlag>` | Only `MagicAttack` exists (Core Rule 6) |
 | `Traits` | `List<TraitData>` | Direct SO references |
 
 **Removed fields.** `CRIT` and `Cost` were specified here and authored on every Hero asset, but **neither was ever read by any system** — `CRIT` never reached the damage formula, `Cost` had no shop to spend it in. They are removed rather than left inert; see Open Questions.
@@ -100,7 +98,7 @@ Each of these was authorable before this pass, and each failed **silently**.
 | Scenario | Expected Behavior | Rationale |
 |---|---|---|
 | Hero has an empty/null `Traits` list | Converts fine; contributes to no synergy | Traitless units are valid |
-| Two Heroes share the same `Id` | Allowed at data level; `Id` is a display/lookup key, runtime `Combatant`s are distinguished per instance | Base game has no 3-combine identity rule yet |
+| Two Heroes are the same type (mirror match, duplicate roster entries) | Never collide — `HeroData` carries no authored identity key at all. Each runtime `Combatant`'s instance id is built purely positionally (`Team` + an incrementing index at `SetCombatants()` time) | There was never actually a collision risk to guard against; identity lives in the asset reference, not a hand-typed string |
 | `ToCombatData` called repeatedly | Returns independent copies; asset never mutated | Assets are read-only content |
 
 ---
@@ -111,7 +109,7 @@ Each of these was authorable before this pass, and each failed **silently**.
 |---|---|---|
 | Trait | This depends on it | Data dependency — Hero references `TraitData` |
 | Skill | It depends on this | Data dependency — Skill loop reads Hero's mana/skill params |
-| Combat (`AutoBattleResolver`) | It depends on this | Data dependency — resolver consumes `UnitCombatData` |
+| Combat (`AutoBattleSimulator`) | It depends on this | Data dependency — resolver consumes `UnitCombatData` |
 
 ---
 
@@ -135,7 +133,7 @@ Safe ranges below are enforced by `[Range]` in the Inspector — they are not me
 
 - [ ] **A new Hero requires zero C# edits.** Creating a `HeroData` asset and adding it to a roster fields a unit that renders in its authored `Icon`/tint, fights, and participates in synergies — with **no code change anywhere**. *(Before this pass, a new Hero rendered as an untinted gray square, because `BattleBoardManager` mapped `Id` → color via a hardcoded `switch` on the literals `"knight"` and `"archer"`.)*
 - [ ] `HeroData` assets can be created via `MagicSchool/Hero` and edited in the Inspector.
-- [ ] `ToCombatData(team)` produces a `UnitCombatData` with correct stats, presentation, `Team`, `Flags`, and `Traits`, without mutating the asset.
+- [ ] `ToCombatData(team)` produces a `UnitCombatData` with correct stats, presentation, `Team`, and `Traits`, without mutating the asset.
 - [ ] Seed sources build the battle roster from `HeroData` assets. Base roster: one melee (Knight, range 1) + one ranged (Archer, range 2), each with a Skill and the shared Fighter trait; a mirror match fields the same two on both teams.
 - [ ] No hardcoded unit stats **or unit visuals** remain in code — all live on assets.
 - [ ] An out-of-range value (e.g. `AttackSpeed = 0`, which would let a hero walk up to the enemy and then never swing) is clamped or rejected at author time, not discovered as a 120-second stall at runtime.
@@ -159,4 +157,4 @@ Safe ranges below are enforced by `[Range]` in the Inspector — they are not me
 | Do enemies participate in synergies in the base game? | designer | — | Yes — synergies are counted per-team, so enemy comps can gain traits too |
 | Is there a crit mechanic? | designer | — | **No.** `CRIT` was authored on every Hero but never reached the damage formula. Removed **pending the feature**, not ruled out forever — re-add the field together with the roll in `CombatMath`. |
 | Is there a shop? | designer | — | **No.** `Cost` was "reserved for a future shop" that does not exist. Removed **pending the feature** — re-add with the shop that spends it. |
-| Should the four unimplemented `BattleBehaviorFlag` members come back? | designer | — | Only alongside their implementation. A flag that appears in the Inspector but does nothing is a liability (see Core Rule 6). |
+| Should damage archetype (physical/magic) come back as a per-unit flag? | designer | — | **No.** It belongs on the action, not the unit — re-add it on the skill/action itself, together with a real magic-damage mechanic, not as a `HeroData` flag. |

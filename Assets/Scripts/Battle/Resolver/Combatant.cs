@@ -3,12 +3,11 @@ using UnityEngine;
 
 namespace MagicSchool.Battle
 {
-    // Per-unit runtime simulation state built by AutoBattleResolver.SetCombatants()
+    // Per-unit runtime simulation state built by AutoBattleSimulator.SetCombatants()
     // from UnitCombatData. Never persisted.
     internal class Combatant
     {
         public string Id;          // unique per combatant instance (grid/units/placement key)
-        public string HeroId;      // hero/type id (e.g. "knight") — stable identity of the unit type
         public string DisplayName;
         public Team Team;
         public bool IsPlayer => Team == Team.Player;
@@ -40,7 +39,6 @@ namespace MagicSchool.Battle
         public float MoveCooldown;
         public bool IsDefeated => CurrentHP <= 0;
 
-        public List<BattleBehaviorFlag> Flags;
         public List<TraitData> Traits;        // synergy tags; read by the trait pass at BeginBattle()
         public string CurrentTargetId;        // last basic-attack target
 

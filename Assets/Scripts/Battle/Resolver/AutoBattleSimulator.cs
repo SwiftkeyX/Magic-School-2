@@ -7,7 +7,7 @@ using UnityEngine;
 namespace MagicSchool.Battle
 {
     [RequireComponent(typeof(HexGrid))]
-    public partial class AutoBattleResolver : MonoBehaviour
+    public partial class AutoBattleSimulator : MonoBehaviour
     {
         // ── Events ──────────────────────────────────────────────────────────
         // Setup event — fires at the end of SetCombatants(); subscribers call
@@ -21,7 +21,7 @@ namespace MagicSchool.Battle
         // removed: OnSkillCast, OnManaChanged, OnCastStateChanged — skill system, rebuilding fresh
 
         // Static forwarding event — AudioSystem subscribes here so it does not need
-        // FindObjectOfType to reach a non-singleton AutoBattleResolver instance.
+        // FindObjectOfType to reach a non-singleton AutoBattleSimulator instance.
         public static event Action<BattleResult> OnAnyBattleComplete;
 
         // ── Tuning ───────────────────────────────────────────────────────────
@@ -66,8 +66,8 @@ namespace MagicSchool.Battle
         // ── Battle ───────────────────────────────────────────────────────────
         public void BeginBattle()
         {
-            if (_battleRunning) { Debug.LogWarning("[AutoBattleResolver] Battle already running."); return; }
-            if (_grid == null) { Debug.LogError("[AutoBattleResolver] HexGrid component required on the same GameObject.", this); return; }
+            if (_battleRunning) { Debug.LogWarning("[AutoBattleSimulator] Battle already running."); return; }
+            if (_grid == null) { Debug.LogError("[AutoBattleSimulator] HexGrid component required on the same GameObject.", this); return; }
 
             // _combatants holds BOTH teams — SetCombatants() takes every unit at once and stamps each
             // with a Team. The two sides only differ in where their positions come from, hence the two
@@ -219,7 +219,7 @@ namespace MagicSchool.Battle
             }
         }
 
-        // Combat helpers (targeting, damage) live in AutoBattleResolver.CombatHelpers.cs.
-        // Attack lifecycle (Attack, HandleKill, MoveTowardNearest) lives in AutoBattleResolver.Attack.cs.
+        // Combat helpers (targeting, damage) live in AutoBattleSimulator.CombatHelpers.cs.
+        // Attack lifecycle (Attack, HandleKill, MoveTowardNearest) lives in AutoBattleSimulator.Attack.cs.
     }
 }

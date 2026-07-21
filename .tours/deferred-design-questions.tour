@@ -5,18 +5,18 @@
   "steps": [
     {
       "file": "Assets/Scripts/Battle/Data/HeroData.cs",
-      "description": "**`Flags` / `BattleBehaviorFlag` — this should not exist.**\n\nDamage archetype (physical / magic / both) is a property of the **action**, not of the unit. The target should mitigate against whatever it was actually hit with, per the skill's own description — not against a flag stapled to the attacker.\n\nIt is already dead in practice:\n- `BattleBehaviorFlag` has exactly **one** member (`MagicAttack`).\n- **No** hero asset sets it.\n- Every hero has `MG: 0`.\n- So `isMagic` at `AutoBattleResolver.Attack.cs:15` is **always false** at runtime.\n\nDon't delete it in isolation — it should die *together with* the skill rebuild that replaces it, since that's what rewrites `Hero.md` Core Rule 6 and `Skill.md:37`.",
-      "pattern": "public List<BattleBehaviorFlag> Flags"
+      "description": "**RESOLVED** — `Flags` / `BattleBehaviorFlag` deleted entirely (user decision: delete now rather than defer to the skill rebuild). Removed from `HeroData`, `UnitCombatData`, `CombatantSnapshot`, `Combatant`, the `isMagic` branch in `AutoBattleSimulator.Attack.cs` (now always ATK vs DEF), and the two hero `.asset` files. `Hero.md` Core Rule 6 and `Skill.md` Core Rule 5 rewritten to match — damage archetype has no per-unit representation until a real magic-damage mechanic is designed on the action/skill itself.",
+      "pattern": "public int MG = 0;"
     },
     {
       "file": "Assets/Scripts/Battle/Data/HeroData.cs",
-      "description": "**`HeroData.Id` — decide what this field is even FOR.**\n\nIt's hand-typed in the Inspector, which invites typos. Two obvious fixes both fail:\n\n- **Make it an enum** → adding a hero would then require a C# edit and a recompile. That is the exact opposite of the editability pass this branch exists for.\n- **Derive it from the asset filename** → conflicts with `Hero.md:103`, which explicitly *permits* two heroes to share an `Id`.\n\nAnd it's nearly vestigial: `HeroData.Id` is read in exactly **one** place (`ToCombatData`), where it's baked into a compound runtime id. The `Combatant.HeroId` that preserves the original is **never read by anything**.\n\nSo the question isn't \"what should we rename it to\" — it's whether it should exist at all. That's a GDD conversation.",
-      "pattern": "public string Id;"
+      "description": "**RESOLVED** — `HeroData.Id` removed entirely (user decision: remove rather than turn into an enum or derive from the filename). Its only real consumer, the compound per-instance `Combatant.Id`, now builds from `{Team}_{index}` alone — still guaranteed unique, one fewer ingredient. The `Combatant.HeroId` mirror (confirmed dead — no consumer anywhere) went with it. `Hero.md` Core Rule 2, the Data Model table, and the duplicate-`Id` Edge Case row rewritten to match.",
+      "pattern": "public string DisplayName;"
     },
     {
-      "file": "Assets/Scripts/Battle/Resolver/AutoBattleResolver.cs",
-      "description": "**The class name is misleading.**\n\nThis doesn't *resolve* a result — it **drives a tick-by-tick simulation**: a coroutine, grid movement, per-action events for the view. \"Resolver\" undersells it into sounding like a pure function.\n\n`AutoBattleSimulator` or `AutoBattleRunner` read truer (it's a MonoBehaviour that *drives* the sim, so an agent noun beats `AutoBattleSimulation`).\n\nDeferred to its own commit because the blast radius is wide: 6 partial-class files, `BattleTest.unity`, and 9 doc files. Mechanically safe though — the scene link is a `.meta` GUID and survives a file rename.\n\n**Related, still open** (see the comments above `BattleLoop()`): the class is long across 6 partials, and there's a proposal for each `Combatant` to tick itself by subscribing to an event from `BattleLoop()` rather than being mutated by the resolver. That would invert who owns state mutation — currently `Combat.md` Core Rule 1 says the resolver is the sole writer.",
-      "pattern": "public partial class AutoBattleResolver : MonoBehaviour"
+      "file": "Assets/Scripts/Battle/Resolver/AutoBattleSimulator.cs",
+      "description": "**RESOLVED** — renamed `AutoBattleResolver` → `AutoBattleSimulator` across 6 partial-class files, `BattleTest.unity` (scene link survived via `.meta` GUID, unaffected by the file rename), and the doc set (`Combat.md`, `Hero.md`, `Skill.md`, `Trait.md`, `architecture-overview.md`, `systems-design.md`, `reading-guide-battle.md`).\n\n**Still open, deliberately not bundled into this rename:** the proposal for each `Combatant` to tick itself by subscribing to an event from `BattleLoop()`, rather than being mutated by the simulator. That would invert who owns state mutation — `Combat.md` Core Rule 1 still says the simulator is the sole writer.",
+      "pattern": "public partial class AutoBattleSimulator : MonoBehaviour"
     }
   ]
 }

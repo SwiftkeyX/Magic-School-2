@@ -7,7 +7,7 @@ namespace MagicSchool.Battle
     // Flat stat-bonus trait synergy pass. Runs once from BeginBattle(): counts distinct
     // heroes per trait per team, then applies the highest satisfied breakpoint's StatBonus to
     // each trait member on that team. Members-only, additive, evaluated once. See Trait GDD.
-    public partial class AutoBattleResolver
+    public partial class AutoBattleSimulator
     {
         private static readonly Team[] AllTeams = { Team.Player, Team.Enemy };
 

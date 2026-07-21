@@ -6,17 +6,16 @@ namespace MagicSchool.Battle
 {
     // Basic-attack resolution and the kill/death handoff.
     // removed: ApplyDamage() — a private wrapper with no caller.
-    public partial class AutoBattleResolver
+    public partial class AutoBattleSimulator
     {
         private void Attack(Combatant actor, Combatant target)
         {
             actor.CurrentTargetId = target.Id;
 
-            bool isMagic   = actor.Flags != null && actor.Flags.Contains(BattleBehaviorFlag.MagicAttack);
-            int rawOffense = isMagic ? actor.MG  : actor.ATK;
-            int rawDefense = isMagic ? target.MR : target.DEF;
-
-            int damage = CombatMath.ApplyMitigation(rawOffense, rawDefense);
+            // Damage archetype (physical/magic) is not yet a mechanic — every attack resolves
+            // ATK vs DEF until a real magic-damage system is designed on the action/skill itself
+            // (see Hero.md Core Rule 6, Skill.md Core Rule 5).
+            int damage = CombatMath.ApplyMitigation(actor.ATK, target.DEF);
 
             // SKILL: a charged unit empowers its next attack (see Skill.md).
             bool cast = false;

@@ -8,7 +8,7 @@
 
 Every Hero has one active Skill powered by a simple mana charge. A unit gains mana each time it basic-attacks; when mana fills, the unit *casts* — its next basic attack is empowered (deals multiplied damage) — then mana resets. This is the genre's "spell" beat in its simplest base-game form: no cast-time channel, no targeting, no mana UI — just a periodic empowered hit that reads as "attack harder."
 
-> **Quick reference** — Layer: `Feature` · Priority: `MVP` · Key deps: `Hero`, `Combat (AutoBattleResolver)`
+> **Quick reference** — Layer: `Feature` · Priority: `MVP` · Key deps: `Hero`, `Combat (AutoBattleSimulator)`
 
 ---
 
@@ -28,13 +28,13 @@ Skills give each Hero a rhythm: charge up over a few attacks, then unleash a big
 
 1. Skill parameters live on `HeroData` (authored) and are copied to `UnitCombatData` → the runtime `Combatant`: `MaxMana`, `ManaPerAttack`, `SkillMultiplier`, `SkillName`.
 2. A `Combatant` tracks runtime `Mana` (starts at 0) and `SkillArmed` (starts false).
-3. On each basic attack (`AutoBattleResolver.Attack()`), in order:
+3. On each basic attack (`AutoBattleSimulator.Attack()`), in order:
    a. Compute mitigated base damage.
    b. **If `SkillArmed`**: `damage = round(damage × SkillMultiplier)`, clear `SkillArmed`, log `SKILL! {name} casts {SkillName}`.
    c. Apply damage.
    d. **Gain mana** (only if `MaxMana > 0`): `Mana += ManaPerAttack`; if `Mana ≥ MaxMana`, set `Mana = 0` and `SkillArmed = true` (armed for the *next* attack).
 4. A unit with `MaxMana ≤ 0` has no skill and never arms.
-5. The empowered attack uses the same offense type as the basic attack (ATK vs DEF, or MG vs MR when the unit has `MagicAttack`). The skill only scales the final damage; it does not change targeting or range.
+5. The empowered attack uses the same offense type as the basic attack (ATK vs DEF — there is no per-unit magic-damage flag; see `Hero.md` Core Rule 6). The skill only scales the final damage; it does not change targeting or range.
 6. Mana is gained *after* damage resolves, so with `MaxMana 3, ManaPerAttack 1` the 4th attack (then 7th, 10th, …) is empowered.
 7. **Damage applies directly to HP — there is no shield layer.** `Combatant.Shield` and the shield-absorb branch in `ApplyDamageAndCheckKill()` were removed: the field was read on every hit but **never written by anything**, so it was dead weight in the hottest path in the game. Re-add it together with the first mechanic that actually grants shield.
 
@@ -49,7 +49,7 @@ Skills give each Hero a rhythm: charge up over a few attacks, then unleash a big
 
 | System | Interaction |
 |---|---|
-| Combat (`AutoBattleResolver`) | The whole charge/empower loop lives inside `Attack()`. No new per-tick phase. |
+| Combat (`AutoBattleSimulator`) | The whole charge/empower loop lives inside `Attack()`. No new per-tick phase. |
 | Hero | Provides `MaxMana`/`ManaPerAttack`/`SkillMultiplier`/`SkillName` via `HeroData` → `UnitCombatData`. |
 | Trait | Independent. Trait bonuses raise base stats (including ATK) before battle; the skill multiplies the *already-buffed* attack, so the two stack. |
 
@@ -90,7 +90,7 @@ final    = SkillArmed ? round(base × SkillMultiplier) : base
 | System | Direction | Nature |
 |---|---|---|
 | Hero | This depends on it | Data dependency — skill params sourced from `HeroData` |
-| Combat (`AutoBattleResolver`) | Ownership handoff | The charge/empower loop is inside `Attack()` |
+| Combat (`AutoBattleSimulator`) | Ownership handoff | The charge/empower loop is inside `Attack()` |
 
 ---
 
@@ -130,7 +130,7 @@ final    = SkillArmed ? round(base × SkillMultiplier) : base
 | This Doc References | Target Doc | Element Referenced | Nature |
 |---|---|---|---|
 | Skill params come from the hero | `production/gdd/Hero.md` | `HeroData` mana/skill fields | Data dependency |
-| Skill scales the basic attack | (Combat resolver) | `Attack()` in `AutoBattleResolver.Attack.cs` | Ownership handoff |
+| Skill scales the basic attack | (Combat resolver) | `Attack()` in `AutoBattleSimulator.Attack.cs` | Ownership handoff |
 | Skill multiplies trait-buffed ATK | `production/gdd/Trait.md` | `StatBonus.ATK` | Rule dependency |
 
 ---

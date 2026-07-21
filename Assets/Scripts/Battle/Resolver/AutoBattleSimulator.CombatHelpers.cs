@@ -3,7 +3,7 @@ using System.Collections.Generic;
 namespace MagicSchool.Battle
 {
     // Targeting helpers and the shared damage choke point.
-    public partial class AutoBattleResolver
+    public partial class AutoBattleSimulator
     {
         private Combatant FindInRange(Combatant actor, List<Combatant> opponents)
         {

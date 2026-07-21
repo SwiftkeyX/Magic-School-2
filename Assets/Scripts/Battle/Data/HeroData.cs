@@ -12,9 +12,6 @@ namespace MagicSchool.Battle
     [CreateAssetMenu(menuName = "MagicSchool/Hero", fileName = "Hero")]
     public class HeroData : ScriptableObject
     {
-        [Tooltip("Stable lookup/display key, e.g. \"knight\". Lowercase, no spaces.")]
-        public string Id;
-
         [Tooltip("Name shown on the bench card and in combat logs.")]
         public string DisplayName;
 
@@ -38,7 +35,7 @@ namespace MagicSchool.Battle
         [Range(MinDefense, 50), Tooltip("Physical mitigation.")]
         public int DEF = 3;
 
-        [Range(0, 80), Tooltip("Magic attack. Used instead of ATK when the MagicAttack flag is set.")]
+        [Range(0, 80), Tooltip("Magic attack. Not yet consumed by combat — no magic-damage mechanic exists (see Hero.md Core Rule 6).")]
         public int MG = 0;
 
         [Range(MinDefense, 50), Tooltip("Magic mitigation.")]
@@ -64,9 +61,6 @@ namespace MagicSchool.Battle
         public string SkillName = "Skill";
 
         [Header("Combat / Synergy")]
-        [Tooltip("MagicAttack makes this unit strike with MG vs MR instead of ATK vs DEF.")]
-        public List<BattleBehaviorFlag> Flags = new List<BattleBehaviorFlag>();
-
         [Tooltip("Synergy tags. Fielding enough carriers of a trait activates its bonus.")]
         public List<TraitData> Traits = new List<TraitData>();
 
@@ -91,14 +85,13 @@ namespace MagicSchool.Battle
         }
 
         // Projects this hero into a runtime-seed UnitCombatData for the given team.
-        // Never mutates the asset — Flags/Traits are copied into fresh lists.
+        // Never mutates the asset — Traits is copied into a fresh list.
         // Tint is resolved to the side this hero is fighting for, so no consumer downstream
         // ever needs to ask "which team is this?" to know how to draw it.
         public UnitCombatData ToCombatData(Team team)
         {
             return new UnitCombatData
             {
-                Id = Id,
                 DisplayName = DisplayName,
                 Team = team,
                 Icon = Icon,
@@ -114,7 +107,6 @@ namespace MagicSchool.Battle
                 ManaPerAttack = ManaPerAttack,
                 SkillMultiplier = SkillMultiplier,
                 SkillName = SkillName,
-                Flags = Flags != null ? new List<BattleBehaviorFlag>(Flags) : new List<BattleBehaviorFlag>(),
                 Traits = Traits != null ? new List<TraitData>(Traits) : new List<TraitData>(),
             };
         }

@@ -6,7 +6,7 @@
 
 ## Summary
 
-Combat is the auto-resolved battle: once `BeginBattle()` is called the player does not act again. `AutoBattleResolver` steps a fixed-rate tick simulation in which every unit runs **two independent clocks** — one for attacking, one for moving — until one side is wiped or the tick cap is hit. It is the only system that mutates `Combatant` state during a fight; everything visual is a subscriber.
+Combat is the auto-resolved battle: once `BeginBattle()` is called the player does not act again. `AutoBattleSimulator` steps a fixed-rate tick simulation in which every unit runs **two independent clocks** — one for attacking, one for moving — until one side is wiped or the tick cap is hit. It is the only system that mutates `Combatant` state during a fight; everything visual is a subscriber.
 
 > **Quick reference** — Layer: `Core` · Priority: `MVP` · Key deps: `Hero`, `Trait`, `Skill`, `HexGrid`
 
@@ -26,7 +26,7 @@ The player arranges heroes on a hex board, presses go, and watches. Each tick (0
 
 ### Core Rules
 
-1. **The simulation is the only writer.** `AutoBattleResolver` is the sole mutator of `Combatant` state during a battle. The view (`BattleBoardManager`) reacts to events (`OnCombatantActed`, `OnCombatantMoved`, `OnCombatantDefeated`, `OnBattleComplete`) and never writes back.
+1. **The simulation is the only writer.** `AutoBattleSimulator` is the sole mutator of `Combatant` state during a battle. The view (`BattleBoardManager`) reacts to events (`OnCombatantActed`, `OnCombatantMoved`, `OnCombatantDefeated`, `OnBattleComplete`) and never writes back.
 2. **Every unit runs two independent clocks.** Both are `0 → 1` fractions of one cycle, not countdown timers.
    - `Combatant.AttackCooldown` charges at **`AttackSpeed × _tickDelay`** per tick — **per-unit**.
    - `Combatant.MoveCooldown` charges at **`_moveSpeed × _tickDelay`** per tick — **shared**, the same value for every unit on the board.

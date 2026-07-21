@@ -6,7 +6,7 @@ namespace MagicSchool.Battle
 {
     // Pre-battle setup API (build combatants, inject placements) and the read-only
     // snapshot/HP accessors UI consumers use.
-    public partial class AutoBattleResolver
+    public partial class AutoBattleSimulator
     {
         // Unified seed API: one list of UnitCombatData, each tagged with its Team.
         public void SetCombatants(List<UnitCombatData> units)
@@ -19,10 +19,10 @@ namespace MagicSchool.Battle
             {
                 _combatants.Add(new Combatant
                 {
-                    // Unique per instance so mirror teams (same hero id on both sides) never
-                    // collide in the grid/_units/placement dictionaries. HeroId keeps the type.
-                    Id          = $"{u.Team}_{u.Id}_{idx++}",
-                    HeroId      = u.Id,
+                    // Unique per instance so mirror teams (same hero on both sides) never
+                    // collide in the grid/_units/placement dictionaries. Purely positional —
+                    // no authored identity key is involved (see Hero.md Edge Cases).
+                    Id          = $"{u.Team}_{idx++}",
                     DisplayName = u.DisplayName,
                     Team        = u.Team,
                     Icon        = u.Icon,
@@ -41,19 +41,18 @@ namespace MagicSchool.Battle
                     SkillName       = u.SkillName,
                     Mana        = 0,
                     SkillArmed  = false,
-                    Flags       = u.Flags  ?? new List<BattleBehaviorFlag>(),
                     Traits      = u.Traits ?? new List<TraitData>(),
                 });
             }
 
-            Debug.Log($"[AutoBattleResolver] SetCombatants complete ({_combatants.Count(c => c.IsPlayer)} players, " +
+            Debug.Log($"[AutoBattleSimulator] SetCombatants complete ({_combatants.Count(c => c.IsPlayer)} players, " +
                       $"{_combatants.Count(c => !c.IsPlayer)} enemies) — firing OnCombatantsSet.");
             OnCombatantsSet?.Invoke();
         }
 
         public void SetUnitPositions(Dictionary<string, HexCoord> placements)
         {
-            if (_battleRunning) { Debug.LogError("[AutoBattleResolver] SetUnitPositions called after battle started."); return; }
+            if (_battleRunning) { Debug.LogError("[AutoBattleSimulator] SetUnitPositions called after battle started."); return; }
             foreach (var kv in placements)
                 _playerPlacements[kv.Key] = kv.Value;
         }
@@ -73,7 +72,7 @@ namespace MagicSchool.Battle
                 if (col >= _grid.Cols) { col = 0; row++; }
                 if (row >= _grid.Rows)
                 {
-                    Debug.LogError($"[AutoBattleResolver] Ran out of enemy rows placing '{c.DisplayName}' — " +
+                    Debug.LogError($"[AutoBattleSimulator] Ran out of enemy rows placing '{c.DisplayName}' — " +
                                    $"the board ({_grid.Cols}x{_grid.Rows}, {_grid.PlayerRowCount} player rows) " +
                                    $"cannot seat this many enemies.", this);
                     break;
@@ -99,8 +98,8 @@ namespace MagicSchool.Battle
                 var missing = new List<string>();
                 if (stub == null)     missing.Add(nameof(StudentRosterStub));
                 if (database == null) missing.Add(nameof(EnemyDatabaseStub));
-                Debug.LogError($"[AutoBattleResolver] Cannot seed the battle — {string.Join(" and ", missing)} " +
-                               $"missing from GameObject '{name}'. HexGrid, AutoBattleResolver, both roster " +
+                Debug.LogError($"[AutoBattleSimulator] Cannot seed the battle — {string.Join(" and ", missing)} " +
+                               $"missing from GameObject '{name}'. HexGrid, AutoBattleSimulator, both roster " +
                                $"components and BattleBoardManager must all live on the same GameObject.", this);
                 return;
             }
@@ -110,7 +109,7 @@ namespace MagicSchool.Battle
             all.AddRange(database.GetUnits());
 
             if (all.Count == 0)
-                Debug.LogWarning($"[AutoBattleResolver] Roster components on '{name}' contain no HeroData assets — " +
+                Debug.LogWarning($"[AutoBattleSimulator] Roster components on '{name}' contain no HeroData assets — " +
                                  $"the board will be empty.", this);
 
             SetCombatants(all);
@@ -121,7 +120,6 @@ namespace MagicSchool.Battle
             return _combatants.Select(c => new CombatantSnapshot
             {
                 Id          = c.Id,
-                HeroId      = c.HeroId,
                 DisplayName = c.DisplayName,
                 IsStudent   = c.IsPlayer,
                 Icon        = c.Icon,
@@ -130,9 +128,6 @@ namespace MagicSchool.Battle
                 CurrentHP   = c.CurrentHP,
                 Position    = c.Position,
                 Range       = c.Range,
-                Flags       = c.Flags != null
-                                  ? new List<BattleBehaviorFlag>(c.Flags)
-                                  : new List<BattleBehaviorFlag>(),
             }).ToList();
         }
 

@@ -2,10 +2,10 @@ using UnityEngine;
 
 namespace MagicSchool.Battle
 {
-    // Editor/QA-only debug hooks, split out of AutoBattleResolver.cs for file-length
+    // Editor/QA-only debug hooks, split out of AutoBattleSimulator.cs for file-length
     // hygiene — these don't participate in battle control flow, they're callable
     // shortcuts for testing.
-    public partial class AutoBattleResolver
+    public partial class AutoBattleSimulator
     {
 #if UNITY_EDITOR
         public void DebugSetAllPlayerHp(float pct)
