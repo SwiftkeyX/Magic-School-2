@@ -24,23 +24,23 @@ OUT = os.path.join(HERE, 'roster-data.json')
 
 SETS = [('set9', 'hero.csv', 'Set 9'), ('set10', 'hero-set10.csv', 'Set 10')]
 
-# Column indices — the 32-col schema. Addressed by name below, never trusted positionally here
+# Column indices — the 33-col schema. Addressed by name below, never trusted positionally here
 # beyond this one map, which is checked against the header on load.
-NAMES = ['Champion', 'Cost', 'Role', 'Origin 1', 'Origin 2', 'Class 1', 'Class 2', 'Range',
-         'Summary', 'Skill Description', 'Step', 'Skill Type', 'Trigger', 'Condition',
+NAMES = ['Champion', 'Cost', 'Role', 'Damage Type', 'Origin 1', 'Origin 2', 'Class 1', 'Class 2',
+         'Range', 'Summary', 'Skill Description', 'Step', 'Skill Type', 'Trigger', 'Condition',
          'Action Source', 'Legacy action', 'Aim Target', 'Offset', 'AOE', 'Skill Range', 'Count',
          'Volley Shape', 'Fire Timing', 'Cast', 'Effect Recipient', 'Effect Category',
          'Effect Detail', 'Amount', 'Scaling Type', 'Scaling', 'Effect Cadence',
          'Effect Duration']
 
-(C_CHAMP, C_COST, C_ROLE, C_O1, C_O2, C_CL1, C_CL2, C_RANGE, C_SUM, C_DESC, C_STEP, C_TYPE,
+(C_CHAMP, C_COST, C_ROLE, C_DMG, C_O1, C_O2, C_CL1, C_CL2, C_RANGE, C_SUM, C_DESC, C_STEP, C_TYPE,
  C_TRIG, C_COND, C_SRC, C_ACT, C_AIM, C_OFF, C_AOE, C_SRANGE, C_COUNT, C_VOLLEY, C_FIRE, C_CAST,
- C_RECIP, C_CAT, C_DET, C_AMT, C_STYPE, C_SCALE, C_CAD, C_DUR) = range(32)
+ C_RECIP, C_CAT, C_DET, C_AMT, C_STYPE, C_SCALE, C_CAD, C_DUR) = range(33)
 
 # Run columns inherit from the row above; Offset/AOE are per-action and do the same.
 RUN = [C_TRIG, C_COND, C_SRC, C_ACT, C_AIM, C_SRANGE, C_COUNT, C_VOLLEY, C_FIRE, C_CAST,
        C_OFF, C_AOE]
-IDENT = list(range(0, 10))
+IDENT = list(range(0, 11))     # 11 since `Damage Type` joined the identity block
 
 
 def cell(row, i):

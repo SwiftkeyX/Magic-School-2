@@ -34,10 +34,12 @@ DATA = os.path.join(HERE, 'data')
 
 SOURCES = [('Set 9', 'hero.csv'), ('Set 10', 'hero-set10.csv')]
 OUT = 'hero-flat.csv'
-NCOLS = 32
 
-
-ACTION_COL = 15          # 0-based index of `Legacy action` in the 32-col schema
+# Both of these USED to be literals (NCOLS = 32, ACTION_COL = 15) and both silently went stale the
+# moment a column was inserted — `Damage Type` landed at index 3 on 2026-07-21 and shifted every
+# column after it, which would have made this script read `Aim Target` as the action name and give
+# all 462 rows an empty Action group. Derived from the header instead, per invariant #1: columns are
+# addressed BY NAME, never by index, because the user edits this schema.
 
 
 def _rows(fname):
@@ -77,7 +79,9 @@ def build_flat(verbose=False):
     for set_label, fname in SOURCES:
         rows = _rows(fname)
         if header is None:
-            head = [(rows[0][i] if i < len(rows[0]) else '') for i in range(NCOLS)]
+            head = [c.strip() for c in rows[0]]
+            NCOLS = len(head)
+            ACTION_COL = head.index('Legacy action')
             header = ['Set'] + head + ['Action group']
 
         carry = [''] * NCOLS
