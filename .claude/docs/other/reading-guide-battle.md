@@ -22,12 +22,12 @@ But it needs ~10 minutes of vocabulary first, or the types won't mean anything. 
 
 | # | File | Lines | Why this one |
 |---|---|---|---|
-| 1 | `Battle/Data/BattleData.cs` | 81 | Every other file speaks in these types: `Team`, `UnitCombatData`, `CombatantSnapshot`, `BattleResult`. Read this and the rest stops looking foreign. |
-| 2 | `Battle/Data/HeroData.cs` | 122 | What a unit **is** when a designer authors it. Jump to `ToCombatData()` at the bottom — that method is the doorway from *authored asset* into *the simulation*. |
-| 3 | `Battle/Resolver/Combatant.cs` | 47 | What a unit **becomes** during a fight. |
+| 1 | `Battle/Data/BattleData.cs` | 81 | Every other file speaks in these types: `Team`, `HeroDataSeed`, `CombatantSnapshot`, `BattleResult`. Read this and the rest stops looking foreign. |
+| 2 | `Battle/Data/HeroDataSO.cs` | 122 | What a unit **is** when a designer authors it. Jump to `ToCombatData()` at the bottom — that method is the doorway from *authored asset* into *the simulation*. |
+| 3 | `Battle/Resolver/HeroDataRuntime.cs` | 47 | What a unit **becomes** during a fight. |
 
-**The single most useful thing you can do:** open `UnitCombatData` (in `BattleData.cs`) and
-`Combatant.cs` side by side. The fields `Combatant` has *extra* — `CurrentHP`, `Mana`,
+**The single most useful thing you can do:** open `HeroDataSeed` (in `BattleData.cs`) and
+`HeroDataRuntime.cs` side by side. The fields `HeroDataRuntime` has *extra* — `CurrentHP`, `Mana`,
 `AttackCooldown`, `MoveCooldown`, `Position`, `SkillArmed` — are exactly "state that exists only
 while fighting."
 
@@ -43,7 +43,7 @@ while fighting."
 | 5 | `Resolver/AutoBattleSimulator.Attack.cs` | 77 | What one hit does. |
 | 6 | `Resolver/CombatMath.cs` | 27 | The one damage formula. |
 | 7 | `Resolver/AutoBattleSimulator.CombatHelpers.cs` | 41 | Targeting + the single damage choke point. |
-| 8 | `Resolver/AutoBattleSimulator.Traits.cs` + `Data/TraitData.cs` | 66 + 40 | Synergy. |
+| 8 | `Resolver/AutoBattleSimulator.Traits.cs` + `Data/TraitDataSO.cs` | 66 + 40 | Synergy. |
 
 ### The whole game, in one paragraph
 
@@ -74,7 +74,7 @@ nothing else. See `production/gdd/Combat.md`.
 | # | File | Lines | Why this one |
 |---|---|---|---|
 | 9 | `Managers/HexGrid.cs` + `Data/HexCoord.cs` | 109 + 76 | Where things stand and how they path. `GetNextStep()` is a BFS. `HexCoord` is offset-hex math — read `Distance()` and move on. |
-| 10 | `Resolver/AutoBattleSimulator.Setup.cs` | 145 | How a battle gets *seeded*: assets in, `Combatant`s out. |
+| 10 | `Resolver/AutoBattleSimulator.Setup.cs` | 145 | How a battle gets *seeded*: assets in, `HeroDataRuntime`s out. |
 | 11 | `Managers/BattleBoardManager.cs` | 382 | **Read this last.** |
 | 12 | `Views/BattleUnit.cs` | 310 | One unit's visuals: HP bar, move lerp, attack lunge, death fade. |
 
@@ -93,8 +93,8 @@ is what actually happens:
 ```
 BattleBoardManager.Start()
   └→ EnsureCombatantsInitialized()      seed from the roster components
-       └→ HeroData.ToCombatData(team)   authored asset  →  UnitCombatData
-            └→ SetCombatants()          UnitCombatData  →  Combatant   ← sim state is born HERE
+       └→ HeroDataSO.ToCombatData(team) authored asset  →  HeroDataSeed
+            └→ SetCombatants()          HeroDataSeed    →  HeroDataRuntime   ← sim state is born HERE
   └→ BuildBoard()   BuildBench()
 
 [you drag a hero onto a tile]

@@ -10,8 +10,8 @@
 | SceneLoader | Handles all scene transitions | GameManager | 1 |
 | InputHandler | Reads raw input and exposes it to other systems | — | 1 |
 | Combat (AutoBattleSimulator) | Runs the auto-battle simulation on the hex grid (movement, attacks, mitigation, win/lose) | Hero, Trait, HexGrid | 2 |
-| Hero | Data-driven unit definition (`HeroData` ScriptableObject); projects to unified `UnitCombatData` per team | Trait, Skill | 3 |
-| Trait | Flat stat-bonus synergy system (`TraitData` ScriptableObject); applied per-team at battle start | Hero, Combat | 3 |
+| Hero | Data-driven unit definition (`HeroDataSO` ScriptableObject); projects to unified `HeroDataSeed` per team | Trait, Skill | 3 |
+| Trait | Flat stat-bonus synergy system (`TraitDataSO` ScriptableObject); applied per-team at battle start | Hero, Combat | 3 |
 | Skill | Per-hero active skill via a mana charge; at full mana the next attack is empowered (in `Attack()`) | Hero, Combat | 3 |
 
 ## Tier Definitions

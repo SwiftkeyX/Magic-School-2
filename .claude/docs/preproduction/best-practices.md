@@ -14,17 +14,21 @@
 <!--   - A bug was caused by a pattern and must never recur -->
 <!--   - An architectural decision was made that differs from the Unity 6 defaults below -->
 
-*(No project-critical patterns yet — add as you discover them during development.)*
+### Comment Conventions
 
-<!-- Example format:
-### [Short rule name]
+**Rule**: When a comment talks about a unit's data at a specific pipeline stage (authored asset / one-time transfer object / runtime simulation state), name that stage's actual type — `HeroDataSO`, `HeroDataSeed`, or `HeroDataRuntime` — rather than the generic word "unit" or "hero". When a comment explains *why* a line exists, lead with the one-word noun the reader needs first (the field, the method, the invariant), not with the reasoning.
 
-**Rule**: Never use `Time.deltaTime` for parry window timers.
+**Why**: A code review flagged `BattleData.cs`'s header comments as confusing — "unit" was used for three different types (an authored asset, a one-shot DTO, and mutable sim state) without saying which, and a why-comment assumed context ("the fighting side") the reader didn't have yet. The three-stage pipeline is easy to describe precisely; "unit" alone forces the reader to guess which stage a comment means.
 
-**Why**: `Time.timeScale = 0` is used for hit-stop — it freezes `deltaTime`, silently stalling the timer.
+**Instead**:
+```csharp
+// ❌ Ambiguous — which "unit"? Authored, transferred, or simulated?
+// This is a unit's combat data.
 
-**Instead**: Use `Time.unscaledDeltaTime` or `WaitForSecondsRealtime` for any timer that must survive `timeScale` changes.
--->
+// ✅ Names the actual pipeline stage
+// HeroDataSeed: a one-time transfer object, produced once by HeroDataSO.ToCombatData()
+// and read once by AutoBattleSimulator.SetCombatants(). Carries no fight-state.
+```
 
 ---
 
