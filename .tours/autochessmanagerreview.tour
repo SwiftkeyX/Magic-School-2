@@ -1,0 +1,26 @@
+{
+  "$schema": "https://aka.ms/codetour-schema",
+  "title": "AutoChessManagerReview",
+  "steps": [
+    {
+      "file": "Assets/Scripts/Battle/Resolver/HeroSimulation.cs",
+      "description": "What is clamp? What is it for?",
+      "line": 20
+    },
+    {
+      "file": "Assets/Scripts/Battle/Resolver/AutoChessManager.cs",
+      "description": "This function is too long. Separate into smaller function.\r\n\r\nDo we have a reason to use this in StartCoroutine(), should we use Update() instead?",
+      "line": 94
+    },
+    {
+      "file": "Assets/Scripts/Battle/Resolver/AutoChessManager.cs",
+      "description": ".IsDefeated = the unit is dead, right?\r\nIt kinda confusing, use .IsDead instead.",
+      "line": 188
+    },
+    {
+      "file": "Assets/Scripts/Battle/Resolver/AutoChessManager.Setup.cs",
+      "description": "Okay, this part is about data in AutoChessManager, correct?\r\n\r\nThen, move it to new calss AutoChessData.\r\n\r\nI want to separate data from manager. Is that make sense?",
+      "line": 12
+    }
+  ]
+}

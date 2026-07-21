@@ -8,7 +8,7 @@
 
 Every Hero has one active Skill powered by a simple mana charge. A unit gains mana each time it basic-attacks; when mana fills, the unit *casts* — its next basic attack is empowered (deals multiplied damage) — then mana resets. This is the genre's "spell" beat in its simplest base-game form: no cast-time channel, no targeting, no mana UI — just a periodic empowered hit that reads as "attack harder."
 
-> **Quick reference** — Layer: `Feature` · Priority: `MVP` · Key deps: `Hero`, `Combat (AutoBattleSimulator)`
+> **Quick reference** — Layer: `Feature` · Priority: `MVP` · Key deps: `Hero`, `Combat (AutoChessManager)`
 
 ---
 
@@ -28,7 +28,7 @@ Skills give each Hero a rhythm: charge up over a few attacks, then unleash a big
 
 1. Skill parameters live on `HeroDataSO` (authored) and are copied to `HeroDataSeed` → the runtime `HeroDataRuntime`: `MaxMana`, `ManaPerAttack`, `SkillMultiplier`, `SkillName`.
 2. A `HeroDataRuntime` tracks runtime `Mana` (starts at 0) and `SkillArmed` (starts false).
-3. On each basic attack (`AutoBattleSimulator.Attack()`), in order:
+3. On each basic attack (`HeroSimulation.TryAttack()`), in order:
    a. Compute mitigated base damage.
    b. **If `SkillArmed`**: `damage = round(damage × SkillMultiplier)`, clear `SkillArmed`, log `SKILL! {name} casts {SkillName}`.
    c. Apply damage.
@@ -49,7 +49,7 @@ Skills give each Hero a rhythm: charge up over a few attacks, then unleash a big
 
 | System | Interaction |
 |---|---|
-| Combat (`AutoBattleSimulator`) | The whole charge/empower loop lives inside `Attack()`. No new per-tick phase. |
+| Combat (`HeroSimulation`) | The whole charge/empower loop lives inside `TryAttack()`. No new per-tick phase. |
 | Hero | Provides `MaxMana`/`ManaPerAttack`/`SkillMultiplier`/`SkillName` via `HeroDataSO` → `HeroDataSeed`. |
 | Trait | Independent. Trait bonuses raise base stats (including ATK) before battle; the skill multiplies the *already-buffed* attack, so the two stack. |
 
@@ -90,7 +90,7 @@ final    = SkillArmed ? round(base × SkillMultiplier) : base
 | System | Direction | Nature |
 |---|---|---|
 | Hero | This depends on it | Data dependency — skill params sourced from `HeroDataSO` |
-| Combat (`AutoBattleSimulator`) | Ownership handoff | The charge/empower loop is inside `Attack()` |
+| Combat (`HeroSimulation`) | Ownership handoff | The charge/empower loop is inside `TryAttack()` |
 
 ---
 
@@ -130,7 +130,7 @@ final    = SkillArmed ? round(base × SkillMultiplier) : base
 | This Doc References | Target Doc | Element Referenced | Nature |
 |---|---|---|---|
 | Skill params come from the hero | `production/gdd/Hero.md` | `HeroDataSO` mana/skill fields | Data dependency |
-| Skill scales the basic attack | (Combat resolver) | `Attack()` in `AutoBattleSimulator.Attack.cs` | Ownership handoff |
+| Skill scales the basic attack | (Combat resolver) | `TryAttack()` in `HeroSimulation.cs` | Ownership handoff |
 | Skill multiplies trait-buffed ATK | `production/gdd/Trait.md` | `StatBonus.ATK` | Rule dependency |
 
 ---

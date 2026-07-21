@@ -14,13 +14,13 @@ namespace MagicSchool.Battle
     /// hides the overlay (removed: RunManager.Instance.CompleteBattlePhase() handshake
     /// — meta-progression system, rebuilding fresh).
     ///
-    /// AutoBattleSimulator has no static Instance, so the reference is Inspector-wired
+    /// AutoChessManager has no static Instance, so the reference is Inspector-wired
     /// via [SerializeField] _resolver. No FindObjectOfType anywhere in this file.
     /// </summary>
     public class BattleHUD : MonoBehaviour
     {
         // ── Inspector reference ───────────────────────────────────────────────
-        [SerializeField] private AutoBattleSimulator _resolver;
+        [SerializeField] private AutoChessManager _resolver;
 
         [SerializeField, Range(1.5f, 8f), Tooltip("Playback speed while the SpeedUp input is held. Affects only how fast the battle is WATCHED — the simulation step is unchanged, so the outcome is identical at any speed.")]
         private float _speedUpMultiplier = 2f;
@@ -77,7 +77,7 @@ namespace MagicSchool.Battle
             if (_resolver == null)
             {
                 Debug.LogWarning("[BattleHUD] _resolver not assigned; events not subscribed. " +
-                                 "Assign AutoBattleSimulator via Inspector.");
+                                 "Assign AutoChessManager via Inspector.");
                 return;
             }
 

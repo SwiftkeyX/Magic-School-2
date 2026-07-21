@@ -8,7 +8,7 @@
 
 A Trait is a synergy tag shared by Heroes. Fielding enough Heroes with the same Trait activates a breakpoint that grants a flat stat bonus to the units that carry it. Traits are `ScriptableObject` assets with ascending unit-count breakpoints; the synergy pass runs once at battle start. This is the genre's core "build a team that combos" hook, in its simplest form — flat stat bonuses only, no active abilities.
 
-> **Quick reference** — Layer: `Feature` · Priority: `MVP` · Key deps: `Hero`, `Combat (AutoBattleSimulator)`
+> **Quick reference** — Layer: `Feature` · Priority: `MVP` · Key deps: `Hero`, `Combat (AutoChessManager)`
 
 ---
 
@@ -29,7 +29,7 @@ Traits turn a collection of Heroes into a *composition*. Each `TraitDataSO` defi
 1. A Trait is a `TraitDataSO : ScriptableObject` created via `Assets/Create → MagicSchool/Trait`, holding `Id`, `DisplayName`, `Description`, and `Breakpoints` (`List<TraitBreakpoint>`).
 2. A `TraitBreakpoint` holds `UnitCount` (the threshold), a `StatBonus` (flat additive deltas), and a `Description`. Breakpoints are authored in ascending `UnitCount` order.
 3. `StatBonus` is a serializable struct of flat additive deltas: `HP`, `ATK`, `DEF`, `MG`, `MR` (int) and `AttackSpeed` (float). It has `ApplyTo(HeroDataRuntime)`. Flat additive only — no percentages, no active effects.
-4. The synergy pass (`AutoBattleSimulator.ApplyTraitBonuses()`) runs **once at the top of `BeginBattle()`**, before the battle loop, after placements are known.
+4. The synergy pass (`AutoChessManager.ApplyTraitBonuses()`) runs **once at the top of `BeginBattle()`**, before the battle loop, after placements are known.
 5. Counting is **per team**: for each team independently, count the number of **distinct fielded Heroes** carrying each Trait.
 6. For each Trait, select the **highest** `TraitBreakpoint` whose `UnitCount ≤ count` (`TraitDataSO.GetActiveBreakpoint(count)`). If the count is below the first breakpoint, the Trait is inactive and grants nothing.
 7. The selected breakpoint's `StatBonus` is applied to **every combatant on that team that carries the Trait** ("trait members benefit"). Units without the Trait are unaffected.
@@ -80,7 +80,7 @@ finalStat(unit)           = baseStat(unit) + Σ activeBreakpoint(trait).Bonus.st
 | System | Direction | Nature |
 |---|---|---|
 | Hero | This depends on it | Data dependency — reads `HeroDataRuntime.Traits` (sourced from `HeroDataSO.Traits`) |
-| Combat (`AutoBattleSimulator`) | Ownership handoff | The synergy pass is a method on the resolver, invoked at `BeginBattle()`, mutating `HeroDataRuntime` stats before the loop |
+| Combat (`AutoChessManager`) | Ownership handoff | The synergy pass is a method on the resolver, invoked at `BeginBattle()`, mutating `HeroDataRuntime` stats before the loop |
 
 ---
 
@@ -108,7 +108,7 @@ finalStat(unit)           = baseStat(unit) + Σ activeBreakpoint(trait).Bonus.st
 |---|---|---|---|
 | Player's traits + `count/breakpoint`, active vs inactive | Left panel on the Battle HUD (`BattleBoardHUD`, `trait-list`) | On roster set + battle start | Always visible in battle |
 
-> Populated by `BattleBoardManager.RefreshTraitPanel()` from `AutoBattleSimulator.GetActiveTraits(Team.Player)`.
+> Populated by `BattleBoardManager.RefreshTraitPanel()` from `AutoChessManager.GetActiveTraits(Team.Player)`.
 
 ---
 

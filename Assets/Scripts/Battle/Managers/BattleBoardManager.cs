@@ -9,7 +9,7 @@ namespace MagicSchool.Battle
     public class BattleBoardManager : MonoBehaviour
     {
         // ── Inspector ────────────────────────────────────────────────────────
-        [SerializeField] private AutoBattleSimulator _resolver;
+        [SerializeField] private AutoChessManager _resolver;
         [SerializeField] private GameObject         _hexTilePrefab;
         [SerializeField] private GameObject         _battleUnitPrefab;
         [SerializeField] private UIDocument         _uiDocument;
@@ -72,7 +72,7 @@ namespace MagicSchool.Battle
 
         private void Start()
         {
-            if (_resolver == null)   { Debug.LogError("[BattleBoardManager] AutoBattleSimulator missing", this); enabled = false; return; }
+            if (_resolver == null)   { Debug.LogError("[BattleBoardManager] AutoChessManager missing", this); enabled = false; return; }
             if (_uiDocument == null) { Debug.LogError("[BattleBoardManager] UIDocument missing", this); enabled = false; return; }
 
             _uiDocument.sortingOrder = BattleUISortOrder.BoardBenchHUD;

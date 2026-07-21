@@ -581,7 +581,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 88ff5603cf38d1940a5e4f909141b893, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MagicSchool.Battle.AutoBattleSimulator
+  m_EditorClassIdentifier: Assembly-CSharp::MagicSchool.Battle.AutoChessManager
   _tickDelay: 0.1
   _maxBattleTicks: 1200
 --- !u!114 &1670095323

@@ -6,7 +6,7 @@ namespace MagicSchool.Battle
 {
     // Pre-battle setup API (build combatants, inject placements) and the read-only
     // snapshot/HP accessors UI consumers use.
-    public partial class AutoBattleSimulator
+    public partial class AutoChessManager
     {
         // Unified seed API: one list of HeroDataSeed, each tagged with its Team.
         public void SetCombatants(List<HeroDataSeed> units)
@@ -17,7 +17,7 @@ namespace MagicSchool.Battle
             int idx = 0;
             foreach (var u in units)
             {
-                _combatants.Add(new HeroDataRuntime
+                var data = new HeroDataRuntime
                 {
                     // Unique per instance so mirror teams (same hero on both sides) never
                     // collide in the grid/_units/placement dictionaries. Purely positional —
@@ -42,17 +42,18 @@ namespace MagicSchool.Battle
                     Mana        = 0,
                     SkillArmed  = false,
                     Traits      = u.Traits ?? new List<TraitDataSO>(),
-                });
+                };
+                _combatants.Add(new HeroSimulation(data));
             }
 
-            Debug.Log($"[AutoBattleSimulator] SetCombatants complete ({_combatants.Count(c => c.IsPlayer)} players, " +
-                      $"{_combatants.Count(c => !c.IsPlayer)} enemies) — firing OnCombatantsSet.");
+            Debug.Log($"[AutoChessManager] SetCombatants complete ({_combatants.Count(c => c.Data.IsPlayer)} players, " +
+                      $"{_combatants.Count(c => !c.Data.IsPlayer)} enemies) — firing OnCombatantsSet.");
             OnCombatantsSet?.Invoke();
         }
 
         public void SetUnitPositions(Dictionary<string, HexCoord> placements)
         {
-            if (_battleRunning) { Debug.LogError("[AutoBattleSimulator] SetUnitPositions called after battle started."); return; }
+            if (_battleRunning) { Debug.LogError("[AutoChessManager] SetUnitPositions called after battle started."); return; }
             foreach (var kv in placements)
                 _playerPlacements[kv.Key] = kv.Value;
         }
@@ -67,17 +68,17 @@ namespace MagicSchool.Battle
 
             int col = 0;
             int row = _grid.PlayerRowCount;   // first enemy row, immediately past the player's half
-            foreach (var c in _combatants.Where(c => !c.IsPlayer))
+            foreach (var c in _combatants.Where(c => !c.Data.IsPlayer))
             {
                 if (col >= _grid.Cols) { col = 0; row++; }
                 if (row >= _grid.Rows)
                 {
-                    Debug.LogError($"[AutoBattleSimulator] Ran out of enemy rows placing '{c.DisplayName}' — " +
+                    Debug.LogError($"[AutoChessManager] Ran out of enemy rows placing '{c.Data.DisplayName}' — " +
                                    $"the board ({_grid.Cols}x{_grid.Rows}, {_grid.PlayerRowCount} player rows) " +
                                    $"cannot seat this many enemies.", this);
                     break;
                 }
-                result[c.Id] = new HexCoord(col++, row);
+                result[c.Data.Id] = new HexCoord(col++, row);
             }
             return result;
         }
@@ -98,8 +99,8 @@ namespace MagicSchool.Battle
                 var missing = new List<string>();
                 if (stub == null)     missing.Add(nameof(StudentRosterStub));
                 if (database == null) missing.Add(nameof(EnemyDatabaseStub));
-                Debug.LogError($"[AutoBattleSimulator] Cannot seed the battle — {string.Join(" and ", missing)} " +
-                               $"missing from GameObject '{name}'. HexGrid, AutoBattleSimulator, both roster " +
+                Debug.LogError($"[AutoChessManager] Cannot seed the battle — {string.Join(" and ", missing)} " +
+                               $"missing from GameObject '{name}'. HexGrid, AutoChessManager, both roster " +
                                $"components and BattleBoardManager must all live on the same GameObject.", this);
                 return;
             }
@@ -109,7 +110,7 @@ namespace MagicSchool.Battle
             all.AddRange(database.GetUnits());
 
             if (all.Count == 0)
-                Debug.LogWarning($"[AutoBattleSimulator] Roster components on '{name}' contain no HeroDataSO assets — " +
+                Debug.LogWarning($"[AutoChessManager] Roster components on '{name}' contain no HeroDataSO assets — " +
                                  $"the board will be empty.", this);
 
             SetCombatants(all);
@@ -119,22 +120,22 @@ namespace MagicSchool.Battle
         {
             return _combatants.Select(c => new CombatantSnapshot
             {
-                Id          = c.Id,
-                DisplayName = c.DisplayName,
-                IsStudent   = c.IsPlayer,
-                Icon        = c.Icon,
-                Tint        = c.Tint,
-                MaxHP       = c.MaxHP,
-                CurrentHP   = c.CurrentHP,
-                Position    = c.Position,
-                Range       = c.Range,
+                Id          = c.Data.Id,
+                DisplayName = c.Data.DisplayName,
+                IsStudent   = c.Data.IsPlayer,
+                Icon        = c.Data.Icon,
+                Tint        = c.Data.Tint,
+                MaxHP       = c.Data.MaxHP,
+                CurrentHP   = c.Data.CurrentHP,
+                Position    = c.Data.Position,
+                Range       = c.Data.Range,
             }).ToList();
         }
 
         public int GetCurrentHP(string id) =>
-            _combatants.FirstOrDefault(c => c.Id == id)?.CurrentHP ?? 0;
+            _combatants.FirstOrDefault(c => c.Data.Id == id)?.Data.CurrentHP ?? 0;
 
         public int GetMaxHP(string id) =>
-            _combatants.FirstOrDefault(c => c.Id == id)?.MaxHP ?? 0;
+            _combatants.FirstOrDefault(c => c.Data.Id == id)?.Data.MaxHP ?? 0;
     }
 }

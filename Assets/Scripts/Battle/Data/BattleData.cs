@@ -17,7 +17,7 @@ namespace MagicSchool.Battle
     }
 
     // One-time transfer object: any unit entering battle, tagged by Team. Produced fresh by
-    // HeroDataSO.ToCombatData() and read exactly once by AutoBattleSimulator.SetCombatants() —
+    // HeroDataSO.ToCombatData() and read exactly once by AutoChessManager.SetCombatants() —
     // it carries no fight-state (no HP tracking, no cooldowns); that only exists once
     // HeroDataRuntime is built from it.
     //

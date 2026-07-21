@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace MagicSchool.Battle
 {
-    // Per-unit runtime simulation state built by AutoBattleSimulator.SetCombatants()
+    // Per-unit runtime simulation state built by AutoChessManager.SetCombatants()
     // from HeroDataSeed. Never persisted.
     internal class HeroDataRuntime
     {
@@ -25,7 +25,7 @@ namespace MagicSchool.Battle
         public float AttackSpeed;
         public int Range;
         public HexCoord Position;
-        // Two independent clocks charged and clamped by AutoBattleSimulator.BattleLoop() —
+        // Two independent clocks charged and clamped by AutoChessManager.BattleLoop() —
         // see the comment above Phase 1 there for how and why.
         public float AttackCooldown;
         public float MoveCooldown;

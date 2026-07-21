@@ -8,7 +8,7 @@
 
 A Hero is the data definition of a fieldable unit: its identity, base combat stats, presentation, and the Traits it carries. Heroes are authored as `ScriptableObject` assets so designers add or tune units in the Inspector with no recompile. At battle setup a Hero is projected into a runtime `HeroDataSeed` for a given team; combat itself is owned by the Combat system, not Hero.
 
-> **Quick reference** — Layer: `Feature` · Priority: `MVP` · Key deps: `Trait`, `Combat (AutoBattleSimulator)`
+> **Quick reference** — Layer: `Feature` · Priority: `MVP` · Key deps: `Trait`, `Combat (AutoChessManager)`
 
 > **Governing rule** — `best-practices.md` → *Tunable Data*: ScriptableObject assets, never hardcoded values. Every authored property of a Hero — **including its visual identity** — lives on the asset. A Hero property that requires a C# edit to take effect is a defect, not a design.
 
@@ -45,7 +45,7 @@ The player is assembling a squad of distinct, recognizable characters — each H
 
 | System | Interaction |
 |---|---|
-| Combat (`AutoBattleSimulator`) | `SetCombatants(List<HeroDataSeed>)` consumes the projected data; the resolver builds runtime `HeroDataRuntime`s. Hero provides data in; owns no combat logic. |
+| Combat (`AutoChessManager`) | `SetCombatants(List<HeroDataSeed>)` consumes the projected data; the resolver builds runtime `HeroDataRuntime`s, each wrapped in a `HeroSimulation`. Hero provides data in; owns no combat logic. |
 | Trait | Hero exposes `Traits` (`List<TraitDataSO>`). The Trait synergy pass reads these off the resulting `HeroDataRuntime`s; Hero neither counts nor applies synergies. |
 | Skill | Hero provides the skill params (`MaxMana`/`ManaPerAttack`/`SkillMultiplier`/`SkillName`) consumed by the mana/empower loop in `Attack()`. See `Skill.md`. |
 | Seed sources (`StudentRosterStub`, `EnemyDatabaseStub`) | Hold the authored `HeroDataSO` roster and convert to `HeroDataSeed` per team. |
@@ -109,7 +109,7 @@ Each of these was authorable before this pass, and each failed **silently**.
 |---|---|---|
 | Trait | This depends on it | Data dependency — Hero references `TraitDataSO` |
 | Skill | It depends on this | Data dependency — Skill loop reads Hero's mana/skill params |
-| Combat (`AutoBattleSimulator`) | It depends on this | Data dependency — resolver consumes `HeroDataSeed` |
+| Combat (`AutoChessManager`) | It depends on this | Data dependency — resolver consumes `HeroDataSeed` |
 
 ---
 

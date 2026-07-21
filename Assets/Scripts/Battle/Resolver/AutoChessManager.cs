@@ -7,7 +7,7 @@ using UnityEngine;
 namespace MagicSchool.Battle
 {
     [RequireComponent(typeof(HexGrid))]
-    public partial class AutoBattleSimulator : MonoBehaviour
+    public partial class AutoChessManager : MonoBehaviour
     {
         // ── Events ──────────────────────────────────────────────────────────
         // Fires once combatants are seeded; subscribers call GetCombatantSnapshots() for data.
@@ -44,12 +44,13 @@ namespace MagicSchool.Battle
         public float GameSpeedMultiplier { get; set; } = 1f;
 
         // ── State ────────────────────────────────────────────────────────────
-        private readonly List<HeroDataRuntime> _combatants = new List<HeroDataRuntime>();
+        // One HeroSimulation per unit, wrapping its HeroDataRuntime. The manager computes turn
+        // order, opponent lists, and win-checks; each HeroSimulation performs its own writes
+        // once told it's that unit's turn (Combat.md Core Rule 1).
+        private readonly List<HeroSimulation> _combatants = new List<HeroSimulation>();
         private readonly Dictionary<string, HexCoord> _playerPlacements = new Dictionary<string, HexCoord>();
         private HexGrid _grid;
         private bool _battleRunning;
-
-        // HeroDataRuntime itself lives in its own file (HeroDataRuntime.cs), top-level in this namespace.
 
         // ── Lifecycle ────────────────────────────────────────────────────────
         // _grid is cached here (not in BeginBattle) because GetAutoEnemyPlacements() needs the
@@ -62,8 +63,8 @@ namespace MagicSchool.Battle
         // ── Battle ───────────────────────────────────────────────────────────
         public void BeginBattle()
         {
-            if (_battleRunning) { Debug.LogWarning("[AutoBattleSimulator] Battle already running."); return; }
-            if (_grid == null) { Debug.LogError("[AutoBattleSimulator] HexGrid component required on the same GameObject.", this); return; }
+            if (_battleRunning) { Debug.LogWarning("[AutoChessManager] Battle already running."); return; }
+            if (_grid == null) { Debug.LogError("[AutoChessManager] HexGrid component required on the same GameObject.", this); return; }
 
             // Place player's unit on the grid — wherever the player dragged it.
             PlaceUnitOnGrid(_playerPlacements);
@@ -83,20 +84,13 @@ namespace MagicSchool.Battle
         {
             foreach (var kv in placements)
             {
-                var c = _combatants.FirstOrDefault(x => x.Id == kv.Key);
+                var c = _combatants.FirstOrDefault(x => x.Data.Id == kv.Key);
                 if (c == null) continue;
-                c.Position = kv.Value;
-                _grid.SetOccupant(kv.Value, c.Id);
+                c.Data.Position = kv.Value;
+                _grid.SetOccupant(kv.Value, c.Data.Id);
             }
         }
 
-        // TODO(deferred): two open architecture questions, parked — see the CodeTour
-        // "Deferred design questions".
-        //   1. This class is long, spread across 6 partial files. Divide it by responsibility?
-        //   2. BattleLoop() charges the tick for every HeroDataRuntime. Should each HeroDataRuntime
-        //      instead update its own clocks by subscribing to an event fired by BattleLoop()? That
-        //      would invert state ownership — Combat.md Core Rule 1 currently makes the resolver the
-        //      SOLE writer of HeroDataRuntime state. Decide the rule before moving the code.
         private IEnumerator BattleLoop()
         {
             _battleRunning = true;
@@ -106,59 +100,53 @@ namespace MagicSchool.Battle
             while (true)
             {
                 // ── PHASE 1 — CHARGE both clocks ────────────────────────────────
-                foreach (var c in _combatants.Where(c => !c.IsDefeated))
-                {
-                    c.AttackCooldown += c.AttackSpeed * _tickDelay;
-                    c.MoveCooldown += _moveSpeed * _tickDelay;
-                }
+                // Each HeroSimulation charges its own HeroDataRuntime; AttackSpeed is per-unit,
+                // _moveSpeed is shared. That is the whole point.
+                foreach (var c in _combatants.Where(c => !c.Data.IsDefeated))
+                    c.ChargeClocks(_tickDelay, _moveSpeed);
 
-                // ── PHASE 2 — ATTACK (charged AND a target in range) ────────────
+                // ── PHASE 2 — ATTACK  ────────────
+                // Get hero that ready to attack
                 var readyToAttackCombatants = _combatants
-                    .Where(c => !c.IsDefeated && c.AttackCooldown >= 1.0f)
-                    .OrderByDescending(c => c.AttackSpeed)
+                    .Where(c => !c.Data.IsDefeated && c.Data.AttackCooldown >= 1.0f)
+                    .OrderByDescending(c => c.Data.AttackSpeed)
                     .ToList();
 
                 foreach (var actor in readyToAttackCombatants)
                 {
-                    if (actor.IsDefeated) continue;
+                    if (actor.Data.IsDefeated) continue;
 
-                    var opponents = _combatants.Where(c => !c.IsDefeated && c.IsPlayer != actor.IsPlayer).ToList();
+                    var opponents = AutoChessHelper.GetOpponentsOf(_combatants, actor);
                     if (opponents.Count == 0) break;
-
-                    var inRange = FindInRange(actor, opponents);
 
                     // Nothing in range: the unit does NOT attack — and does NOT lose its charge.
                     // It will move in Phase 3 instead. Moving no longer costs a unit its attack.
-                    if (inRange == null) continue;
+                    var result = actor.TryAttack(opponents);
+                    if (result == null) continue;
 
-                    Attack(actor, inRange);
+                    OnCombatantActed?.Invoke(actor.Data.Id, result.Value.TargetId, result.Value.Damage, new List<string>());
+                    AutoChessHelper.HandleKillIfNeeded(_combatants, _grid, result.Value);
+                    if (result.Value.WasKill) OnCombatantDefeated?.Invoke(result.Value.TargetId);
 
-                    // Subtract one full cycle; overflow carries into the next cycle naturally
-                    actor.AttackCooldown -= 1.0f;
-
-                    // Win check
-                    bool playersAlive = _combatants.Any(c => c.IsPlayer && !c.IsDefeated);
-                    bool enemiesAlive = _combatants.Any(c => !c.IsPlayer && !c.IsDefeated);
-                    if (!enemiesAlive || !playersAlive) goto BattleEnd;
+                    if (AutoChessHelper.CheckWinCondition(_combatants)) goto BattleEnd;
                 }
 
                 // ── PHASE 3 — MOVE (charged AND nothing in range) ───────────────
                 var readyToMoveCombatants = _combatants
-                    .Where(c => !c.IsDefeated && c.MoveCooldown >= 1.0f)
+                    .Where(c => !c.Data.IsDefeated && c.Data.MoveCooldown >= 1.0f)
                     .ToList();
 
                 foreach (var actor in readyToMoveCombatants)
                 {
-                    if (actor.IsDefeated) continue;
+                    if (actor.Data.IsDefeated) continue;
 
-                    var opponents = _combatants.Where(c => !c.IsDefeated && c.IsPlayer != actor.IsPlayer).ToList();
+                    var opponents = AutoChessHelper.GetOpponentsOf(_combatants, actor);
                     if (opponents.Count == 0) break;
 
-                    // A unit with a target in range stands and fights; it does not reposition.
-                    if (FindInRange(actor, opponents) != null) continue;
-
-                    MoveTowardNearest(actor, opponents);
-                    actor.MoveCooldown -= 1.0f;
+                    // A unit with a target in range stands and fights; TryMove re-checks this itself.
+                    var moveResult = actor.TryMove(opponents, _grid);
+                    if (moveResult != null)
+                        OnCombatantMoved?.Invoke(actor.Data.Id, moveResult.Value.From, moveResult.Value.To);
                 }
 
                 // ── PHASE 4 — CLAMP ─────────────────────────────────────────────
@@ -169,19 +157,16 @@ namespace MagicSchool.Battle
                 // Clamping HERE only bites units that could not act, which is what stops a unit
                 // that walked 30 ticks from banking 1.8 attacks and bursting on contact. It
                 // arrives with exactly ONE attack ready. See Combat.md, Core Rules 7-8.
-                foreach (var c in _combatants.Where(c => !c.IsDefeated))
-                {
-                    c.AttackCooldown = Mathf.Min(c.AttackCooldown, 1f);
-                    c.MoveCooldown = Mathf.Min(c.MoveCooldown, 1f);
-                }
+                foreach (var c in _combatants.Where(c => !c.Data.IsDefeated))
+                    c.ClampClocks();
 
                 // Hard length cap: at _maxBattleTicks (1200 ticks = 120s at 0.1s/tick), declare a
                 // Timeout and end the battle early. The side with more survivors wins.
                 ticks++;
                 if (ticks >= _maxBattleTicks)
                 {
-                    int pCount = _combatants.Count(c => c.IsPlayer && !c.IsDefeated);
-                    int eCount = _combatants.Count(c => !c.IsPlayer && !c.IsDefeated);
+                    int pCount = _combatants.Count(c => c.Data.IsPlayer && !c.Data.IsDefeated);
+                    int eCount = _combatants.Count(c => !c.Data.IsPlayer && !c.Data.IsDefeated);
                     var result = new BattleResult { Won = pCount > eCount, TicksElapsed = ticks, TimedOut = true };
                     Debug.Log($"[AutoBattle] TIMEOUT — {(result.Won ? "PLAYERS WIN" : "PLAYERS LOSE")}");
                     OnBattleComplete?.Invoke(result);
@@ -200,7 +185,7 @@ namespace MagicSchool.Battle
             // case where C# `goto` is the honest tool.
         BattleEnd:
             {
-                bool won = _combatants.Any(c => c.IsPlayer && !c.IsDefeated);
+                bool won = _combatants.Any(c => c.Data.IsPlayer && !c.Data.IsDefeated);
                 int finalTicks = ticks;
                 var res = new BattleResult { Won = won, TicksElapsed = finalTicks, TimedOut = false };
                 Debug.Log($"[AutoBattle] END — {(won ? "PLAYERS WIN" : "PLAYERS LOSE")} in {finalTicks} ticks");
@@ -210,7 +195,8 @@ namespace MagicSchool.Battle
             }
         }
 
-        // Combat helpers (targeting, damage) live in AutoBattleSimulator.CombatHelpers.cs.
-        // Attack lifecycle (Attack, HandleKill, MoveTowardNearest) lives in AutoBattleSimulator.Attack.cs.
+        // Per-hero turn logic (targeting, attack, movement) lives in HeroSimulation.cs; the
+        // shared per-tick queries (opponent lists, the win-check, kill cleanup) live in
+        // AutoChessHelper.cs. This class only sequences the tick and fires events.
     }
 }
