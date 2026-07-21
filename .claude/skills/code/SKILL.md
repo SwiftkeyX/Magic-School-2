@@ -19,8 +19,8 @@ The user describes, in plain language, a change to build or modify (a new featur
 **Step 0 — Branch check**
 Run `git branch --show-current`. If on `main`, run `/start-branch` first so work lands on a feature branch (per `git-hygiene.md`), then continue.
 
-**Step 1 — Read the design docs (`/read-gdd`)**
-Run `/read-gdd` for the target system. "Spec" is not only the GDD — it includes `design-decisions.md` and `game-vision.md` where the change touches a core mechanic or the pillars. It returns a verdict:
+**Step 1 — Read the design docs (`/read-gdd`) — mandatory unless the change is pure mechanical**
+**Skip straight to Step 3** only if the change is a rename with no behavior change, or deletes code already confirmed to have zero consumers (no caller, no asset sets it, nothing reads the result) — and say so ("pure mechanical, deferring to `/reconcile-gdd` at PR time"). Any doubt about that (it alters what a method returns, when it runs, or what depends on what) means it isn't pure mechanical — run `/read-gdd` for the target system. "Spec" is not only the GDD — it includes `design-decisions.md` and `game-vision.md` where the change touches a core mechanic or the pillars. It returns a verdict:
 - **YES** (the docs already cover the change) → go to Step 3.
 - **NO / PARTIAL** (a doc is wrong, missing, or the change alters the design) → go to Step 2.
 
@@ -46,6 +46,6 @@ The user's described change(s) are in the scene/scripts, compiling, saved, and t
 ## Constraints
 
 - This skill performs no edits itself — it only sequences `/read-gdd`, `/write-gdd`, and `/edit-unity`.
-- Never write to Unity without `/read-gdd` first — the gate is mandatory (see `unity-editor.md`).
+- Never write to Unity without `/read-gdd` first, unless the change is pure mechanical (rename / confirmed-dead-code deletion, no behavior change) — see Step 1 and `unity-editor.md`.
 - One change at a time through the loop — do not bundle unrelated changes into a single `/edit-unity` pass.
 - Do not commit or push — that is `/make-commit-plan`'s job.

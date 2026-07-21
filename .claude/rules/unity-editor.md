@@ -13,12 +13,12 @@ Key coplay workflow:
 
 ## Entry point (the gate)
 
-**Never write to Unity without reading the GDD first.** All Unity changes go through an entry skill, never by prompting Claude directly:
+**Never write to Unity without checking the GDD first — but the depth of that check scales to the change.** All Unity changes go through an entry skill, never by prompting Claude directly:
 
-- **Building or changing something → `/code`.** It runs `/read-gdd` (the mandatory spec gate), then `/write-gdd` if the spec is wrong, then `/edit-unity`.
-- **Fixing a known bug → `/debug`** → `/fix-bug`, which also reads the GDD before touching anything.
+- **Building or changing something → `/code`.** For a new system, or any change to a documented behavior, mechanic, data model, or cross-system contract, it runs `/read-gdd` (the mandatory spec gate) before touching code, then `/write-gdd` if the spec is wrong, then `/edit-unity`. For a **pure mechanical change** — a rename with no behavior change, or deleting code already confirmed to have zero consumers — `/code` may skip straight to `/edit-unity` and rely on `/reconcile-gdd` to catch any resulting doc drift at PR time. See `/code`'s own skip criteria; when in doubt, treat the change as design-affecting.
+- **Fixing a known bug → `/debug`** → `/fix-bug`, which also reads the GDD before touching anything — a "known bug" fix is a behavior claim, never eligible for the skip.
 
-`/edit-unity` is the atomic executor — it enforces the snapshot read, compile check, play-test, save, and snapshot update in order, but has no design opinion. The "read the GDD first" gate is enforced by `/code` and `/fix-bug`, not by `/edit-unity`. Do not call `/edit-unity` directly to bypass the gate.
+`/edit-unity` is the atomic executor — it enforces the snapshot read, compile check, play-test, save, and snapshot update in order, but has no design opinion. The "read the GDD first" gate, where it applies, is enforced by `/code` and `/fix-bug`, not by `/edit-unity`. Do not call `/edit-unity` directly to bypass the gate.
 
 ## Scene management
 

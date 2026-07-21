@@ -26,9 +26,11 @@ End-to-end process for every code task, from branch creation to merge.
 
 ## GDD gates
 
-**Before any code task → the `/read-gdd` gate (run automatically by `/code`)**
+**Before any design-affecting code task → the `/read-gdd` gate (run automatically by `/code`)**
 
-Before writing or modifying any `.cs` file, `/code` runs `/read-gdd` for the system you are about to touch. It reads the GDD, and if the GDD is wrong or your change alters the design, `/code` runs `/write-gdd` to update the doc first so you start from a spec that matches intent. If no GDD exists for a new system, author one with `/write-gdd` (or `/design-system` in Phase 2) before coding. Never write to Unity without this gate (see `unity-editor.md`).
+Before writing or modifying any `.cs` file that touches a new system, a documented behavior/mechanic, or a cross-system contract, `/code` runs `/read-gdd` for the system you are about to touch. It reads the GDD, and if the GDD is wrong or your change alters the design, `/code` runs `/write-gdd` to update the doc first so you start from a spec that matches intent. If no GDD exists for a new system, author one with `/write-gdd` (or `/design-system` in Phase 2) before coding. Never write to Unity without this gate for these changes (see `unity-editor.md`).
+
+**Exception — pure mechanical changes skip straight to `/edit-unity`.** A rename with no behavior change, or deleting code already confirmed to have zero consumers, doesn't need a pre-code `/read-gdd` round trip each time — this exists to cut the per-edit token cost of re-reading the same GDDs for changes that can't contradict them. `/reconcile-gdd` catches any resulting doc drift at PR time instead. If a change alters what a method returns, when it runs, or what depends on what, it is not pure mechanical — read the GDD first.
 
 **At PR time → push auto-opens the PR, then `/reconcile-gdd`**
 

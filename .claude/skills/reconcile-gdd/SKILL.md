@@ -62,7 +62,9 @@ Compare the code diff against the GDD. Look for:
 - A user comment **flagging** the relevant line (e.g. "this is wrong", "shouldn't call this here") → lean toward **flag code for fix**.
 - A user comment **endorsing** the code (e.g. "this is better", "keep this") → lean toward **update GDD**.
 
-**Ignore:** internal private details, variable renames with no contract change, comments, formatting.
+**Ignore:** internal private details (local variables, private fields), comments, formatting.
+
+**Do not ignore:** a rename of a class, public method, or public field that the GDD names directly — that GDD reference is now stale and must be flagged as a divergence, even though nothing else about the behavior changed. This is the main thing `/code`'s pure-mechanical skip path (see `workflow.md`) relies on this skill to catch.
 
 If zero divergences for a GDD → "✓ `<Name>.md` — no divergences." and move on.
 
