@@ -3,9 +3,9 @@
   "title": "Review",
   "steps": [
     {
-      "file": "Assets/Scripts/Battle/Resolver/AutoChessManager.Setup.cs",
-      "description": "Change the name to SetPlacementsAtGameStart",
-      "line": 31
+      "file": "Assets/Scripts/Battle/Resolver/AutoChessManager.cs",
+      "description": "I don't like having simulation, setup, trait, debug in 1 class AutoChessManager.\r\n\r\nLet's separate it into ACsimulator, ACsetup, ACManager\r\n\r\nIs that make sense?\r\n\r\n---\r\n**Claude's reply:** The concern is fair, but note today's 4 files (`AutoChessManager.cs`/`.Setup.cs`/`.Traits.cs`/`.Debug.cs`) are `partial class AutoChessManager` -- splitting into files didn't split the responsibility. It's one class, one MonoBehaviour, one public API surface, and all four pieces read/write the same `_data`/`_playerPlacements`/`_battleRunning` directly. Anything that does `GetComponent<AutoChessManager>()` (BattleBoardManager, BattleHUD) gets simulation + setup + trait + debug through the same handle, whether it needs all of that or not.\r\n\r\nTwo things worth separating before picking a shape:\r\n1. **Traits and Debug are already thin** -- `.Traits.cs` is a 2-line delegate to stateless `Trait.cs`, `.Debug.cs` is `#if UNITY_EDITOR`-gated and never touches the loop. Giving these their own classes wouldn't remove much real coupling; the responsibility split that actually matters is Simulation (the tick loop) vs. Setup (placement/seeding) -- different logic, different callers.\r\n2. **The real design choice is whether ACManager stays the single public entry point.** Following the HeroSimulation/AutoChessHelper precedent (neither holds a reference to the other), ACSimulator and ACSetup could be plain C# classes owned by ACManager (same shape `AutoChessData` already has) rather than separate MonoBehaviours -- that way BattleBoardManager/BattleHUD/tests keep calling one component and its existing public methods; ACManager becomes a thin facade delegating to the two internal classes. Full separate MonoBehaviours is also possible, but then every external caller needs to be re-pointed at whichever of the 3 components owns the method it wants.\r\n\r\nThis changes what depends on what, so it's a `/code`-gated change (read-gdd first), not a pure rename -- want me to draft this as a GDD update before touching any code, and if so, facade-over-MonoBehaviour or full separate components?",
+      "line": 10
     }
   ]
 }
