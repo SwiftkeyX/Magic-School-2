@@ -20,13 +20,13 @@ namespace MagicSchool.Battle
     public class BattleHUD : MonoBehaviour
     {
         // ── Inspector reference ───────────────────────────────────────────────
-        [SerializeField] private AutoChessManager _resolver;
+        [SerializeField] private ACManager _resolver;
 
         [SerializeField, Range(1.5f, 8f), Tooltip("Playback speed while the SpeedUp input is held. Affects only how fast the battle is WATCHED — the simulation step is unchanged, so the outcome is identical at any speed.")]
         private float _speedUpMultiplier = 2f;
 
         // ── UIDocument ────────────────────────────────────────────────────────
-        private UIDocument    _document;
+        private UIDocument _document;
         private VisualElement _root;
 
         // ── Structural elements ───────────────────────────────────────────────
@@ -34,9 +34,9 @@ namespace MagicSchool.Battle
 
         // ── Outcome overlay ───────────────────────────────────────────────────
         private VisualElement _outcomeOverlay;
-        private Label         _outcomeTitle;
-        private Label         _outcomeSub;
-        private Button        _continueButton;
+        private Label _outcomeTitle;
+        private Label _outcomeSub;
+        private Button _continueButton;
 
         // ── Lifecycle ─────────────────────────────────────────────────────────
 
@@ -56,8 +56,8 @@ namespace MagicSchool.Battle
             // Cache element references — never call Q<> outside Awake
             _speedIndicator = _root.Q<Label>("speed-indicator");
             _outcomeOverlay = _root.Q<VisualElement>("outcome-overlay");
-            _outcomeTitle   = _root.Q<Label>("outcome-title");
-            _outcomeSub     = _root.Q<Label>("outcome-sub");
+            _outcomeTitle = _root.Q<Label>("outcome-title");
+            _outcomeSub = _root.Q<Label>("outcome-sub");
             _continueButton = _root.Q<Button>("continue-button");
 
             // Wire Continue button in code — never rely on Inspector wiring
@@ -85,7 +85,7 @@ namespace MagicSchool.Battle
 
             if (InputHandler.Instance != null)
             {
-                InputHandler.Instance.OnSpeedUpStarted   += HandleSpeedUpStarted;
+                InputHandler.Instance.OnSpeedUpStarted += HandleSpeedUpStarted;
                 InputHandler.Instance.OnSpeedUpCancelled += HandleSpeedUpCancelled;
             }
         }
@@ -99,7 +99,7 @@ namespace MagicSchool.Battle
 
             if (InputHandler.Instance != null)
             {
-                InputHandler.Instance.OnSpeedUpStarted   -= HandleSpeedUpStarted;
+                InputHandler.Instance.OnSpeedUpStarted -= HandleSpeedUpStarted;
                 InputHandler.Instance.OnSpeedUpCancelled -= HandleSpeedUpCancelled;
             }
         }

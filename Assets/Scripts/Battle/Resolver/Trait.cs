@@ -14,7 +14,7 @@ namespace MagicSchool.Battle
         // Runs once from BeginBattle(): counts distinct heroes per trait per team, then applies
         // the highest satisfied breakpoint's StatBonus to each trait member on that team.
         // Members-only, additive, evaluated once. See Trait GDD.
-        public static void ApplyTraitBonuses(AutoChessData data)
+        public static void ApplyTraitBonuses(ACData data)
         {
             foreach (Team team in AllTeams)
             {
@@ -41,7 +41,7 @@ namespace MagicSchool.Battle
         }
 
         // Read-only active-trait readout for a future HUD synergy panel. Not used in combat.
-        public static List<(TraitDataSO trait, int count, TraitBreakpoint active)> GetActiveTraits(AutoChessData data, Team team)
+        public static List<(TraitDataSO trait, int count, TraitBreakpoint active)> GetActiveTraits(ACData data, Team team)
         {
             var members = data.Combatants.Where(c => c.Data.Team == team).ToList();
             return CountTraits(members)

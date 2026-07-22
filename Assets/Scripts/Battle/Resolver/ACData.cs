@@ -8,7 +8,7 @@ namespace MagicSchool.Battle
     // separate parameters. Deliberately does NOT include _playerPlacements (pre-battle setup
     // buffer) or _battleRunning (the manager's own lifecycle guard) -- those aren't part of
     // the simulation's live world state and don't belong here.
-    internal class AutoChessData
+    internal class ACData
     {
         public List<HeroSimulation> Combatants { get; } = new List<HeroSimulation>();
         public HexGrid Grid { get; set; }
@@ -19,50 +19,49 @@ namespace MagicSchool.Battle
         {
             var data = new HeroDataRuntime
             {
-                Id          = id,
+                Id = id,
                 DisplayName = seed.DisplayName,
-                Team        = seed.Team,
-                Icon        = seed.Icon,
-                Tint        = seed.Tint,
-                MaxHP       = seed.MaxHP,
-                CurrentHP   = seed.MaxHP,
-                ATK         = seed.ATK,
-                DEF         = seed.DEF,
+                Team = seed.Team,
+                Icon = seed.Icon,
+                Tint = seed.Tint,
+                MaxHP = seed.MaxHP,
+                CurrentHP = seed.MaxHP,
+                ATK = seed.ATK,
+                DEF = seed.DEF,
                 AttackSpeed = seed.AttackSpeed,
-                Range       = seed.Range,
-                MG          = seed.MG,
-                MR          = seed.MR,
-                MaxMana         = seed.MaxMana,
-                ManaPerAttack   = seed.ManaPerAttack,
+                Range = seed.Range,
+                MG = seed.MG,
+                MR = seed.MR,
+                MaxMana = seed.MaxMana,
+                ManaPerAttack = seed.ManaPerAttack,
                 SkillMultiplier = seed.SkillMultiplier,
-                SkillName       = seed.SkillName,
-                Mana        = 0,
-                SkillArmed  = false,
-                Traits      = seed.Traits ?? new List<TraitDataSO>(),
+                SkillName = seed.SkillName,
+                Mana = 0,
+                SkillArmed = false,
+                Traits = seed.Traits ?? new List<TraitDataSO>(),
             };
             Combatants.Add(new HeroSimulation(data));
         }
 
-        public int GetCurrentHP(string id) =>
-            Combatants.FirstOrDefault(c => c.Data.Id == id)?.Data.CurrentHP ?? 0;
-
-        public int GetMaxHP(string id) =>
-            Combatants.FirstOrDefault(c => c.Data.Id == id)?.Data.MaxHP ?? 0;
-
+        // 
         public List<CombatantSnapshot> GetCombatantSnapshots()
         {
             return Combatants.Select(c => new CombatantSnapshot
             {
-                Id          = c.Data.Id,
+                Id = c.Data.Id,
                 DisplayName = c.Data.DisplayName,
-                IsStudent   = c.Data.IsPlayer,
-                Icon        = c.Data.Icon,
-                Tint        = c.Data.Tint,
-                MaxHP       = c.Data.MaxHP,
-                CurrentHP   = c.Data.CurrentHP,
-                Position    = c.Data.Position,
-                Range       = c.Data.Range,
+                IsStudent = c.Data.IsPlayer,
+                Icon = c.Data.Icon,
+                Tint = c.Data.Tint,
+                MaxHP = c.Data.MaxHP,
+                CurrentHP = c.Data.CurrentHP,
+                Position = c.Data.Position,
+                Range = c.Data.Range,
             }).ToList();
         }
+
+        // ====================================== getter & setter ========================================
+        public int GetCurrentHP(string id) => Combatants.FirstOrDefault(c => c.Data.Id == id)?.Data.CurrentHP ?? 0;
+        public int GetMaxHP(string id) => Combatants.FirstOrDefault(c => c.Data.Id == id)?.Data.MaxHP ?? 0;
     }
 }

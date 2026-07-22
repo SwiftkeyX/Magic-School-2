@@ -6,7 +6,7 @@
 
 ## Summary
 
-Combat is the auto-resolved battle: once `BeginBattle()` is called the player does not act again. `AutoChessManager` steps a fixed-rate tick simulation in which every unit runs **two independent clocks** — one for attacking, one for moving — until one side is wiped or the tick cap is hit. Each unit's own turn is executed by its `HeroSimulation` (charge, attack, move); the resolver owns turn order, event-firing, and the win-check. Together they are the only system that mutates `HeroDataRuntime` state during a fight; everything visual is a subscriber.
+Combat is the auto-resolved battle: once `BeginBattle()` is called the player does not act again. `ACManager` steps a fixed-rate tick simulation in which every unit runs **two independent clocks** — one for attacking, one for moving — until one side is wiped or the tick cap is hit. Each unit's own turn is executed by its `HeroSimulation` (charge, attack, move); the resolver owns turn order, event-firing, and the win-check. Together they are the only system that mutates `HeroDataRuntime` state during a fight; everything visual is a subscriber.
 
 > **Quick reference** — Layer: `Core` · Priority: `MVP` · Key deps: `Hero`, `Trait`, `Skill`, `HexGrid`
 
@@ -26,7 +26,7 @@ The player arranges heroes on a hex board, presses go, and watches. Each tick (0
 
 ### Core Rules
 
-1. **The Combat system is the only writer.** `AutoChessManager` (the manager) computes turn order, each actor's opponent list, fires events, and runs the win-check; `HeroSimulation` (one per unit, wrapping its `HeroDataRuntime`) performs the actual writes — `ChargeClocks()`, `TryAttack()`, `TryMove()`, `ClampClocks()` — once told it's that unit's turn. `HeroSimulation` never fires events itself and holds no reference back to the manager: `TryAttack()`/`TryMove()` return a result (target id, damage) and the manager translates that into events. The view (`BattleBoardManager`) reacts to those events and never writes back.
+1. **The Combat system is the only writer.** `ACManager` is the public-facing facade (`MonoBehaviour`) — it owns the tick loop's public API and fires every resolver event; internally it delegates turn-order computation, each actor's opponent list, and the win-check to `ACSimulator`, and pre-battle seeding/placement to `ACSetup`. `HeroSimulation` (one per unit, wrapping its `HeroDataRuntime`) performs the actual writes — `ChargeClocks()`, `TryAttack()`, `TryMove()`, `ClampClocks()` — once told it's that unit's turn. `HeroSimulation` never fires events itself and holds no reference back to `ACSimulator` or the facade: `TryAttack()`/`TryMove()` return a result (target id, damage) that gets translated into an event. The view (`BattleBoardManager`) reacts to those events and never writes back.
 2. **Every unit runs two independent clocks.** Both are `0 → 1` fractions of one cycle, not countdown timers.
    - `HeroDataRuntime.AttackCooldown` charges at **`AttackSpeed × _tickDelay`** per tick — **per-unit**.
    - `HeroDataRuntime.MoveCooldown` charges at **`_moveSpeed × _tickDelay`** per tick — **shared**, the same value for every unit on the board.
@@ -63,7 +63,9 @@ A combatant is **Alive** (`CurrentHP > 0`) or **Dead** (`IsDead`). Death is term
 | Trait | `ApplyTraitBonuses()` runs **once**, at the top of `BeginBattle()`, before the loop — flat `StatBonus` deltas applied to trait members per team. Stays manager-level; not part of any unit's per-tick turn. |
 | Skill | Mana is gained per **attack**; at `MaxMana` the next attack is empowered by `SkillMultiplier`. The charge/empower logic lives inside `HeroSimulation.TryAttack()`, not the manager. |
 | HeroSimulation | One per unit, wrapping its `HeroDataRuntime`. Owns the actual per-tick writes (`ChargeClocks`/`TryAttack`/`TryMove`/`ClampClocks`); the manager calls into it and translates results into events. Holds no reference back to the manager. |
-| AutoChessHelper | Stateless shared queries the manager needs but doesn't own as its own methods: `GetOpponentsOf()`, `CheckWinCondition()`, `HandleKillIfNeeded()` (grid cleanup + log on a kill). Takes `_combatants`/`_grid` as parameters — same decoupled pattern as `HeroSimulation`, no reference held either direction. Does not fire events; the manager still does that. |
+| ACHelper | Stateless shared queries the manager needs but doesn't own as its own methods: `GetOpponentsOf()`, `CheckWinCondition()`, `HandleKillIfNeeded()` (grid cleanup + log on a kill). Takes `_combatants`/`_grid` as parameters — same decoupled pattern as `HeroSimulation`, no reference held either direction. Does not fire events; the manager still does that. |
+| ACSimulator | Internal collaborator, no GDD-facing API of its own. Owns the tick loop's five phases (Charge/Attack/Move/Clamp/Overtime) and `ApplyTraitBonuses()` at battle start. Takes `ACData` as a parameter — same decoupled pattern as `HeroSimulation`/`ACHelper`, holds no reference back to the facade or to `ACSetup`. The facade (`ACManager`) calls into it each tick and fires the resulting events. |
+| ACSetup | Internal collaborator, no GDD-facing API of its own. Owns pre-battle seeding and placement (`EnsureCombatantsInitialized`, `Set`/`GetPlayerPlacements`, `Set`/`GetEnemyPlacements`) and the read-only snapshot/HP accessors. Takes `ACData` as a parameter, holds no reference back to the facade or to `ACSimulator`. The facade (`ACManager`) exposes its results under the same public API used today. |
 | HexGrid | Owns occupancy (`SetOccupant` / `ClearOccupant`) and pathing (`FindNearest`, `GetNextStep`). `HeroSimulation.TryMove()` asks (grid passed in directly); the manager also asks for placement. |
 | BattleBoardManager | Subscribes to the resolver's events to drive sprites. Enemy placements come from `GetEnemyPlacements()` — the **same** method the simulation places from, so view and sim cannot desync. |
 
@@ -114,6 +116,8 @@ then, every tick:  AttackCooldown = min(AttackCooldown, 1.0)
 | Trait | This depends on it | Ownership handoff — `ApplyTraitBonuses()` mutates `HeroDataRuntime` stats before the loop |
 | Skill | This depends on it | Rule dependency — mana per attack; empowered hit, executed inside `HeroSimulation.TryAttack()` |
 | HeroSimulation | Ownership handoff | Each unit's actual state writes happen here; the manager owns sequencing and never writes `HeroDataRuntime` fields directly |
+| ACSimulator | Ownership handoff | Owns tick-loop sequencing and the win-check internally; the facade (`ACManager`) still fires the public events |
+| ACSetup | Ownership handoff | Owns pre-battle seeding/placement internally; the facade (`ACManager`) exposes the same public API |
 | HexGrid | This depends on it | Data dependency — occupancy and next-step pathing |
 | BattleBoardManager | It depends on this | State trigger — subscribes to the resolver's events to drive the view |
 
