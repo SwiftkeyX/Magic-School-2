@@ -27,7 +27,7 @@
 
 // ✅ Names the actual pipeline stage
 // HeroDataSeed: a one-time transfer object, produced once by HeroDataSeedFactory.ToCombatData()
-// and read once by AutoChessManager.SetCombatants(). Carries no fight-state.
+// and read once by ACManager.SetInitialCombatantsRuntimeData(). Carries no fight-state.
 ```
 
 ---
