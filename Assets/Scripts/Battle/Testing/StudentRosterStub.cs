@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 namespace MagicSchool.Battle
@@ -12,11 +11,8 @@ namespace MagicSchool.Battle
     {
         [SerializeField] private List<HeroPlacementEntry> _heroes = new List<HeroPlacementEntry>();
 
-        public List<HeroDataSeed> GetUnits() =>
-            _heroes.Where(e => e.Hero != null).Select(e => HeroDataSeedFactory.ToCombatData(e.Hero, Team.Player)).ToList();
+        public List<HeroDataSeed> GetUnits() => RosterStubHelper.GetUnits(_heroes, Team.Player);
 
-        // Parallel to GetUnits() -- same filter, same order -- so callers can zip the two by index.
-        public List<HexCoord> GetPlacements() =>
-            _heroes.Where(e => e.Hero != null).Select(e => e.Position).ToList();
+        public List<HexCoord> GetPlacements() => RosterStubHelper.GetPlacements(_heroes);
     }
 }

@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace MagicSchool.Battle
 {
-    // Per-unit runtime simulation state built by AutoChessManager.SetCombatants()
+    // Per-unit runtime simulation state built by AutoChessManager.SetInitialCombatantsRuntimeData()
     // from HeroDataSeed. Never persisted.
     internal class HeroDataRuntime
     {

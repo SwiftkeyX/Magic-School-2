@@ -67,11 +67,10 @@ namespace MagicSchool.Battle
             if (_battleRunning) { Debug.LogWarning("[AutoChessManager] Battle already running."); return; }
             if (_data.Grid == null) { Debug.LogError("[AutoChessManager] HexGrid component required on the same GameObject.", this); return; }
 
-            // Place player's unit on the grid — wherever it was dragged, else its default formation.
+            // Place player's unit on the grid 
             PlaceUnitOnGrid(GetPlayerPlacements());
 
-            // Place enemy's unit on the grid — the SAME source BattleBoardManager spawns enemy
-            // GameObjects from, so sprites and sim can't desync.
+            // Place enemy's unit on the grid 
             PlaceUnitOnGrid(GetEnemyPlacements());
 
             // Apply flat trait-synergy bonuses once, per team, before the loop starts.
@@ -92,6 +91,7 @@ namespace MagicSchool.Battle
             }
         }
 
+        // Act like a manager that simulate the battle;
         private IEnumerator BattleLoop()
         {
             _battleRunning = true;
@@ -122,23 +122,22 @@ namespace MagicSchool.Battle
                 // end the battle early if the time exceed capacity
                 if (OverTimePhase(ticks)) yield break;
 
-                // Only the wall-clock wait is scaled by GameSpeedMultiplier — the sim step above is not.
+                // tick cooldown before starting next battle loop
                 yield return new WaitForSeconds(_tickDelay / Mathf.Max(0.01f, GameSpeedMultiplier));
             }
         }
 
+        #region Phase Function
         // ── PHASE 1 — CHARGE both clocks ────────────────────────────────────────
-        // Each HeroSimulation charges its own HeroDataRuntime; AttackSpeed is per-unit,
-        // _moveSpeed is shared. That is the whole point.
+        // Each HeroSimulation count cooldown for AttackSpeed and MoveSpeed
         private void ChargePhase()
         {
             foreach (var c in _data.Combatants.Where(c => !c.Data.IsDead))
                 c.ChargeClocks(_tickDelay, _moveSpeed);
         }
 
-        // ── PHASE 2 — ATTACK (charged AND a target in range) ────────────────────
-        // Returns true the instant either side is wiped, so BattleLoop() can end the battle
-        // immediately instead of waiting for the tick to finish.
+        // ── PHASE 2 — ATTACK  ────────────────────
+        // Hero that ready to attack, attack enemy 
         private bool AttackPhase()
         {
             var readyToAttackCombatants = _data.Combatants
@@ -189,13 +188,6 @@ namespace MagicSchool.Battle
         }
 
         // ── PHASE 4 — CLAMP ──────────────────────────────────────────────────────
-        // DO NOT fold this into Phase 1. Clamping during the charge (Min(x + delta, 1f))
-        // would pin a unit sitting at 1.02 down to 1.0; it attacks, and lands on 0.0
-        // instead of 0.02 — losing a sliver EVERY cycle and re-quantising attack speed to
-        // the tick rate, which is exactly what the overflow carry above exists to prevent.
-        // Clamping HERE only bites units that could not act, which is what stops a unit
-        // that walked 30 ticks from banking 1.8 attacks and bursting on contact. It
-        // arrives with exactly ONE attack ready. See Combat.md, Core Rules 7-8.
         private void ClampPhase()
         {
             foreach (var c in _data.Combatants.Where(c => !c.Data.IsDead))
@@ -229,8 +221,6 @@ namespace MagicSchool.Battle
             _battleRunning = false;
         }
 
-        // Per-hero turn logic (targeting, attack, movement) lives in HeroSimulation.cs; the
-        // shared per-tick queries (opponent lists, the win-check, kill cleanup) live in
-        // AutoChessHelper.cs. This class only sequences the tick and fires events.
+        #endregion
     }
 }
