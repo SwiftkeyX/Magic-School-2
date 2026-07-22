@@ -53,7 +53,7 @@ namespace MagicSchool.Battle
             CurrentCell = startCell;
         }
 
-        // Appearance comes from the hero's authored HeroData asset (via CombatantSnapshot).
+        // Appearance comes from the hero's authored HeroDataSO asset (via CombatantSnapshot).
         // A null icon falls back to the procedural square, so a half-authored hero is still
         // visible and correctly tinted rather than invisible.
         public void SetVisual(Sprite icon, Color tint)

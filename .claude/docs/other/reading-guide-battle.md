@@ -10,7 +10,7 @@
 
 ## Start here
 
-**`Assets/Scripts/Battle/Resolver/AutoBattleResolver.cs` → the `BattleLoop()` coroutine.**
+**`Assets/Scripts/Battle/Resolver/AutoChessManager.cs` → the `BattleLoop()` coroutine.**
 
 That is the spine of the entire game. Everything else either feeds it data or draws what it decided.
 
@@ -22,12 +22,12 @@ But it needs ~10 minutes of vocabulary first, or the types won't mean anything. 
 
 | # | File | Lines | Why this one |
 |---|---|---|---|
-| 1 | `Battle/Data/BattleData.cs` | 81 | Every other file speaks in these types: `Team`, `UnitCombatData`, `CombatantSnapshot`, `BattleResult`. Read this and the rest stops looking foreign. |
-| 2 | `Battle/Data/HeroData.cs` | 122 | What a unit **is** when a designer authors it. Jump to `ToCombatData()` at the bottom — that method is the doorway from *authored asset* into *the simulation*. |
-| 3 | `Battle/Resolver/Combatant.cs` | 47 | What a unit **becomes** during a fight. |
+| 1 | `Battle/Data/BattleData.cs` | 81 | Every other file speaks in these types: `Team`, `HeroDataSeed`, `CombatantSnapshot`, `BattleResult`. Read this and the rest stops looking foreign. |
+| 2 | `Battle/Data/HeroDataSO.cs` | 122 | What a unit **is** when a designer authors it. Jump to `ToCombatData()` at the bottom — that method is the doorway from *authored asset* into *the simulation*. |
+| 3 | `Battle/Resolver/HeroDataRuntime.cs` | 47 | What a unit **becomes** during a fight. |
 
-**The single most useful thing you can do:** open `UnitCombatData` (in `BattleData.cs`) and
-`Combatant.cs` side by side. The fields `Combatant` has *extra* — `CurrentHP`, `Mana`,
+**The single most useful thing you can do:** open `HeroDataSeed` (in `BattleData.cs`) and
+`HeroDataRuntime.cs` side by side. The fields `HeroDataRuntime` has *extra* — `CurrentHP`, `Mana`,
 `AttackCooldown`, `MoveCooldown`, `Position`, `SkillArmed` — are exactly "state that exists only
 while fighting."
 
@@ -39,11 +39,11 @@ while fighting."
 
 | # | File | Lines | Why this one |
 |---|---|---|---|
-| 4 | **`Resolver/AutoBattleResolver.cs`** | 167 | **The heart.** Go straight to `BattleLoop()`. |
-| 5 | `Resolver/AutoBattleResolver.Attack.cs` | 77 | What one hit does. |
+| 4 | **`Resolver/AutoChessManager.cs`** | 167 | **The heart.** Go straight to `BattleLoop()`. |
+| 5 | `Resolver/AutoChessManager.Attack.cs` | 77 | What one hit does. |
 | 6 | `Resolver/CombatMath.cs` | 27 | The one damage formula. |
-| 7 | `Resolver/AutoBattleResolver.CombatHelpers.cs` | 41 | Targeting + the single damage choke point. |
-| 8 | `Resolver/AutoBattleResolver.Traits.cs` + `Data/TraitData.cs` | 66 + 40 | Synergy. |
+| 7 | `Resolver/AutoChessManager.CombatHelpers.cs` | 41 | Targeting + the single damage choke point. |
+| 8 | `Resolver/AutoChessManager.Traits.cs` + `Data/TraitDataSO.cs` | 66 + 40 | Synergy. |
 
 ### The whole game, in one paragraph
 
@@ -74,7 +74,7 @@ nothing else. See `production/gdd/Combat.md`.
 | # | File | Lines | Why this one |
 |---|---|---|---|
 | 9 | `Managers/HexGrid.cs` + `Data/HexCoord.cs` | 109 + 76 | Where things stand and how they path. `GetNextStep()` is a BFS. `HexCoord` is offset-hex math — read `Distance()` and move on. |
-| 10 | `Resolver/AutoBattleResolver.Setup.cs` | 145 | How a battle gets *seeded*: assets in, `Combatant`s out. |
+| 10 | `Resolver/AutoChessManager.Setup.cs` | 145 | How a battle gets *seeded*: assets in, `HeroDataRuntime`s out. |
 | 11 | `Managers/BattleBoardManager.cs` | 382 | **Read this last.** |
 | 12 | `Views/BattleUnit.cs` | 310 | One unit's visuals: HP bar, move lerp, attack lunge, death fade. |
 
@@ -93,8 +93,8 @@ is what actually happens:
 ```
 BattleBoardManager.Start()
   └→ EnsureCombatantsInitialized()      seed from the roster components
-       └→ HeroData.ToCombatData(team)   authored asset  →  UnitCombatData
-            └→ SetCombatants()          UnitCombatData  →  Combatant   ← sim state is born HERE
+       └→ HeroDataSO.ToCombatData(team) authored asset  →  HeroDataSeed
+            └→ SetCombatants()          HeroDataSeed    →  HeroDataRuntime   ← sim state is born HERE
   └→ BuildBoard()   BuildBench()
 
 [you drag a hero onto a tile]
@@ -145,5 +145,5 @@ Two known gaps you'll notice and should not be confused by:
   `InitManaBar` / `UpdateMana` / `PlayCastText` / `SetCastingVisual`, all marked
   **NOT CURRENTLY CALLED** — they're kept deliberately (per `Skill.md`) for the pass that re-adds
   the events that drive them.
-- **`AutoBattleResolver` has no GDD.** All three existing GDDs (Hero, Skill, Trait) couple to it,
+- **`AutoChessManager` has no GDD.** All three existing GDDs (Hero, Skill, Trait) couple to it,
   but it has no spec of its own. It is the highest-value doc still to write.

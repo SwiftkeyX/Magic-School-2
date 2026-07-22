@@ -19,7 +19,7 @@ namespace MagicSchool.Battle
     // activates the highest satisfied breakpoint and grants its flat StatBonus to the trait's
     // members. Authored as an asset; base game applies flat bonuses only. See Trait GDD.
     [CreateAssetMenu(menuName = "MagicSchool/Trait", fileName = "Trait")]
-    public class TraitData : ScriptableObject
+    public class TraitDataSO : ScriptableObject
     {
         public string Id;
         public string DisplayName;

@@ -11,8 +11,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5bb83eda7f4a9a64ab8733ee82839a5c, type: 3}
   m_Name: Archer
-  m_EditorClassIdentifier: Assembly-CSharp::MagicSchool.Battle.HeroData
-  Id: archer
+  m_EditorClassIdentifier: Assembly-CSharp::MagicSchool.Battle.HeroDataSO
   DisplayName: Archer
   Icon: {fileID: 0}
   PlayerTint: {r: 0.2, g: 0.8, b: 0.3, a: 1}
@@ -28,6 +27,5 @@ MonoBehaviour:
   ManaPerAttack: 1
   SkillMultiplier: 2
   SkillName: Power Shot
-  Flags: 
   Traits:
   - {fileID: 11400000, guid: e701f55cd34fc834d8ca58ba17de8b4f, type: 2}

@@ -4,30 +4,33 @@ using UnityEngine;
 
 namespace MagicSchool.Battle
 {
-    // Flat stat-bonus trait synergy pass. Runs once from BeginBattle(): counts distinct
-    // heroes per trait per team, then applies the highest satisfied breakpoint's StatBonus to
-    // each trait member on that team. Members-only, additive, evaluated once. See Trait GDD.
-    public partial class AutoBattleResolver
+    // Flat stat-bonus trait-synergy queries the manager (AutoChessManager) needs but shouldn't
+    // own as its own methods. Stateless -- takes AutoChessData as a parameter rather than
+    // holding a reference to it, matching the same decoupled pattern AutoChessHelper uses.
+    internal static class Trait
     {
         private static readonly Team[] AllTeams = { Team.Player, Team.Enemy };
 
-        private void ApplyTraitBonuses()
+        // Runs once from BeginBattle(): counts distinct heroes per trait per team, then applies
+        // the highest satisfied breakpoint's StatBonus to each trait member on that team.
+        // Members-only, additive, evaluated once. See Trait GDD.
+        public static void ApplyTraitBonuses(AutoChessData data)
         {
             foreach (Team team in AllTeams)
             {
-                var members = _combatants.Where(c => c.Team == team).ToList();
+                var members = data.Combatants.Where(c => c.Data.Team == team).ToList();
                 if (members.Count == 0) continue;
 
                 var counts = CountTraits(members);
                 foreach (var kv in counts)
                 {
-                    TraitData trait = kv.Key;
+                    TraitDataSO trait = kv.Key;
                     int count = kv.Value;
                     TraitBreakpoint bp = trait.GetActiveBreakpoint(count);
                     if (bp == null) continue;   // below the first breakpoint — no bonus
 
-                    foreach (var c in members.Where(c => c.Traits != null && c.Traits.Contains(trait)))
-                        bp.Bonus.ApplyTo(c);
+                    foreach (var c in members.Where(c => c.Data.Traits != null && c.Data.Traits.Contains(trait)))
+                        bp.Bonus.ApplyTo(c.Data);
 
                     Debug.Log($"[AutoBattle] Trait '{trait.DisplayName}' ({team}) active at {count} → " +
                               $"breakpoint {bp.UnitCount} (+HP {bp.Bonus.HP}, +ATK {bp.Bonus.ATK}, " +
@@ -38,22 +41,22 @@ namespace MagicSchool.Battle
         }
 
         // Read-only active-trait readout for a future HUD synergy panel. Not used in combat.
-        public List<(TraitData trait, int count, TraitBreakpoint active)> GetActiveTraits(Team team)
+        public static List<(TraitDataSO trait, int count, TraitBreakpoint active)> GetActiveTraits(AutoChessData data, Team team)
         {
-            var members = _combatants.Where(c => c.Team == team).ToList();
+            var members = data.Combatants.Where(c => c.Data.Team == team).ToList();
             return CountTraits(members)
                 .Select(kv => (kv.Key, kv.Value, kv.Key.GetActiveBreakpoint(kv.Value)))
                 .ToList();
         }
 
         // Distinct-hero count per trait across the given combatants.
-        private static Dictionary<TraitData, int> CountTraits(List<Combatant> members)
+        private static Dictionary<TraitDataSO, int> CountTraits(List<HeroSimulation> members)
         {
-            var counts = new Dictionary<TraitData, int>();
+            var counts = new Dictionary<TraitDataSO, int>();
             foreach (var c in members)
             {
-                if (c.Traits == null) continue;
-                foreach (var trait in c.Traits.Distinct())
+                if (c.Data.Traits == null) continue;
+                foreach (var trait in c.Data.Traits.Distinct())
                 {
                     if (trait == null) continue;
                     counts.TryGetValue(trait, out int n);

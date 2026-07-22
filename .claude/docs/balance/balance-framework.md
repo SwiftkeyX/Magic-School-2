@@ -218,5 +218,5 @@ Run **`/balance-pass`** to execute the full loop end to end, or invoke its steps
 | This doc references | Target | Nature |
 |---|---|---|
 | Champion stats | `TraitSystem.md` | Source of truth for all HP/ATK/DEF/MG/MR/AS/CRIT/Range values |
-| AS accumulator | `AutoBattleResolver.cs` | `ActionProgress` field, BattleLoop accumulation block |
+| AS accumulator | `AutoChessManager.cs` | `ActionProgress` field, BattleLoop accumulation block |
 | Simulation tool | `Assets/Editor/BalanceValidator.cs` | Implementation |

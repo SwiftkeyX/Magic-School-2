@@ -9,7 +9,7 @@ namespace MagicSchool.Battle
     public class BattleBoardManager : MonoBehaviour
     {
         // ── Inspector ────────────────────────────────────────────────────────
-        [SerializeField] private AutoBattleResolver _resolver;
+        [SerializeField] private AutoChessManager _resolver;
         [SerializeField] private GameObject         _hexTilePrefab;
         [SerializeField] private GameObject         _battleUnitPrefab;
         [SerializeField] private UIDocument         _uiDocument;
@@ -72,7 +72,7 @@ namespace MagicSchool.Battle
 
         private void Start()
         {
-            if (_resolver == null)   { Debug.LogError("[BattleBoardManager] AutoBattleResolver missing", this); enabled = false; return; }
+            if (_resolver == null)   { Debug.LogError("[BattleBoardManager] AutoChessManager missing", this); enabled = false; return; }
             if (_uiDocument == null) { Debug.LogError("[BattleBoardManager] UIDocument missing", this); enabled = false; return; }
 
             _uiDocument.sortingOrder = BattleUISortOrder.BoardBenchHUD;
@@ -293,9 +293,9 @@ namespace MagicSchool.Battle
             _startBattleButton.style.display = DisplayStyle.None;
             _benchScrollView.style.display   = DisplayStyle.None;
 
-            // Enemy GameObjects are spawned from GetAutoEnemyPlacements() — the same method
+            // Enemy GameObjects are spawned from GetEnemyPlacements() — the same method
             // BeginBattle() now places the simulation from, so sprites and sim cannot disagree.
-            var enemyPlacements = _resolver.GetAutoEnemyPlacements();
+            var enemyPlacements = _resolver.GetEnemyPlacements();
             var enemySnapshots  = _resolver.GetCombatantSnapshots().Where(s => !s.IsStudent);
             foreach (var e in enemySnapshots)
             {
@@ -304,7 +304,7 @@ namespace MagicSchool.Battle
                 if (unit != null) _units[e.Id] = unit;
             }
 
-            _resolver.SetUnitPositions(_pendingPlacements);
+            _resolver.SetPlayerPlacements(_pendingPlacements);
 #if UNITY_EDITOR
             if (_debugPlayerStartHpPct < 1f) _resolver.DebugSetAllPlayerHp(_debugPlayerStartHpPct);
 #endif
@@ -374,9 +374,9 @@ namespace MagicSchool.Battle
         }
 
         // removed: StudentColor(id) / EnemyColor(id) — hardcoded switch on the literals "knight"
-        // and "archer". Any new HeroData asset fell through to the default case and rendered as a
+        // and "archer". Any new HeroDataSO asset fell through to the default case and rendered as a
         // gray square, which meant adding a hero required a C# edit. Appearance is now authored on
-        // HeroData (Icon / PlayerTint / EnemyTint) and reaches the view via CombatantSnapshot.
+        // HeroDataSO (Icon / PlayerTint / EnemyTint) and reaches the view via CombatantSnapshot.
         // See Hero GDD Core Rule 7 — presentation is data, never a code lookup.
     }
 }

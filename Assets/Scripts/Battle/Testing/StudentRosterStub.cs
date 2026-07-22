@@ -1,16 +1,18 @@
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 namespace MagicSchool.Battle
 {
-    // Player-side seed for the vanilla engine. Holds authored HeroData assets and projects
-    // them to UnitCombatData (Team.Player). Replaces the former hardcoded stat structs.
+    // Player-side seed for the vanilla engine. Holds authored (HeroDataSO, HexCoord) pairs and
+    // projects the Hero half to HeroDataSeed (Team.Player); the Position half is read by
+    // AutoChessManager.GetPlayerPlacements() as the default formation, overridable by
+    // AutoChessManager.SetPlayerPlacements() (BattlePlacementController drag-and-drop).
     public class StudentRosterStub : MonoBehaviour
     {
-        [SerializeField] private List<HeroData> _heroes = new List<HeroData>();
+        [SerializeField] private List<HeroPlacementEntry> _heroes = new List<HeroPlacementEntry>();
 
-        public List<UnitCombatData> GetUnits() =>
-            _heroes.Where(h => h != null).Select(h => h.ToCombatData(Team.Player)).ToList();
+        public List<HeroDataSeed> GetUnits() => RosterStubHelper.GetUnits(_heroes, Team.Player);
+
+        public List<HexCoord> GetPlacements() => RosterStubHelper.GetPlacements(_heroes);
     }
 }

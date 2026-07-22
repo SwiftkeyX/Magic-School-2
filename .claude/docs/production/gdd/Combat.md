@@ -6,7 +6,7 @@
 
 ## Summary
 
-Combat is the auto-resolved battle: once `BeginBattle()` is called the player does not act again. `AutoBattleResolver` steps a fixed-rate tick simulation in which every unit runs **two independent clocks** — one for attacking, one for moving — until one side is wiped or the tick cap is hit. It is the only system that mutates `Combatant` state during a fight; everything visual is a subscriber.
+Combat is the auto-resolved battle: once `BeginBattle()` is called the player does not act again. `AutoChessManager` steps a fixed-rate tick simulation in which every unit runs **two independent clocks** — one for attacking, one for moving — until one side is wiped or the tick cap is hit. Each unit's own turn is executed by its `HeroSimulation` (charge, attack, move); the resolver owns turn order, event-firing, and the win-check. Together they are the only system that mutates `HeroDataRuntime` state during a fight; everything visual is a subscriber.
 
 > **Quick reference** — Layer: `Core` · Priority: `MVP` · Key deps: `Hero`, `Trait`, `Skill`, `HexGrid`
 
@@ -26,22 +26,22 @@ The player arranges heroes on a hex board, presses go, and watches. Each tick (0
 
 ### Core Rules
 
-1. **The simulation is the only writer.** `AutoBattleResolver` is the sole mutator of `Combatant` state during a battle. The view (`BattleBoardManager`) reacts to events (`OnCombatantActed`, `OnCombatantMoved`, `OnCombatantDefeated`, `OnBattleComplete`) and never writes back.
+1. **The Combat system is the only writer.** `AutoChessManager` (the manager) computes turn order, each actor's opponent list, fires events, and runs the win-check; `HeroSimulation` (one per unit, wrapping its `HeroDataRuntime`) performs the actual writes — `ChargeClocks()`, `TryAttack()`, `TryMove()`, `ClampClocks()` — once told it's that unit's turn. `HeroSimulation` never fires events itself and holds no reference back to the manager: `TryAttack()`/`TryMove()` return a result (target id, damage) and the manager translates that into events. The view (`BattleBoardManager`) reacts to those events and never writes back.
 2. **Every unit runs two independent clocks.** Both are `0 → 1` fractions of one cycle, not countdown timers.
-   - `Combatant.AttackCooldown` charges at **`AttackSpeed × _tickDelay`** per tick — **per-unit**.
-   - `Combatant.MoveCooldown` charges at **`_moveSpeed × _tickDelay`** per tick — **shared**, the same value for every unit on the board.
+   - `HeroDataRuntime.AttackCooldown` charges at **`AttackSpeed × _tickDelay`** per tick — **per-unit**.
+   - `HeroDataRuntime.MoveCooldown` charges at **`_moveSpeed × _tickDelay`** per tick — **shared**, the same value for every unit on the board.
 3. **`AttackSpeed` governs attack cadence and nothing else.** It does not affect movement. Movement pace is uniform across all heroes **by design** — a hero that swings faster does not walk faster.
 4. **Each tick runs four phases, in this order:**
-   1. **Charge** — every living unit accrues both clocks.
-   2. **Attack** — units with `AttackCooldown ≥ 1.0` **and a target within `Range`** attack, then subtract `1.0`. Processed in descending `AttackSpeed` order. A unit with nothing in range does **not** act here and does **not** lose its charge.
-   3. **Move** — units with `MoveCooldown ≥ 1.0` **and no target in range** step one hex toward the nearest opponent, then subtract `1.0`.
-   4. **Clamp** — both clocks are capped at `1.0`.
+   1. **Charge** — every living unit's `HeroSimulation.ChargeClocks()` accrues both clocks.
+   2. **Attack** — the manager computes units with `AttackCooldown ≥ 1.0`, in descending `AttackSpeed` order, and for each calls `HeroSimulation.TryAttack(opponents)`. A unit with nothing in range returns no result — it does **not** act here and does **not** lose its charge. When a result comes back, the manager fires `OnCombatantActed` and runs the win-check.
+   3. **Move** — the manager computes units with `MoveCooldown ≥ 1.0` and calls `HeroSimulation.TryMove(opponents, grid)`, which itself re-checks range (a unit with a target in range does not move) and steps one hex toward the nearest opponent.
+   4. **Clamp** — every living unit's `HeroSimulation.ClampClocks()` caps both clocks at `1.0`.
 5. **A unit either attacks or moves in a tick, never both.** Having a target in range suppresses movement; the unit stands and fights.
 6. **The attack clock keeps charging while a unit walks.** A unit therefore arrives in range with an attack ready and strikes immediately. **Moving no longer costs a unit its attack.**
 7. **Subtracting `1.0` (rather than resetting to `0`) is load-bearing.** The overflow carries into the next cycle, which is what keeps `AttackSpeed` continuous instead of quantised to the tick rate: at `_tickDelay = 0.1`, `AttackSpeed` 0.35 and 0.30 must remain genuinely different.
 8. **The clamp is a separate phase and must stay one.** See *Why the clamp is its own phase* below — folding it into the charge silently breaks Rule 7.
 9. **A battle ends** when either team has no living combatants. If `_maxBattleTicks` is reached first, the team with more surviving units wins and the result is flagged `TimedOut`.
-10. **`SpeedMultiplier` scales only the wall-clock wait between ticks — never the simulation step.** The outcome of a battle is identical at any playback speed. Speeding up what you watch must never change who wins.
+10. **`GameSpeedMultiplier` scales only the wall-clock wait between ticks — never the simulation step.** The outcome of a battle is identical at any playback speed. Speeding up what you watch must never change who wins.
 
 ### Why the clamp is its own phase
 
@@ -53,17 +53,19 @@ The clamp's actual job is to stop **banking**: without it, a unit that walked 30
 
 ### States and Transitions
 
-A combatant is **Alive** (`CurrentHP > 0`) or **Defeated**. Defeat is terminal — there is no revive, and a defeated unit's grid cell is released immediately. Within Alive, a unit is *engaging* (a target is within `Range`; it attacks, it does not move) or *approaching* (nothing in range; it moves, it does not attack). The transition is re-evaluated every tick from board position — there is no committed state to exit.
+A combatant is **Alive** (`CurrentHP > 0`) or **Dead** (`IsDead`). Death is terminal — there is no revive, and a dead unit's grid cell is released immediately. Within Alive, a unit is *engaging* (a target is within `Range`; it attacks, it does not move) or *approaching* (nothing in range; it moves, it does not attack). The transition is re-evaluated every tick from board position — there is no committed state to exit.
 
 ### Interactions with Other Systems
 
 | System | Interaction |
 |---|---|
-| Hero | `HeroData.ToCombatData(team)` seeds each `Combatant`'s stats. The resolver reads them; it never writes back to the asset. |
-| Trait | `ApplyTraitBonuses()` runs **once**, at the top of `BeginBattle()`, before the loop — flat `StatBonus` deltas applied to trait members per team. |
-| Skill | Mana is gained per **attack**; at `MaxMana` the next attack is empowered by `SkillMultiplier`. |
-| HexGrid | Owns occupancy (`SetOccupant` / `ClearOccupant`) and pathing (`FindNearest`, `GetNextStep`). The resolver asks; the grid answers. |
-| BattleBoardManager | Subscribes to the resolver's events to drive sprites. Enemy placements come from `GetAutoEnemyPlacements()` — the **same** method the simulation places from, so view and sim cannot desync. |
+| Hero | `HeroDataSeedFactory.ToCombatData(hero, team)` seeds each `HeroDataRuntime`'s stats. The resolver reads them; it never writes back to the asset. |
+| Trait | `ApplyTraitBonuses()` runs **once**, at the top of `BeginBattle()`, before the loop — flat `StatBonus` deltas applied to trait members per team. Stays manager-level; not part of any unit's per-tick turn. |
+| Skill | Mana is gained per **attack**; at `MaxMana` the next attack is empowered by `SkillMultiplier`. The charge/empower logic lives inside `HeroSimulation.TryAttack()`, not the manager. |
+| HeroSimulation | One per unit, wrapping its `HeroDataRuntime`. Owns the actual per-tick writes (`ChargeClocks`/`TryAttack`/`TryMove`/`ClampClocks`); the manager calls into it and translates results into events. Holds no reference back to the manager. |
+| AutoChessHelper | Stateless shared queries the manager needs but doesn't own as its own methods: `GetOpponentsOf()`, `CheckWinCondition()`, `HandleKillIfNeeded()` (grid cleanup + log on a kill). Takes `_combatants`/`_grid` as parameters — same decoupled pattern as `HeroSimulation`, no reference held either direction. Does not fire events; the manager still does that. |
+| HexGrid | Owns occupancy (`SetOccupant` / `ClearOccupant`) and pathing (`FindNearest`, `GetNextStep`). `HeroSimulation.TryMove()` asks (grid passed in directly); the manager also asks for placement. |
+| BattleBoardManager | Subscribes to the resolver's events to drive sprites. Enemy placements come from `GetEnemyPlacements()` — the **same** method the simulation places from, so view and sim cannot desync. |
 
 ---
 
@@ -84,11 +86,11 @@ then, every tick:  AttackCooldown = min(AttackCooldown, 1.0)
 
 | Variable | Type | Range | Source | Description |
 |---|---|---|---|---|
-| `AttackSpeed` | float | 0.05–1.0 | `HeroData` (per hero) | attacks per second |
+| `AttackSpeed` | float | 0.05–1.0 | `HeroDataSO` (per hero) | attacks per second |
 | `_moveSpeed` | float | 0.1–3.0 | Inspector (resolver) | hexes per second — **identical for every unit** |
 | `_tickDelay` | float | 0.02–0.5 | Inspector (resolver) | seconds per simulation tick |
 
-**Edge cases**: `AttackSpeed` is floored at `0.05` by `HeroData` (see Hero.md) — at `0` a unit would still walk, but never swing.
+**Edge cases**: `AttackSpeed` is floored at `0.05` by `HeroDataSO` (see Hero.md) — at `0` a unit would still walk, but never swing.
 
 ---
 
@@ -100,7 +102,7 @@ then, every tick:  AttackCooldown = min(AttackCooldown, 1.0)
 | Unit stands in range for a long fight | Move charge sits pinned at `1.0`; it steps the instant its target dies and the next is out of range | No ramp-up lag after a kill |
 | Both teams' last units die on the same tick | Battle ends; `Won` is evaluated from surviving player units (none → loss) | Win check runs after each actor resolves |
 | Tick cap reached with both sides alive | Side with more survivors wins, `TimedOut = true` | A battle must always terminate |
-| `AttackSpeed = 0` slips through | Unit walks to the enemy and never attacks — the fight runs to the tick cap | Guarded by `HeroData`'s `MinAttackSpeed` floor, not by this system |
+| `AttackSpeed = 0` slips through | Unit walks to the enemy and never attacks — the fight runs to the tick cap | Guarded by `HeroDataSO`'s `MinAttackSpeed` floor, not by this system |
 
 ---
 
@@ -108,9 +110,10 @@ then, every tick:  AttackCooldown = min(AttackCooldown, 1.0)
 
 | System | Direction | Nature |
 |---|---|---|
-| Hero | This depends on it | Data dependency — `Combatant` stats seeded from `HeroData` |
-| Trait | This depends on it | Ownership handoff — `ApplyTraitBonuses()` mutates `Combatant` stats before the loop |
-| Skill | This depends on it | Rule dependency — mana per attack; empowered hit |
+| Hero | This depends on it | Data dependency — `HeroDataRuntime` stats seeded from `HeroDataSO` |
+| Trait | This depends on it | Ownership handoff — `ApplyTraitBonuses()` mutates `HeroDataRuntime` stats before the loop |
+| Skill | This depends on it | Rule dependency — mana per attack; empowered hit, executed inside `HeroSimulation.TryAttack()` |
+| HeroSimulation | Ownership handoff | Each unit's actual state writes happen here; the manager owns sequencing and never writes `HeroDataRuntime` fields directly |
 | HexGrid | This depends on it | Data dependency — occupancy and next-step pathing |
 | BattleBoardManager | It depends on this | State trigger — subscribes to the resolver's events to drive the view |
 
@@ -150,9 +153,9 @@ Recorded because both were true *before* this design and silently stopped being 
 
 | This Doc References | Target Doc | Element Referenced | Nature |
 |---|---|---|---|
-| Seeds combatant stats | `production/gdd/Hero.md` | `HeroData.ToCombatData()`, `AttackSpeed` | Data dependency |
+| Seeds combatant stats | `production/gdd/Hero.md` | `HeroDataSeedFactory.ToCombatData()`, `AttackSpeed` | Data dependency |
 | Applies synergy bonuses at start | `production/gdd/Trait.md` | `ApplyTraitBonuses()`, `StatBonus` | Ownership handoff |
-| Mana gain and empowered hit | `production/gdd/Skill.md` | `ManaPerAttack`, `SkillMultiplier` | Rule dependency |
+| Mana gain and empowered hit | `production/gdd/Skill.md` | `ManaPerAttack`, `SkillMultiplier`, executed in `HeroSimulation.TryAttack()` | Rule dependency |
 
 ---
 
@@ -163,7 +166,7 @@ Recorded because both were true *before* this design and silently stopped being 
 - [ ] A unit that crosses the board attacks **once** on arrival, not a burst.
 - [ ] Attack speed stays continuous: `AttackSpeed` 0.30 and 0.35 produce measurably different attack counts, not the same tick-quantised count.
 - [ ] A battle always terminates — by wipe, or by the `_maxBattleTicks` cap with `TimedOut = true`.
-- [ ] `SpeedMultiplier` changes only how fast the battle is *watched*; the winner and tick count are identical at any speed.
+- [ ] `GameSpeedMultiplier` changes only how fast the battle is *watched*; the winner and tick count are identical at any speed.
 - [ ] No hardcoded values — `_moveSpeed`, `_tickDelay`, `_maxBattleTicks` are all Inspector-exposed.
 
 ---
@@ -172,5 +175,5 @@ Recorded because both were true *before* this design and silently stopped being 
 
 | Question | Owner | Deadline | Resolution |
 |---|---|---|---|
-| Should `_moveSpeed` become a per-hero stat (a "fast" archetype)? | designer | — | **No, deliberately.** The requirement is that every hero shares one default movement speed. Revisit only with a hero concept that needs it — it would mean a `MoveSpeed` on `HeroData` and a `MoveSpeed` on `StatBonus`. |
+| Should `_moveSpeed` become a per-hero stat (a "fast" archetype)? | designer | — | **No, deliberately.** The requirement is that every hero shares one default movement speed. Revisit only with a hero concept that needs it — it would mean a `MoveSpeed` on `HeroDataSO` and a `MoveSpeed` on `StatBonus`. |
 | Should a unit be able to move *and* attack in the same tick? | designer | — | No — in-range suppresses movement. Keeps the sim legible. |
