@@ -1,0 +1,11 @@
+{
+  "$schema": "https://aka.ms/codetour-schema",
+  "title": "Review",
+  "steps": [
+    {
+      "file": "Assets/Scripts/Battle/Resolver/AutoChessManager.Setup.cs",
+      "description": "Change the name to SetPlacementsAtGameStart",
+      "line": 31
+    }
+  ]
+}
