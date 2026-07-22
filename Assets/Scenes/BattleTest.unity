@@ -576,7 +576,7 @@ MonoBehaviour:
   _hexTilePrefab: {fileID: 126809410757081819, guid: a82e41ffb6763a34584ba0683301d4a7, type: 3}
   _battleUnitPrefab: {fileID: 4953770828635532444, guid: 91548fef8835bb54f926b0b37860eaca, type: 3}
   _uiDocument: {fileID: 1670095327}
-  _maxSquadSize: 2147483647
+  _maxSquadSize: 12
   _hexWidth: 1.1
   _hexHeight: 0.95
   _hexOffset: 0.55
